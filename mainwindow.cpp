@@ -3,6 +3,8 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
+using json = nlohmann::json;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -55,4 +57,18 @@ void MainWindow::openFile()
     builder.setStorage(m_pStorage);
     m_pHeaderFrame->setVisible(true);
     builder.build();
+
+    std::ifstream t("C:\\Users\\Alex\\Source\\Repos\\IdTool\\blockdef\\1.json");
+    std::string str((std::istreambuf_iterator<char>(t)),
+                     std::istreambuf_iterator<char>());
+
+    json j = json::parse(str);
+    std::string s = j["description"];
+
+    // iterate the array
+    for (size_t i=0; i<j["items"].size(); i++) {
+      s = j["items"].at(i)["name"];
+    }
+
+
 }

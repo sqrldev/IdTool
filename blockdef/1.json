@@ -1,0 +1,90 @@
+{
+  "block_type": 1,
+  "description": "Type 1 - User access password authenticated & encrypted data",
+  "items": [
+    {
+      "name": "Length",
+      "description": "Inclusive length of the entire outer block",
+      "type": "uint16_t",
+      "bytes": 2
+    },
+    {
+      "name": "Type",
+      "description": "Block type",
+      "type": "uint16_t",
+      "bytes": 2
+    },
+    {
+      "name": "Plaintext length",
+      "description": "Inclusive length of the entire inner block",
+      "type": "uint16_t",
+      "bytes": 2
+    },
+    {
+      "name": "AES-GCM IV",
+      "description": "Initialization vector for authentication and encryption",
+      "type": "char[]",
+      "bytes": 12
+    },
+    {
+      "name": "SCrypt random salt",
+      "description": "Random salt for the SCrypt operation",
+      "type": "char[]",
+      "bytes": 16
+    },
+    {
+      "name": "SCrypt log(n) factor",
+      "description": "Memory consumption factor for the SCrypt operation",
+      "type": "char",
+      "bytes": 1
+    },
+    {
+      "name": "SCrypt iteration count",
+      "description": "Time consumption factor for the SCrypt operation",
+      "type": "uint32_t",
+      "bytes": 4
+    },
+    {
+      "name": "Option flags",
+      "description": "16 binary option flags",
+      "type": "uint16_t",
+      "bytes": 2
+    },
+    {
+      "name": "QuickPass length",
+      "description": "Number of characters in QuickPass",
+      "type": "char",
+      "bytes": 1
+    },
+    {
+      "name": "Password verify seconds",
+      "description": "Number of seconds to run the password EnScrypt function",
+      "type": "char",
+      "bytes": 1
+    },
+    {
+      "name": "QuickPass timeout",
+      "description": "Number of minutes before the QuickPass is wiped from memory",
+      "type": "uint16_t",
+      "bytes": 2
+    },
+    {
+      "name": "Identity Master Key",
+      "description": "The encrypted Identity Master Key",
+      "type": "char[]",
+      "bytes": 32
+    },
+    {
+      "name": "Identity Lock Key",
+      "description": "The encrypted Identity Lock Key",
+      "type": "char[]",
+      "bytes": 32
+    },
+    {
+      "name": "Verification tag",
+      "description": "Data to verify/authenticate the encrypted information",
+      "type": "char[]",
+      "bytes": 16
+    }
+  ]
+}

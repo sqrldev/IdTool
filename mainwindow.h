@@ -3,6 +3,10 @@
 
 #include "s4.hpp"
 #include "uibuilder.h"
+#include "json.hpp"
+#include <string>
+#include <fstream>
+#include <streambuf>
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QtGui>

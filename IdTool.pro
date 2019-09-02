@@ -31,6 +31,7 @@ SOURCES += \
         uibuilder.cpp
 
 HEADERS += \
+        json.hpp \
         mainwindow.h \
         s4.hpp \
         uibuilder.h
@@ -49,3 +50,6 @@ RESOURCES += \
 RC_FILE = IdTool.rc
 
 VERSION = 0.1.0    # major.minor.patch
+
+DISTFILES += \
+    blockdef/1.json
