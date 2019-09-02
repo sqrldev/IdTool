@@ -47,5 +47,4 @@ void MainWindow::openFile()
     }
     m_pStorage = new S4();
     m_pStorage->readIdentityFile(pszFileName);
-
 }

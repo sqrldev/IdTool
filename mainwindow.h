@@ -23,7 +23,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    S4 *m_pStorage;
+    S4 *m_pStorage = nullptr;
 
 };
 

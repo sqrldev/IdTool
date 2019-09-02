@@ -62,7 +62,7 @@ namespace SqrlStorage
             BlockType1(std::vector<char>* data, int blockStartIndex);
         };
 
-        class S4BlockType2 : public Block
+        class BlockType2 : public Block
         {
         public:
             unsigned char scryptRandomSalt[16] = { 0 };
@@ -71,18 +71,18 @@ namespace SqrlStorage
             unsigned char identityUnlockKey[32] = { 0 };
             unsigned char verificationTag[16] = { 0 };
 
-            S4BlockType2(std::vector<char>* data, int blockStartIndex);
+            BlockType2(std::vector<char>* data, int blockStartIndex);
         };
 
-        class S4BlockType3 : public Block
+        class BlockType3 : public Block
         {
         public:
             uint16_t nrOfPreviousIuks = 0;
             std::vector<char*> previousIuks;
             unsigned char verificationTag[16] = { 0 };
 
-            S4BlockType3(std::vector<char>* data, int blockStartIndex);
-            ~S4BlockType3();
+            BlockType3(std::vector<char>* data, int blockStartIndex);
+            ~BlockType3();
         };
 
         enum EBlockType

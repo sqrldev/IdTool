@@ -53,14 +53,14 @@ namespace SqrlStorage
 
             case EBlockType::TYPE_2_RC_ENCRYPTED_DATA:
             {
-                S4BlockType2* pBlock = new S4BlockType2(data, i);
+                BlockType2 *pBlock = new BlockType2(data, i);
                 this->blocks.push_back(pBlock);
                 break;
             }
 
             case EBlockType::TYPE_3_PREVIOUS_IUK:
             {
-                S4BlockType3* pBlock = new S4BlockType3(data, i);
+                BlockType3 *pBlock = new BlockType3(data, i);
                 this->blocks.push_back(pBlock);
                 break;
             }
@@ -99,7 +99,7 @@ namespace SqrlStorage
 
     S4::~S4()
     {
-        for (unsigned int i = 0; i < this->blocks.size(); i++)
+        for (size_t i=0; i<this->blocks.size(); i++)
         {
             delete this->blocks[i];
         }
@@ -144,7 +144,7 @@ namespace SqrlStorage
         memcpy(this->verificationTag, &pData[105], sizeof(this->verificationTag));
     }
 
-    S4::S4BlockType2::S4BlockType2(std::vector<char>* data, int blockStartIndex) :
+    S4::BlockType2::BlockType2(std::vector<char>* data, int blockStartIndex) :
         Block(data, blockStartIndex)
     {
         if (static_cast<int>(data->size()) - blockStartIndex < this->length)
@@ -162,7 +162,7 @@ namespace SqrlStorage
         memcpy(this->verificationTag, &pData[53], sizeof(this->verificationTag));
     }
 
-    S4::S4BlockType3::S4BlockType3(std::vector<char>* data, int blockStartIndex) :
+    S4::BlockType3::BlockType3(std::vector<char>* data, int blockStartIndex) :
         Block(data, blockStartIndex)
     {
         if (static_cast<int>(data->size()) - blockStartIndex < this->length)
@@ -186,7 +186,7 @@ namespace SqrlStorage
         memcpy(this->verificationTag, pData, sizeof(this->verificationTag));
     }
 
-    S4::S4BlockType3::~S4BlockType3()
+    S4::BlockType3::~BlockType3()
     {
         for (unsigned int i = 0; i < this->previousIuks.size(); i++)
         {
@@ -194,7 +194,6 @@ namespace SqrlStorage
         }
         this->previousIuks.clear();
     }
-
 
 }
 
