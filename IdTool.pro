@@ -27,11 +27,13 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        s4.cpp
+        s4.cpp \
+        uibuilder.cpp
 
 HEADERS += \
         mainwindow.h \
-        s4.hpp
+        s4.hpp \
+        uibuilder.h
 
 FORMS += \
         mainwindow.ui

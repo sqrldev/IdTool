@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    m_pHeaderFrame = this->findChild<QFrame*>("headerFrame");
+    m_pHeaderFrame->setVisible(false);
 
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
 }
@@ -47,4 +49,10 @@ void MainWindow::openFile()
     }
     m_pStorage = new S4();
     m_pStorage->readIdentityFile(pszFileName);
+
+    QScrollArea* scrollArea = this->findChild<QScrollArea*>("scrollArea");
+    UIBuilder builder(this, scrollArea);
+    builder.setStorage(m_pStorage);
+    m_pHeaderFrame->setVisible(true);
+    builder.build();
 }

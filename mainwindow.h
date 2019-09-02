@@ -2,7 +2,10 @@
 #define MAINWINDOW_H
 
 #include "s4.hpp"
+#include "uibuilder.h"
 #include <QMainWindow>
+#include <QScrollArea>
+#include <QtGui>
 
 using namespace SqrlStorage;
 
@@ -23,6 +26,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QFrame* m_pHeaderFrame = nullptr;
     S4 *m_pStorage = nullptr;
 
 };
