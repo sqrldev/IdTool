@@ -15,41 +15,46 @@ namespace SqrlStorage
         std::streamsize size = file.tellg();
         file.seekg(0, std::ios::beg);
 
-        std::vector<char> buffer(static_cast<unsigned long long>(size));
-        if (!file.read(buffer.data(), size))
+        std::vector<char> data(static_cast<unsigned long long>(size));
+        if (!file.read(data.data(), size))
         {
             throw std::runtime_error("Error reading the identity file!");
         }
 
-        if (!checkHeader(&buffer))
+        parse(&data);
+    }
+
+    void S4::parse(std::vector<char> *data)
+    {
+        if (!checkHeader(data))
         {
             throw std::runtime_error("Invalid header!");
         }
 
         int i = HEADER_SIZE;
-        while (i < static_cast<int>(buffer.size()))
+        while (i < static_cast<int>(data->size()))
         {
-            Block block(&buffer, i);
+            Block block(data, i);
 
             switch (block.type)
             {
             case EBlockType::TYPE_1_PW_ENCRYPTED_DATA:
             {
-                BlockType1 *pBlock = new BlockType1(&buffer, i);
+                BlockType1 *pBlock = new BlockType1(data, i);
                 this->blocks.push_back(pBlock);
                 break;
             }
 
             case EBlockType::TYPE_2_RC_ENCRYPTED_DATA:
             {
-                S4BlockType2* pBlock = new S4BlockType2(&buffer, i);
+                S4BlockType2* pBlock = new S4BlockType2(data, i);
                 this->blocks.push_back(pBlock);
                 break;
             }
 
             case EBlockType::TYPE_3_PREVIOUS_IUK:
             {
-                S4BlockType3* pBlock = new S4BlockType3(&buffer, i);
+                S4BlockType3* pBlock = new S4BlockType3(data, i);
                 this->blocks.push_back(pBlock);
                 break;
             }

@@ -6,6 +6,13 @@
 
 namespace SqrlStorage
 {
+
+    /*!
+        \class S4
+
+        \brief The S4 class provides access to the
+        "SQRL Secure Storage System" (S4).
+    */
     class S4
     {
     public:
@@ -15,8 +22,9 @@ namespace SqrlStorage
         class Block; //Forward decl
         std::vector<Block*> blocks;
 
-    protected:
+    private:
         bool m_IsBase64 = false;
+        void parse(std::vector<char> *data);
 
     public:
 
