@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>IdTool - View and manipulate SQRL identities</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/res/img/IdTool_Icon.png</normaloff>:/res/img/IdTool_Icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -26,7 +30,7 @@
          <x>0</x>
          <y>0</y>
          <width>603</width>
-         <height>469</height>
+         <height>447</height>
         </rect>
        </property>
       </widget>
@@ -48,6 +52,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpenFile"/>
+    <addaction name="actionPasteIdentityData"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -58,15 +63,32 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpenFile"/>
+   <addaction name="actionPasteIdentityData"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpenFile">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/OpenFile_16x.png</normaloff>:/res/img/OpenFile_16x.png</iconset>
+   </property>
    <property name="text">
-    <string>Open</string>
+    <string>Open identity file</string>
+   </property>
+  </action>
+  <action name="actionPasteIdentityData">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/Paste_16x.png</normaloff>:/res/img/Paste_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste identity data</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>

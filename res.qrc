@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>res/img/OpenFile_16x.png</file>
+    <file>res/img/Paste_16x.png</file>
+    <file>res/img/IdTool_Icon.png</file>
+</qresource>
+</RCC>
