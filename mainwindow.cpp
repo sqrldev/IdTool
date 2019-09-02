@@ -15,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    if (m_pStorage != nullptr)
+    {
+        delete m_pStorage;
+        m_pStorage = nullptr;
+    }
 }
 
 void MainWindow::openFile()
@@ -29,4 +34,18 @@ void MainWindow::openFile()
 
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open Image"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
+
+    if (fileName == nullptr) return;
+
+    QByteArray ba = fileName.toLocal8Bit();
+    char *pszFileName = ba.data();
+
+    if (m_pStorage != nullptr)
+    {
+        delete m_pStorage;
+        m_pStorage = nullptr;
+    }
+    m_pStorage = new S4();
+    m_pStorage->readIdentityFile(pszFileName);
+
 }

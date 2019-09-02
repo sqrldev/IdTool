@@ -1,7 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "s4.hpp"
 #include <QMainWindow>
+
+using namespace SqrlStorage;
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +23,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    S4 *m_pStorage;
+
 };
 
 #endif // MAINWINDOW_H
