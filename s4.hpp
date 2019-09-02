@@ -29,6 +29,7 @@ namespace SqrlStorage
     public:
 
         void readIdentityFile(char* fileName);
+        void readIdentityText(char* identityData, int length);
         bool checkHeader(std::vector<char> *data);
         ~S4();
 

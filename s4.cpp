@@ -24,6 +24,12 @@ namespace SqrlStorage
         parse(&data);
     }
 
+    void S4::readIdentityText(char* identityData, int length)
+    {
+        std::vector<char> data(identityData, identityData + length);
+        parse(&data);
+    }
+
     void S4::parse(std::vector<char> *data)
     {
         if (!checkHeader(data))
