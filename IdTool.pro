@@ -25,12 +25,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        identitymodel.cpp \
         main.cpp \
         mainwindow.cpp \
         s4.cpp \
         uibuilder.cpp
 
 HEADERS += \
+        identitymodel.h \
         json.hpp \
         mainwindow.h \
         s4.hpp \
