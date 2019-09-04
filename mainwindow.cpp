@@ -69,6 +69,4 @@ void MainWindow::openFile()
     for (size_t i=0; i<j["items"].size(); i++) {
       s = j["items"].at(i)["name"];
     }
-
-
 }

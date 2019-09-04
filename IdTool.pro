@@ -25,7 +25,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        identitymodel.cpp \
         main.cpp \
         mainwindow.cpp \
         s4.cpp \

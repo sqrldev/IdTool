@@ -15,8 +15,6 @@ public:
 
 class IdentityBlock
 {
-public:
-    struct IdentityBlockItem; // Forward declaration
 private:
     std::vector<IdentityBlockItem*> m_Items;
 
@@ -34,9 +32,6 @@ public:
 
 class IdentityModel
 {
-public:
-    class IdentityBlock; // Forward declaration
-
 private:
     std::vector<IdentityBlock*> m_Blocks;
 
