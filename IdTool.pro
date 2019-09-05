@@ -37,6 +37,7 @@ HEADERS += \
         json.hpp \
         mainwindow.h \
         s4.hpp \
+        s4parser.h \
         uibuilder.h
 
 FORMS += \

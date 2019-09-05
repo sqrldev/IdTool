@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "s4parser.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -44,6 +45,16 @@ void MainWindow::openFile()
     QByteArray ba = fileName.toLocal8Bit();
     char *pszFileName = ba.data();
 
+
+    S4Parser parser;
+    IdentityModel model;
+    parser.parseIdentityFile(pszFileName, &model);
+
+    int i= 0;
+    i++;
+
+    /*
+
     if (m_pStorage != nullptr)
     {
         delete m_pStorage;
@@ -58,7 +69,10 @@ void MainWindow::openFile()
     m_pHeaderFrame->setVisible(true);
     builder.build();
 
-    std::ifstream t("C:\\Users\\Alex\\Source\\Repos\\IdTool\\blockdef\\1.json");
+
+
+
+    std::ifstream t("C:\\Users\\alex.hauser\\Source\\Repos\\IdTool\\blockdef\\1.json");
     std::string str((std::istreambuf_iterator<char>(t)),
                      std::istreambuf_iterator<char>());
 
@@ -69,4 +83,6 @@ void MainWindow::openFile()
     for (size_t i=0; i<j["items"].size(); i++) {
       s = j["items"].at(i)["name"];
     }
+
+    */
 }

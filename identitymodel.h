@@ -1,139 +1,27 @@
 #ifndef IDENTITYMODEL_H
 #define IDENTITYMODEL_H
 
-#include <QString>
-#include <QApplication>
-#include <QTranslator>
 #include <vector>
-#include "base64.h"
+#include <json.hpp>
 
-enum EItemDataType
-{
-    UINT_8,
-    UINT_16,
-    UINT_32,
-    BYTE_ARRAY,
-    UNDEFINED
-};
-
-class IdentityBlockItem
-{
-public:
-    QString name = "";
-    QString description = "";
-    EItemDataType type = EItemDataType::UNDEFINED;
-    int bytes = -1;
-    QString value = "";
-
-    bool parseValue(std::vector<char> data, int offset)
-    {
-        if (name == "" ||
-            description == "" ||
-            type == EItemDataType::UNDEFINED ||
-            bytes == -1)
-        {
-            return false;
-        }
-
-        if (data.size() < (offset + bytes))
-        {
-            return false;
-        }
-
-        switch (type)
-        {
-        case EItemDataType::UINT_8:
-            if (bytes != 1)
-            {
-                throw std::runtime_error("Invalid byte count for datatype UINT_8!");
-                return false;
-            }
-            value = parseUint8(data, offset);
-            return true;
-
-        case EItemDataType::UINT_16:
-            if (bytes != 2) throw std::runtime_error("Invalid byte count for datatype UINT_16!");
-            value = parseUint16(data, offset);
-            break;
-
-        case EItemDataType::UINT_32:
-            if (bytes != 4) throw std::runtime_error("Invalid byte count for datatype UINT_32!");
-            value = parseUint32(data, offset);
-            break;
-
-        case EItemDataType::BYTE_ARRAY:
-            if (bytes < 1) throw std::runtime_error("Invalid byte count for datatype BYTE_ARRAY!");
-            value = parseByteArray(data, offset, bytes);
-            break;
-        }
-    }
-
-    QString parseUint8(std::vector<char> data, int offset)
-    {
-        if ((data.size() - offset) < 1) return "";
-        return QString::number(data[offset]);
-    }
-
-    QString parseUint16(std::vector<char> data, int offset)
-    {
-        if ((data.size() - offset) < 2) return "";
-        return QString::number(data[offset] | (data[offset+1] << 8));
-    }
-
-    QString parseUint32(std::vector<char> data, int offset)
-    {
-        if ((data.size() - offset) < 4) return "";
-        return QString::number(data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24));
-    }
-
-    QString parseByteArray(std::vector<char>* data, int offset, int bytes)
-    {
-        if ((data->size() - offset - bytes) < 1) return "";
-
-        char *pszData = data->data();
-
-        char szValue[bytes+1];
-        memset(&szValue, 0, bytes+1);
-        memcpy_s(&szValue, bytes, pszData, bytes);
-
-        return QString::fromUtf8(
-                    base64_encode(reinterpret_cast<const unsigned char*>(&szValue), bytes).c_str());
-
-    }
-};
-
-class IdentityBlock
-{
-private:
-    std::vector<IdentityBlockItem*> m_Items;
-
-public:
-    IdentityBlock();
-    ~IdentityBlock()
-    {
-        for (size_t i=0; i<m_Items.size(); i++)
-        {
-            delete m_Items[i];
-        }
-        m_Items.clear();
-    }
-};
+using json = nlohmann::json;
 
 class IdentityModel
-{
-private:
-    std::vector<IdentityBlock*> m_Blocks;
-
+{  
 public:
-    IdentityModel();
+    std::vector<int> blocks;
+    IdentityModel() {}
     ~IdentityModel()
     {
-        for (size_t i=0; i<m_Blocks.size(); i++)
+        /*
+        for (size_t i=0; i<blocks.size(); i++)
         {
-            delete m_Blocks[i];
+            delete blocks[i];
         }
-        m_Blocks.clear();
+        blocks.clear();
+        */
     }
+
 };
 
 #endif // IDENTITYMODEL_H
