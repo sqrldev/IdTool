@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QTranslator>
 #include <vector>
+#include "base64.h"
 
 enum EItemDataType
 {
@@ -85,15 +86,19 @@ public:
         return QString::number(data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24));
     }
 
-    QString parseByteArray(std::vector<char> data, int offset, int bytes)
+    QString parseByteArray(std::vector<char>* data, int offset, int bytes)
     {
-        if ((data.size() - offset - bytes) < 1) return "";
+        if ((data->size() - offset - bytes) < 1) return "";
 
-        for (int i=offset; i<(offset + bytes); i++)
-        {
-            //TODO: Base64-encode!!
-        }
-        return "";
+        char *pszData = data->data();
+
+        char szValue[bytes+1];
+        memset(&szValue, 0, bytes+1);
+        memcpy_s(&szValue, bytes, pszData, bytes);
+
+        return QString::fromUtf8(
+                    base64_encode(reinterpret_cast<const unsigned char*>(&szValue), bytes).c_str());
+
     }
 };
 
