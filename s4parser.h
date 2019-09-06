@@ -81,12 +81,9 @@ private:
         {
             uint16_t blockLength = getBlockLength(&myData[i]);
             uint16_t blockType = getBlockType(&myData[i]);
-
-            std::string sBlockDef = getBlockDefinition(blockType);
-            json* pBlockDef = new json();
-            *pBlockDef = json::parse(sBlockDef);
-            parseBlock(&myData[i], pBlockDef);
-            model->blocks.push_back(pBlockDef);
+            json* pBlockDefinition = getBlockDefinition(blockType);
+            parseBlock(&myData[i], pBlockDefinition);
+            model->blocks.push_back(1);
 
             i += blockLength;
         }
@@ -94,6 +91,9 @@ private:
 
     void parseBlock(const char* data, json* blockDefinition)
     {
+        int t = (*blockDefinition)["block_type"];
+        if (t != 1) return;
+
         size_t nrOfItems = (*blockDefinition)["items"].size();
 
         for (size_t i=0; i<nrOfItems; i++)
@@ -119,11 +119,11 @@ private:
             else if (sType == "BYTE_ARRAY")
             {
                 if (bytes < 1) throw std::runtime_error("Invalid byte count for datatype BYTE_ARRAY!");
-                (*blockDefinition)["items"].at(i)["value"] = parseByteArray(data, 0, bytes);
+                (*blockDefinition)["items"].at(i)["value"] = 1; //parseByteArray(data, 0, bytes);
             }
             else
             {
-                (*blockDefinition)["items"].at(i)["value"] = "";
+                (*blockDefinition)["items"].at(i)["value"] = 1; //"";
             }
         }
     }
@@ -160,16 +160,17 @@ private:
         return static_cast<uint16_t>(data[2] | (data[3] << 8));
     }
 
-    std::string getBlockDefinition(uint16_t blockType)
+    json* getBlockDefinition(uint16_t blockType)
     {
         QDir path = QDir::currentPath();
-        QDir fullPath = path.filePath(QString("blockdef/") + QString::number(blockType) + ".json");
-        std::string fileName = fullPath .absolutePath().toStdString();
+        path.filePath("blockdef/");
+        QDir fullPath = path.filePath(QString::number(blockType) + ".json");
+        std::string fileName = fullPath.absolutePath().toStdString();
 
-        std::ifstream t(fileName);
+        std::ifstream t("C:\\Users\\alex.hauser\\Source\\Repos\\IdTool\\blockdef\\1.json");
         std::string contents((std::istreambuf_iterator<char>(t)),
                          std::istreambuf_iterator<char>());
-        return contents;
+        return new json(contents);
     }
 
     std::string parseUint8(const char* data, int offset)

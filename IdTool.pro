@@ -56,6 +56,4 @@ RC_FILE = IdTool.rc
 VERSION = 0.1.0    # major.minor.patch
 
 DISTFILES += \
-    blockdef/1.json \
-    blockdef/2.json \
-    blockdef/3.json
+    blockdef/1.json
