@@ -1,0 +1,54 @@
+{
+  "block_type": 2,
+  "description": "Type 2 - Rescue code encrypted data",
+  "items": [
+    {
+      "name": "Length",
+      "description": "Inclusive length of the entire outer block",
+      "type": "UINT_16",
+      "bytes": 2
+    },
+    {
+      "name": "Type",
+      "description": "Block type",
+      "type": "UINT_16",
+      "bytes": 2
+    },
+    {
+      "name": "Plaintext length",
+      "description": "Inclusive length of the entire inner block",
+      "type": "UINT_16",
+      "bytes": 2
+    },
+    {
+      "name": "SCrypt random salt",
+      "description": "Random salt for the SCrypt operation",
+      "type": "BYTE_ARRAY",
+      "bytes": 16
+    },
+    {
+      "name": "SCrypt log(n) factor",
+      "description": "Memory consumption factor for the SCrypt operation",
+      "type": "UINT_8",
+      "bytes": 1
+    },
+    {
+      "name": "SCrypt iteration count",
+      "description": "Time consumption factor for the SCrypt operation",
+      "type": "UINT_32",
+      "bytes": 4
+    },
+    {
+      "name": "Identity Unlock Key",
+      "description": "The encrypted Identity Unlock Key",
+      "type": "BYTE_ARRAY",
+      "bytes": 32
+    },
+    {
+      "name": "Verification tag",
+      "description": "Data to verify/authenticate the encrypted information",
+      "type": "BYTE_ARRAY",
+      "bytes": 16
+    }
+  ]
+}
