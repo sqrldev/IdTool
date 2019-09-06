@@ -9,17 +9,15 @@ using json = nlohmann::json;
 class IdentityModel
 {  
 public:
-    std::vector<int> blocks;
+    std::vector<json*> blocks;
     IdentityModel() {}
     ~IdentityModel()
     {
-        /*
         for (size_t i=0; i<blocks.size(); i++)
         {
             delete blocks[i];
         }
         blocks.clear();
-        */
     }
 
 };
