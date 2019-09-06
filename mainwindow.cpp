@@ -20,11 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    if (m_pStorage != nullptr)
-    {
-        delete m_pStorage;
-        m_pStorage = nullptr;
-    }
+    delete m_pIdentityModel;
 }
 
 void MainWindow::openFile()
@@ -45,44 +41,19 @@ void MainWindow::openFile()
     QByteArray ba = fileName.toLocal8Bit();
     char *pszFileName = ba.data();
 
-
-    S4Parser parser;
-    IdentityModel model;
-    parser.parseIdentityFile(pszFileName, &model);
-
-    int i= 0;
-    i++;
-
-    /*
-
-    if (m_pStorage != nullptr)
+    try
     {
-        delete m_pStorage;
-        m_pStorage = nullptr;
+        S4Parser parser;
+        m_pIdentityModel = new IdentityModel();
+        parser.parseIdentityFile(pszFileName, m_pIdentityModel);
+
+        QScrollArea* scrollArea = this->findChild<QScrollArea*>("scrollArea");
+        UIBuilder builder(scrollArea, m_pIdentityModel);
+        m_pHeaderFrame->setVisible(true);
+        builder.build();
     }
-    m_pStorage = new S4();
-    m_pStorage->readIdentityFile(pszFileName);
-
-    QScrollArea* scrollArea = this->findChild<QScrollArea*>("scrollArea");
-    UIBuilder builder(this, scrollArea);
-    builder.setStorage(m_pStorage);
-    m_pHeaderFrame->setVisible(true);
-    builder.build();
-
-
-
-
-    std::ifstream t("C:\\Users\\alex.hauser\\Source\\Repos\\IdTool\\blockdef\\1.json");
-    std::string str((std::istreambuf_iterator<char>(t)),
-                     std::istreambuf_iterator<char>());
-
-    json j = json::parse(str);
-    std::string s = j["description"];
-
-    // iterate the array
-    for (size_t i=0; i<j["items"].size(); i++) {
-      s = j["items"].at(i)["name"];
+    catch (std::exception e)
+    {
+        //TODO: Error handling
     }
-
-    */
 }

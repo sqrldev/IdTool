@@ -1,17 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "s4.hpp"
+#include "identitymodel.h"
 #include "uibuilder.h"
-#include "json.hpp"
 #include <string>
 #include <fstream>
 #include <streambuf>
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QtGui>
-
-using namespace SqrlStorage;
 
 namespace Ui {
 class MainWindow;
@@ -31,7 +28,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QFrame* m_pHeaderFrame = nullptr;
-    S4 *m_pStorage = nullptr;
+    IdentityModel *m_pIdentityModel = nullptr;
 
 };
 

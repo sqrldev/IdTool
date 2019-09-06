@@ -6,26 +6,19 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include "s4.hpp"
-
-using namespace SqrlStorage;
+#include "identitymodel.h"
 
 class UIBuilder
 {
 public:
-    UIBuilder(QMainWindow* mainWindow, QWidget* container);
-    void setStorage(S4* storage);
+    UIBuilder(QWidget* container, IdentityModel* model);
     void build();
 
 private:
-    QMainWindow* m_pMainWindow = nullptr;
     QWidget* m_pContainer = nullptr;
-    S4* m_pStorage = nullptr;
+    IdentityModel* m_pModel = nullptr;
 
-    void buildBlockGeneric(S4::Block *block);
-    void buildBlockType1(S4::BlockType1 *block);
-    void buildBlockType2(S4::BlockType2 *block);
-    void buildBlockType3(S4::BlockType3 *block);
+    void buildBlock(IdentityModel::IdentityBlock* block);
     void addBlock(QString title, QColor color);
     void addLineItem(QString label, QString data, QVBoxLayout* layout);
 };
