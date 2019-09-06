@@ -24,13 +24,13 @@ public:
 
     void parseIdentityFile(const char* fileName, IdentityModel* model)
     {
-        if (!fileName)
+        if (!fileName || !model)
         {
-            throw std::invalid_argument("Both fileName and model must be valid pointers!");
+            throw std::invalid_argument("Both filename and model must be valid pointers!");
         }
 
         std::ifstream file(fileName, std::ios::binary | std::ios::ate);
-        std::streamsize size = file.tellg();
+        std::streamsize size = static_cast<std::streamsize>(file.tellg());
         file.seekg(0, std::ios::beg);
 
         char buffer[size];
@@ -45,9 +45,9 @@ public:
 
     void parseIdentityText(const char* identityText, IdentityModel* model)
     {
-        if (!identityText)
+        if (!identityText || !model)
         {
-            throw std::invalid_argument("Both fileName and model must be valid pointers!");
+            throw std::invalid_argument("Both filename and model must be valid pointers!");
         }
 
         size_t len = strlen(identityText);
@@ -83,49 +83,77 @@ private:
             uint16_t blockType = getBlockType(&myData[i]);
 
             std::string sBlockDef = getBlockDefinition(blockType);
-            json* pBlockDef = new json();
-            *pBlockDef = json::parse(sBlockDef);
-            parseBlock(&myData[i], pBlockDef);
-            model->blocks.push_back(pBlockDef);
+            json blockDef = json::parse(sBlockDef);
+
+            IdentityModel::IdentityBlock block = parseBlock(&myData[i], &blockDef);
+            model->blocks.push_back(block);
 
             i += blockLength;
         }
     }
 
-    void parseBlock(const char* data, json* blockDefinition)
+    IdentityModel::IdentityBlock parseBlock(const char* data, json* blockDefinition)
     {
-        size_t nrOfItems = (*blockDefinition)["items"].size();
+        IdentityModel::IdentityBlock newBlock;
+        int index = 0;
+        auto items = (*blockDefinition)["items"];
 
-        for (size_t i=0; i<nrOfItems; i++)
+        newBlock.blockType = (*blockDefinition)["block_type"];
+        newBlock.description = (*blockDefinition)["description"];
+
+        for (size_t i=0; i<items.size(); i++)
         {
-            std::string sType = (*blockDefinition)["items"].at(i)["type"];
-            int bytes =  (*blockDefinition)["items"].at(i)["bytes"];
+            IdentityModel::IdentityBlockItem newItem;
+            auto item = items.at(i);
 
-            if (sType == "UINT_8")
+            int repeat_count = 1;
+            if (item.contains("repeat_index"))
             {
-                if (bytes != 1) throw std::runtime_error("Invalid byte count for datatype UINT_8!");
-                (*blockDefinition)["items"].at(i)["value"] = parseUint8(data, 0);
+                size_t repeat_index = item["repeat_index"];
+                if (newBlock.items.size() > repeat_index)
+                {
+                    repeat_count = atoi(newBlock.items[repeat_index].value.c_str());
+                }
             }
-            else if (sType == "UINT_16")
+
+            newItem.name = item["name"];
+            newItem.description = item["description"];
+            newItem.type = item["type"];
+            newItem.bytes = item["bytes"];
+
+            for (int j=0; j<repeat_count; j++)
             {
-                if (bytes != 2) throw std::runtime_error("Invalid byte count for datatype UINT_16!");
-                (*blockDefinition)["items"].at(i)["value"] = parseUint16(data, 0);
-            }
-            else if (sType == "UINT_32")
-            {
-                if (bytes != 4) throw std::runtime_error("Invalid byte count for datatype UINT_32!");
-                (*blockDefinition)["items"].at(i)["value"] = parseUint32(data, 0);
-            }
-            else if (sType == "BYTE_ARRAY")
-            {
-                if (bytes < 1) throw std::runtime_error("Invalid byte count for datatype BYTE_ARRAY!");
-                (*blockDefinition)["items"].at(i)["value"] = parseByteArray(data, 0, bytes);
-            }
-            else
-            {
-                (*blockDefinition)["items"].at(i)["value"] = "";
+                if (newItem.type == "UINT_8")
+                {
+                    if (newItem.bytes != 1) throw std::runtime_error("Invalid byte count for datatype UINT_8!");
+                    newItem.value = parseUint8(data, index);
+                }
+                else if (newItem.type == "UINT_16")
+                {
+                    if (newItem.bytes != 2) throw std::runtime_error("Invalid byte count for datatype UINT_16!");
+                    newItem.value = parseUint16(data, index);
+                }
+                else if (newItem.type == "UINT_32")
+                {
+                    if (newItem.bytes != 4) throw std::runtime_error("Invalid byte count for datatype UINT_32!");
+                    newItem.value = parseUint32(data, index);
+                }
+                else if (newItem.type == "BYTE_ARRAY")
+                {
+                    if (newItem.bytes < 1) throw std::runtime_error("Invalid byte count for datatype BYTE_ARRAY!");
+                    newItem.value = parseByteArray(data, index, newItem.bytes);
+                }
+                else
+                {
+                    item["value"] = "";
+                }
+
+                newBlock.items.push_back(newItem);
+                index += newItem.bytes;
             }
         }
+
+        return newBlock;
     }
 
     bool checkHeader(const char* data)
@@ -150,16 +178,6 @@ private:
         return true;
     }
 
-    uint16_t getBlockLength(const char* data)
-    {
-        return static_cast<uint16_t>(data[0] | (data[1] << 8));
-    }
-
-    uint16_t getBlockType(const char* data)
-    {
-        return static_cast<uint16_t>(data[2] | (data[3] << 8));
-    }
-
     std::string getBlockDefinition(uint16_t blockType)
     {
         QDir path = QDir::currentPath();
@@ -170,6 +188,16 @@ private:
         std::string contents((std::istreambuf_iterator<char>(t)),
                          std::istreambuf_iterator<char>());
         return contents;
+    }
+
+    uint16_t getBlockLength(const char* data)
+    {
+        return static_cast<uint16_t>(data[0] | (data[1] << 8));
+    }
+
+    uint16_t getBlockType(const char* data)
+    {
+        return static_cast<uint16_t>(data[2] | (data[3] << 8));
     }
 
     std::string parseUint8(const char* data, int offset)
@@ -184,7 +212,8 @@ private:
 
     std::string parseUint32(const char* data, int offset)
     {
-        std::to_string(data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24));
+        uint32_t num = static_cast<uint32_t>(data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24));
+        return std::to_string(num);
     }
 
     std::string parseByteArray(const char* data, int offset, int bytes)
