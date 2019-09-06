@@ -48,6 +48,7 @@ void MainWindow::openFile()
         parser.parseIdentityFile(pszFileName, m_pIdentityModel);
 
         QScrollArea* scrollArea = this->findChild<QScrollArea*>("scrollArea");
+        scrollArea->setWidgetResizable(true);
         UIBuilder builder(scrollArea, m_pIdentityModel);
         m_pHeaderFrame->setVisible(true);
         builder.build();

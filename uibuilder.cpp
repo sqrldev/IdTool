@@ -13,15 +13,13 @@ void UIBuilder::build()
         throw std::runtime_error("Invalid container or model pointers!");
     }
 
-    QVBoxLayout* pVerticalLayout = new QVBoxLayout();
+    QGridLayout* pVerticalLayout = new QGridLayout();
     m_pContainer->setLayout(pVerticalLayout);
 
     for (size_t i=0; i<m_pModel->blocks.size(); i++)
     {
         buildBlock(&m_pModel->blocks[i]);
     }
-
-    static_cast<QVBoxLayout*>(m_pContainer->layout())->addStretch();
 }
 
 
@@ -29,21 +27,26 @@ void UIBuilder::build()
 void UIBuilder::buildBlock(IdentityModel::IdentityBlock *block)
 {
     QFrame* pBlockFrame = new QFrame();
+    pBlockFrame->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    pBlockFrame->sizeHint();
     pBlockFrame->setStyleSheet("background: rgb(214, 201, 163)");
 
-    QVBoxLayout* pVerticalFrameLayout = new QVBoxLayout();
+    QGridLayout* frameLayout = new QGridLayout();
 
-    addLineItem("Length:", QString::number(12), pVerticalFrameLayout);
+    for (size_t i=0; i<block->items.size(); i++)
+    {
+        addLineItem(QString::fromUtf8(block->items[i].name.c_str()),
+                    QString::fromUtf8(block->items[i].value.c_str()),
+                    frameLayout);
+    }
 
-    pVerticalFrameLayout->addStretch();
-
-    pBlockFrame->setLayout(pVerticalFrameLayout);
+    pBlockFrame->setLayout(frameLayout);
     m_pContainer->layout()->addWidget(pBlockFrame);
 }
 
 
 
-void UIBuilder::addLineItem(QString label, QString data, QVBoxLayout* layout)
+void UIBuilder::addLineItem(QString label, QString data, QGridLayout* layout)
 {
     QWidget* widget = new QWidget();
     QHBoxLayout* hlayout = new QHBoxLayout();

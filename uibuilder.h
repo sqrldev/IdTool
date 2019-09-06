@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QSizePolicy>
 #include "identitymodel.h"
 
 class UIBuilder
@@ -20,7 +21,7 @@ private:
 
     void buildBlock(IdentityModel::IdentityBlock* block);
     void addBlock(QString title, QColor color);
-    void addLineItem(QString label, QString data, QVBoxLayout* layout);
+    void addLineItem(QString label, QString data, QGridLayout* layout);
 };
 
 #endif // UIBUILDER_H
