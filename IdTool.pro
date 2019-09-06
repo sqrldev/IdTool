@@ -28,7 +28,6 @@ SOURCES += \
         base64.cpp \
         main.cpp \
         mainwindow.cpp \
-        s4.cpp \
         uibuilder.cpp
 
 HEADERS += \
@@ -36,7 +35,6 @@ HEADERS += \
         identitymodel.h \
         json.hpp \
         mainwindow.h \
-        s4.hpp \
         s4parser.h \
         uibuilder.h
 
