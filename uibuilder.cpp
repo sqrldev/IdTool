@@ -105,7 +105,7 @@ QWidget* UIBuilder::createBlockItem(QString label, QString data)
     QPushButton* wButton = new QPushButton();
     wButton->setMaximumWidth(30);
     wLabel->setMinimumWidth(30);
-    wButton->setIcon(QIcon(":/res/img/Paste_16x.png"));
+    wButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
     pLayout->addWidget(wButton);
 
     pWidget->setLayout(pLayout);
