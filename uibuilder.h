@@ -2,7 +2,7 @@
 #define UIBUILDER_H
 
 #include <QMainWindow>
-#include <QWidget>
+#include <QScrollArea>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -12,16 +12,16 @@
 class UIBuilder
 {
 public:
-    UIBuilder(QWidget* container, IdentityModel* model);
+    UIBuilder(QScrollArea* scrollArea, IdentityModel* model);
     void build();
 
 private:
-    QWidget* m_pContainer = nullptr;
+    QScrollArea* m_pScrollArea = nullptr;
     IdentityModel* m_pModel = nullptr;
 
     void buildBlock(IdentityModel::IdentityBlock* block);
     void addBlock(QString title, QColor color);
-    void addLineItem(QString label, QString data, QGridLayout* layout);
+    QWidget* createBlockItem(QString label, QString data);
 };
 
 #endif // UIBUILDER_H
