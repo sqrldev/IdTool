@@ -20,63 +20,35 @@ void UIBuilder::build()
     // Add frame
     for (size_t i=0; i<m_pModel->blocks.size(); i++)
     {
-        QFrame* pFrame = new QFrame();
-        pFrame->setStyleSheet("background: rgb(214, 201, 163)");
-        QGridLayout* pFrameLayout = new QGridLayout();
-
-        // Add items
-        for (int j=0; j<m_pModel->blocks[i].items.size(); j++)
-        {
-            QWidget* pItemWidget = createBlockItem(
-                        QString::fromUtf8(m_pModel->blocks[i].items[j].name.c_str()),
-                        QString::fromUtf8(m_pModel->blocks[i].items[j].value.c_str()));
-            pFrameLayout->addWidget(pItemWidget);
-        }
-
-
-        pFrame->setLayout(pFrameLayout);
-        pLayout->addWidget(pFrame);
+        QWidget* pBlock = createBlock(&m_pModel->blocks[i]);
+        pLayout->addWidget(pBlock);
     }
-
-
 
     pWidget->setLayout(pLayout);
     m_pScrollArea->setWidget(pWidget);
-
-    /*
-    QVBoxLayout *pLayout = new QVBoxLayout();
-    pLayout->setSizeConstraint(QLayout::SetFixedSize);
-    m_pScrollArea->setLayout(pLayout);
-
-    for (size_t i=0; i<m_pModel->blocks.size(); i++)
-    {
-        buildBlock(&m_pModel->blocks[i]);
-    }
-    pLayout->insertStretch(0, 1);
-    */
 }
 
 
 
-void UIBuilder::buildBlock(IdentityModel::IdentityBlock *block)
+QWidget* UIBuilder::createBlock(IdentityModel::IdentityBlock *block)
 {
-    /*
-    QFrame* pBlockFrame = new QFrame();
-    pBlockFrame->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    pBlockFrame->setStyleSheet("background: rgb(214, 201, 163)");
+    QFrame* pFrame = new QFrame();
+    pFrame->setStyleSheet("background: rgb(214, 201, 163)");
+    QGridLayout* pFrameLayout = new QGridLayout();
+    pFrameLayout->setSpacing(3);
 
-    QGridLayout* frameLayout = new QGridLayout();
-
+    // Add items
     for (size_t i=0; i<block->items.size(); i++)
     {
-        addLineItem(QString::fromUtf8(block->items[i].name.c_str()),
-                    QString::fromUtf8(block->items[i].value.c_str()),
-                    frameLayout);
+        QWidget* pItemWidget = createBlockItem(
+                    QString::fromUtf8(block->items[i].name.c_str()),
+                    QString::fromUtf8(block->items[i].value.c_str()));
+        pFrameLayout->addWidget(pItemWidget);
     }
 
-    pBlockFrame->setLayout(frameLayout);
-    m_pScrollArea->layout()->addWidget(pBlockFrame);
-    */
+    pFrame->setLayout(pFrameLayout);
+
+    return pFrame;
 }
 
 
@@ -84,8 +56,8 @@ void UIBuilder::buildBlock(IdentityModel::IdentityBlock *block)
 QWidget* UIBuilder::createBlockItem(QString label, QString data)
 {
     QWidget* pWidget = new QWidget();
-    //pWidget->setStyleSheet("background: rgb(66,66,66)");
     QHBoxLayout* pLayout = new QHBoxLayout();
+
     pLayout->setContentsMargins(0,0,0,0);
 
     QLabel* wLabel = new QLabel(label + ":");

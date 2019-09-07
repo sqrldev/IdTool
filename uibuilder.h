@@ -19,8 +19,7 @@ private:
     QScrollArea* m_pScrollArea = nullptr;
     IdentityModel* m_pModel = nullptr;
 
-    void buildBlock(IdentityModel::IdentityBlock* block);
-    void addBlock(QString title, QColor color);
+    QWidget* createBlock(IdentityModel::IdentityBlock* block);
     QWidget* createBlockItem(QString label, QString data);
 };
 
