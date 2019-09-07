@@ -50,7 +50,7 @@ void MainWindow::openFile()
         QScrollArea* scrollArea = this->findChild<QScrollArea*>("scrollArea");
         scrollArea->setWidgetResizable(true);
         UIBuilder builder(scrollArea, m_pIdentityModel);
-        m_pHeaderFrame->setVisible(true);
+        //m_pHeaderFrame->setVisible(true);
         builder.build();
     }
     catch (std::exception e)

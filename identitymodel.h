@@ -23,6 +23,7 @@ public:
     public:
         int blockType = -1;
         std::string description = "";
+        std::string color = "rgb(214, 201, 163)";
         std::vector<IdentityBlockItem> items;
     };
 

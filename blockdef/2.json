@@ -1,6 +1,7 @@
 {
   "block_type": 2,
   "description": "Type 2 - Rescue code encrypted data",
+  "color": "rgb(159, 178, 194)",
   "items": [
     {
       "name": "Length",

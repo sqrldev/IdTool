@@ -100,6 +100,7 @@ private:
 
         newBlock.blockType = (*blockDefinition)["block_type"];
         newBlock.description = (*blockDefinition)["description"];
+        newBlock.color = (*blockDefinition)["color"];
 
         for (size_t i=0; i<items.size(); i++)
         {

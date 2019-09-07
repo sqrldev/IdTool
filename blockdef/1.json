@@ -1,6 +1,7 @@
 {
   "block_type": 1,
   "description": "Type 1 - User access password authenticated & encrypted data",
+  "color": "rgb(196, 201, 187)",
   "items": [
     {
       "name": "Length",

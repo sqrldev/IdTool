@@ -15,9 +15,8 @@ void UIBuilder::build()
 
     QWidget* pWidget = new QWidget();
     QVBoxLayout *pLayout = new QVBoxLayout();
-    //pLayout->setSizeConstraint(QLayout::SetFixedSize);
+    pLayout->setSpacing(20);
 
-    // Add frame
     for (size_t i=0; i<m_pModel->blocks.size(); i++)
     {
         QWidget* pBlock = createBlock(&m_pModel->blocks[i]);
@@ -28,14 +27,24 @@ void UIBuilder::build()
     m_pScrollArea->setWidget(pWidget);
 }
 
-
-
 QWidget* UIBuilder::createBlock(IdentityModel::IdentityBlock *block)
 {
+    QString objectName = "obj_" + QUuid::createUuid().toString(QUuid::Id128);
+
     QFrame* pFrame = new QFrame();
-    pFrame->setStyleSheet("background: rgb(214, 201, 163)");
+    pFrame->setObjectName(objectName);
+    pFrame->setFrameStyle(QFrame::Box | QFrame::Raised);
+    QString styleSheet = "QFrame#";
+    styleSheet += objectName;
+    styleSheet += " { background: ";
+    styleSheet += block->color.c_str();
+    styleSheet += "; border-radius: 6px; }";
+    pFrame->setStyleSheet(styleSheet);
     QGridLayout* pFrameLayout = new QGridLayout();
     pFrameLayout->setSpacing(3);
+
+    QWidget* pBlockHeader = createBlockHeader(block);
+    pFrameLayout->addWidget(pBlockHeader);
 
     // Add items
     for (size_t i=0; i<block->items.size(); i++)
@@ -49,6 +58,25 @@ QWidget* UIBuilder::createBlock(IdentityModel::IdentityBlock *block)
     pFrame->setLayout(pFrameLayout);
 
     return pFrame;
+}
+
+QWidget* UIBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
+{
+    QWidget* pWidget = new QWidget();
+    QHBoxLayout* pLayout = new QHBoxLayout();
+
+    pLayout->setContentsMargins(10,10,10,30);
+
+    QLabel* wLabel = new QLabel("Block " + QString::fromUtf8(block->description.c_str()));
+    QFont font = wLabel->font();
+    font.setPointSize(14);
+    wLabel->setFont(font);
+    wLabel->setWordWrap(true);
+
+    pLayout->addWidget(wLabel);
+    pWidget->setLayout(pLayout);
+
+    return pWidget;
 }
 
 
@@ -67,7 +95,8 @@ QWidget* UIBuilder::createBlockItem(QString label, QString data)
     pLayout->addWidget(wLabel);
 
     QLabel* wData = new QLabel(data);
-    wData->setStyleSheet("background: rgb(237, 237, 237)");
+    wData->setObjectName("wDataLabel");
+    wData->setStyleSheet("QLabel#wDataLabel { background: rgb(237, 237, 237); border-radius: 6px; }");
     wData->setMinimumWidth(300);
     wData->setMargin(5);
     wData->setWordWrap(true);

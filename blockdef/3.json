@@ -1,6 +1,7 @@
 {
   "block_type": 3,
   "description": "Type 3 - Encrypted previous identity unlock keys",
+  "color": "rgb(214, 178, 163)",
   "items": [
     {
       "name": "Length",
