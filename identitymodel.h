@@ -23,8 +23,8 @@ public:
     {
     public:
         int blockType = -1;
-        std::string description = "";
-        std::string color = "rgb(214, 201, 163)";
+        QString description = "";
+        QString color = "rgb(214, 201, 163)";
         std::vector<IdentityBlockItem> items;
     };
 
@@ -44,11 +44,11 @@ public:
 
     public:
         // Public member variables
-        std::string name = "";
-        std::string description = "";
-        std::string type = "UNDEFINED";
+        QString name = "";
+        QString description = "";
+        QString type = "UNDEFINED";
         int bytes = 0;
-        std::string value = "";
+        QString value = "";
     };
 };
 

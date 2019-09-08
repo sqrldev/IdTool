@@ -36,7 +36,7 @@ QWidget* UiBuilder::createBlock(IdentityModel::IdentityBlock *block)
     pFrame->setFrameStyle(QFrame::Box | QFrame::Raised);
     QString styleSheet = QString("QFrame#") + objectName +
             " { background: " +
-            block->color.c_str() +
+            block->color +
             "; border-radius: 6px; }";
     pFrame->setStyleSheet(styleSheet);
     QGridLayout* pFrameLayout = new QGridLayout();
@@ -64,7 +64,7 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
 
     pLayout->setContentsMargins(10,10,10,30);
 
-    QLabel* wLabel = new QLabel("Block " + QString::fromUtf8(block->description.c_str()));
+    QLabel* wLabel = new QLabel("Block " + block->description);
     QFont font = wLabel->font();
     font.setPointSize(14);
     wLabel->setFont(font);
@@ -85,13 +85,13 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 
     pLayout->setContentsMargins(0,0,0,0);
 
-    QLabel* wLabel = new QLabel(item->name.c_str());
+    QLabel* wLabel = new QLabel(item->name);
     wLabel->setWordWrap(true);
     wLabel->setMaximumWidth(150);
     wLabel->setMinimumWidth(150);
     pLayout->addWidget(wLabel);
 
-    QLabel* wData = new QLabel(item->value.c_str());
+    QLabel* wData = new QLabel(item->value);
     wData->setObjectName("wDataLabel");
     wData->setStyleSheet("QLabel#wDataLabel { background: rgb(237, 237, 237); border-radius: 6px; }");
     wData->setMinimumWidth(300);
@@ -118,9 +118,7 @@ void UiBuilder::editButtonClicked()
     EditButtonConnector* pEditButtonConnector =
             static_cast<EditButtonConnector*>(sender()->userData(0));
 
-    std:: string name = pEditButtonConnector->item->name;
-
     QMessageBox msgBox;
-    msgBox.setText(name.c_str());
+    msgBox.setText(pEditButtonConnector->item->name);
     msgBox.exec();
 }

@@ -34,7 +34,6 @@ HEADERS += \
         base64.h \
         identitymodel.h \
         identityparser.h \
-        json.hpp \
         mainwindow.h \
         uibuilder.h
 

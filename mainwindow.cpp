@@ -4,8 +4,6 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
-using json = nlohmann::json;
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)

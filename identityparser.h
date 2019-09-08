@@ -1,13 +1,13 @@
 #ifndef S4PARSER_H
 #define S4PARSER_H
 
-#include "json.hpp"
 #include "base64.h"
 #include "identitymodel.h"
 #include <fstream>
 #include <QDir>
-
-using json = nlohmann::json;
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 class IdentityParser
 {
@@ -82,8 +82,9 @@ private:
             uint16_t blockLength = getBlockLength(&myData[i]);
             uint16_t blockType = getBlockType(&myData[i]);
 
-            std::string sBlockDef = getBlockDefinition(blockType);
-            json blockDef = json::parse(sBlockDef);
+            QByteArray sBlockDef = getBlockDefinition(blockType);
+            QJsonParseError e;
+            QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, &e);
 
             IdentityModel::IdentityBlock block = parseBlock(&myData[i], &blockDef);
             model->blocks.push_back(block);
@@ -92,35 +93,37 @@ private:
         }
     }
 
-    IdentityModel::IdentityBlock parseBlock(const char* data, json* blockDefinition)
+    IdentityModel::IdentityBlock parseBlock(const char* data, QJsonDocument* blockDef)
     {
         IdentityModel::IdentityBlock newBlock;
         int index = 0;
-        auto items = (*blockDefinition)["items"];
+        auto bd = (*blockDef);
 
-        newBlock.blockType = (*blockDefinition)["block_type"];
-        newBlock.description = (*blockDefinition)["description"];
-        newBlock.color = (*blockDefinition)["color"];
+        newBlock.blockType = bd["block_type"].toInt();
+        newBlock.description = bd["description"].toString();
+        newBlock.color = bd["color"].toString();
 
-        for (size_t i=0; i<items.size(); i++)
+        QJsonArray items = bd["items"].toArray();
+
+        for (int i=0; i<items.size(); i++)
         {
             IdentityModel::IdentityBlockItem newItem;
-            auto item = items.at(i);
+            QJsonObject item = items.at(i).toObject();
 
             int repeat_count = 1;
             if (item.contains("repeat_index"))
             {
-                size_t repeat_index = item["repeat_index"];
+                size_t repeat_index = static_cast<size_t>(item["repeat_index"].toInt());
                 if (newBlock.items.size() > repeat_index)
                 {
-                    repeat_count = atoi(newBlock.items[repeat_index].value.c_str());
+                    repeat_count = newBlock.items[repeat_index].value.toInt();
                 }
             }
 
-            newItem.name = item["name"];
-            newItem.description = item["description"];
-            newItem.type = item["type"];
-            newItem.bytes = item["bytes"];
+            newItem.name = item["name"].toString();
+            newItem.description = item["description"].toString();
+            newItem.type = item["type"].toString();
+            newItem.bytes = item["bytes"].toInt();
 
             for (int j=0; j<repeat_count; j++)
             {
@@ -179,16 +182,15 @@ private:
         return true;
     }
 
-    std::string getBlockDefinition(uint16_t blockType)
+    QByteArray getBlockDefinition(uint16_t blockType)
     {
         QDir path = QDir::currentPath();
         QDir fullPath = path.filePath(QString("blockdef/") + QString::number(blockType) + ".json");
-        std::string fileName = fullPath .absolutePath().toStdString();
+        QString sFullPath = fullPath.absolutePath();
 
-        std::ifstream t(fileName);
-        std::string contents((std::istreambuf_iterator<char>(t)),
-                         std::istreambuf_iterator<char>());
-        return contents;
+        QFile file(sFullPath);
+        if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Error reading block definition file!");
+        return file.readAll();
     }
 
     uint16_t getBlockLength(const char* data)
@@ -201,25 +203,27 @@ private:
         return static_cast<uint16_t>(data[2] | (data[3] << 8));
     }
 
-    std::string parseUint8(const char* data, int offset)
+    QString parseUint8(const char* data, int offset)
     {
-        return std::to_string(data[offset]);
+        return QString::number(data[offset]);
     }
 
-    std::string parseUint16(const char* data, int offset)
+    QString parseUint16(const char* data, int offset)
     {
-        return std::to_string(data[offset] | (data[offset+1] << 8));
+        return QString::number(data[offset] | (data[offset+1] << 8));
     }
 
-    std::string parseUint32(const char* data, int offset)
+    QString parseUint32(const char* data, int offset)
     {
         uint32_t num = static_cast<uint32_t>(data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24));
-        return std::to_string(num);
+        return QString::number(num);
     }
 
-    std::string parseByteArray(const char* data, int offset, int bytes)
+    QString parseByteArray(const char* data, int offset, int bytes)
     {
-        return base64_encode(reinterpret_cast<const unsigned char*>(&data[offset]), static_cast<unsigned int>(bytes));
+        return QString::fromUtf8(
+                    base64_encode(reinterpret_cast<const unsigned char*>(&data[offset]), static_cast<unsigned int>(bytes)).c_str()
+                    );
     }
 };
 
