@@ -1,7 +1,6 @@
 #ifndef S4PARSER_H
 #define S4PARSER_H
 
-#include "base64.h"
 #include "identitymodel.h"
 #include <fstream>
 #include <QDir>
@@ -67,12 +66,13 @@ private:
 
         if (m_bIsBase64)
         {
-            std::string decoded = base64_decode(std::string(myData, length));
-            if (decoded.empty()) throw std::runtime_error("Invalid base64-format on identity!");
+            QByteArray ba(myData, static_cast<int>(length));
+            QString decoded = QString::fromLocal8Bit(ba.toBase64());
+            if (decoded.isEmpty()) throw std::runtime_error("Invalid base64-format on identity!");
 
-            decoded = std::string(HEADER, HEADER_SIZE) + decoded;
-            myData = decoded.c_str();
-            length = decoded.length();
+            decoded = HEADER + decoded;
+            myData = decoded.toLocal8Bit().data();
+            length = static_cast<size_t>(decoded.length());
         }
 
         size_t i = HEADER_SIZE; // skip header
@@ -221,9 +221,14 @@ private:
 
     QString parseByteArray(const char* data, int offset, int bytes)
     {
+        QByteArray ba(&data[offset], bytes);
+        return QString::fromLocal8Bit(ba.toBase64());
+
+        /*
         return QString::fromUtf8(
                     base64_encode(reinterpret_cast<const unsigned char*>(&data[offset]), static_cast<unsigned int>(bytes)).c_str()
                     );
+        */
     }
 };
 
