@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        identityparser.cpp \
         main.cpp \
         mainwindow.cpp \
         uibuilder.cpp
