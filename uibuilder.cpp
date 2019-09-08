@@ -115,10 +115,12 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 
 void UiBuilder::editButtonClicked()
 {
-    EditButtonConnector* pEditButtonConnector =
+    EditButtonConnector* pConnector =
             static_cast<EditButtonConnector*>(sender()->userData(0));
 
-    QMessageBox msgBox;
-    msgBox.setText(pEditButtonConnector->item->name);
-    msgBox.exec();
+    QString result = QInputDialog::getText(
+                nullptr, tr("Edit value"), tr("New value:"), QLineEdit::Normal,
+                pConnector->item->value);
+
+    pConnector->item->value = result;
 }

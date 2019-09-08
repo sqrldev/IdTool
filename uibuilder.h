@@ -10,6 +10,7 @@
 #include <QUuid>
 #include <QObjectUserData>
 #include <QMessageBox>
+#include <QInputDialog>
 #include "identitymodel.h"
 
 class UiBuilder : public QObject
