@@ -37,11 +37,16 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
     if (m_bIsBase64)
     {
-        QString decoded = QString::fromLocal8Bit(data.toBase64());
+        QString decoded = QString::fromLocal8Bit(data);
+        decoded = decoded.mid(HEADER.length());
+        decoded = QString::fromLocal8Bit(
+                    QByteArray::fromBase64(
+                        decoded.toLocal8Bit(),
+                        QByteArray::OmitTrailingEquals | QByteArray::Base64UrlEncoding));
         if (decoded.isEmpty()) throw std::runtime_error("Invalid base64-format on identity!");
 
         decoded = HEADER + decoded;
-        data = decoded.toLocal8Bit().data();
+        data = decoded.toLocal8Bit();
     }
 
     int i = HEADER.length(); // skip header
@@ -165,32 +170,43 @@ QByteArray IdentityParser::getBlockDefinition(uint16_t blockType)
 
 uint16_t IdentityParser::getBlockLength(const char* data)
 {
-    return static_cast<uint16_t>(data[0] | (data[1] << 8));
+    unsigned char c1 = static_cast<unsigned char>(data[0]);
+    unsigned char c2 = static_cast<unsigned char>(data[1]);
+    return static_cast<uint16_t>(c1 | (c2 << 8));
 }
 
 uint16_t IdentityParser::getBlockType(const char* data)
 {
-    return static_cast<uint16_t>(data[2] | (data[3] << 8));
+    unsigned char c1 = static_cast<unsigned char>(data[2]);
+    unsigned char c2 = static_cast<unsigned char>(data[3]);
+    return static_cast<uint16_t>(c1 | (c2 << 8));
 }
 
 QString IdentityParser::parseUint8(const char* data, int offset)
 {
-    return QString::number(static_cast<uint8_t>(data[offset]));
+    return QString::number(static_cast<unsigned char>(data[offset]));
 }
 
 QString IdentityParser::parseUint16(const char* data, int offset)
 {
-    return QString::number(static_cast<uint16_t>(data[offset] | (data[offset+1] << 8)));
+    unsigned char c1 = static_cast<unsigned char>(data[offset]);
+    unsigned char c2 = static_cast<unsigned char>(data[offset+1]);
+    uint32_t num = static_cast<uint32_t>(c1 | (c2 << 8));
+    return QString::number(num);
 }
 
 QString IdentityParser::parseUint32(const char* data, int offset)
 {
-    uint32_t num = static_cast<uint32_t>(data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24));
+    unsigned char c1 = static_cast<unsigned char>(data[offset]);
+    unsigned char c2 = static_cast<unsigned char>(data[offset+1]);
+    unsigned char c3 = static_cast<unsigned char>(data[offset+2]);
+    unsigned char c4 = static_cast<unsigned char>(data[offset+3]);
+    uint32_t num = static_cast<uint32_t>(c1 | (c2 << 8) | (c3 << 16) | (c4 << 24));
     return QString::number(num);
 }
 
 QString IdentityParser::parseByteArray(const char* data, int offset, int bytes)
 {
     QByteArray ba(&data[offset], bytes);
-    return QString::fromLocal8Bit(ba.toBase64());
+    return QString::fromLocal8Bit(ba.toBase64(QByteArray::OmitTrailingEquals));
 }

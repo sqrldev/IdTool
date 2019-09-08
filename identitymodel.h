@@ -6,6 +6,8 @@
 #include <string>
 #include <QObject>
 #include <QFile>
+#include <QDataStream>
+#include <QDebug>
 
 class IdentityModel
 {     

@@ -118,12 +118,16 @@ void UiBuilder::editButtonClicked()
     EditButtonConnector* pConnector =
             static_cast<EditButtonConnector*>(sender()->userData(0));
 
+    bool ok = false;
     QString result = QInputDialog::getText(
                 nullptr, tr("Edit value"), tr("New value:"), QLineEdit::Normal,
-                pConnector->item->value);
+                pConnector->item->value, &ok);
 
-    pConnector->item->value = result;
-    pConnector->valueLabel->setText(result);
+    if (ok)
+    {
+        pConnector->item->value = result;
+        pConnector->valueLabel->setText(result);
+    }
 }
 
 UiBuilder::EditButtonConnector::EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLabel* valueLabel)

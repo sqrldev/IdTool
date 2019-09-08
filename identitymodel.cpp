@@ -22,17 +22,33 @@ QByteArray IdentityModel::IdentityBlock::toByteArray()
 
     for (size_t i=0; i<items.size(); i++)
     {
-        QByteArray value;
-
-        if (items[i].type == "UINT_8" ||
-            items[i].type == "UINT_16" ||
-            items[i].type == "UINT_32")
+        if (items[i].type == "UINT_8")
         {
-            ba.append(QByteArray::number(items[i].value.toInt()));
+            ba.append(static_cast<char>(items[i].value.toInt()));
+        }
+        else if (items[i].type == "UINT_16")
+        {
+            int value = items[i].value.toInt();
+            char* data = static_cast<char*>(static_cast<void*>(&value));
+            ba.append(data[0]);
+            ba.append(data[1]);
+        }
+        else if (items[i].type == "UINT_32")
+        {
+            QString v = items[i].value;
+            int vi = v.toInt();
+            uint32_t value = static_cast<uint32_t>(vi);
+            char* data = static_cast<char*>(static_cast<void*>(&value));
+            ba.append(data[0]);
+            ba.append(data[1]);
+            ba.append(data[2]);
+            ba.append(data[3]);
         }
         else if (items[i].type == "BYTE_ARRAY")
         {
-            ba.append(QByteArray::fromBase64(items[i].value.toUtf8()));
+            QByteArray baTemp = QByteArray::fromBase64(items[i].value.toUtf8(), QByteArray::OmitTrailingEquals);
+            qDebug() << baTemp;
+            ba.append(baTemp);
         }
     }
 
