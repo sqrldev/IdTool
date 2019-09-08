@@ -175,12 +175,12 @@ uint16_t IdentityParser::getBlockType(const char* data)
 
 QString IdentityParser::parseUint8(const char* data, int offset)
 {
-    return QString::number(data[offset]);
+    return QString::number(static_cast<uint8_t>(data[offset]));
 }
 
 QString IdentityParser::parseUint16(const char* data, int offset)
 {
-    return QString::number(data[offset] | (data[offset+1] << 8));
+    return QString::number(static_cast<uint16_t>(data[offset] | (data[offset+1] << 8)));
 }
 
 QString IdentityParser::parseUint32(const char* data, int offset)
