@@ -38,11 +38,10 @@ public:
     {
     public:
         IdentityModel::IdentityBlockItem* item = nullptr;
+        QLabel* valueLabel = nullptr;
 
-        EditButtonConnector(IdentityModel::IdentityBlockItem* item)
-        {
-            this->item = item;
-        }
+    public:
+        EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLabel* valueLabel);
     };
 };
 

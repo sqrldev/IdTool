@@ -103,7 +103,7 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
     wButton->setMaximumWidth(30);
     wLabel->setMinimumWidth(30);
     wButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
-    EditButtonConnector* pEditButtonConnector = new EditButtonConnector(item);
+    EditButtonConnector* pEditButtonConnector = new EditButtonConnector(item, wData);
     wButton->setUserData(0, pEditButtonConnector);
     connect(wButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
 
@@ -123,4 +123,11 @@ void UiBuilder::editButtonClicked()
                 pConnector->item->value);
 
     pConnector->item->value = result;
+    pConnector->valueLabel->setText(result);
+}
+
+UiBuilder::EditButtonConnector::EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLabel* valueLabel)
+{
+    this->item = item;
+    this->valueLabel = valueLabel;
 }
