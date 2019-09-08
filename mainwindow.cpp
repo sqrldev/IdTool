@@ -11,8 +11,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     m_pHeaderFrame = this->findChild<QFrame*>("headerFrame");
+    m_pScrollArea = this->findChild<QScrollArea*>("scrollArea");
+    m_pParser = new S4Parser();
+    m_pIdentityModel = new IdentityModel();
+    m_pUiBuilder = new UIBuilder(m_pScrollArea, m_pIdentityModel);
     m_pHeaderFrame->setVisible(false);
+
+    m_pScrollArea->setWidgetResizable(true);
 
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
 }
@@ -20,7 +27,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete m_pParser;
     delete m_pIdentityModel;
+    delete m_pUiBuilder;
 }
 
 void MainWindow::openFile()
@@ -43,15 +52,10 @@ void MainWindow::openFile()
 
     try
     {
-        S4Parser parser;
-        m_pIdentityModel = new IdentityModel();
-        parser.parseIdentityFile(pszFileName, m_pIdentityModel);
+        m_pParser->parseIdentityFile(pszFileName, m_pIdentityModel);
+        m_pUiBuilder->build();
 
-        QScrollArea* scrollArea = this->findChild<QScrollArea*>("scrollArea");
-        scrollArea->setWidgetResizable(true);
-        UIBuilder builder(scrollArea, m_pIdentityModel);
         //m_pHeaderFrame->setVisible(true);
-        builder.build();
     }
     catch (std::exception e)
     {

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "identitymodel.h"
+#include "s4parser.h"
 #include "uibuilder.h"
 #include <string>
 #include <fstream>
@@ -28,7 +29,10 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QFrame* m_pHeaderFrame = nullptr;
+    QScrollArea* m_pScrollArea = nullptr;
     IdentityModel *m_pIdentityModel = nullptr;
+    S4Parser* m_pParser = nullptr;
+    UIBuilder* m_pUiBuilder = nullptr;
 
 };
 

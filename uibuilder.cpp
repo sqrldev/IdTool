@@ -34,11 +34,10 @@ QWidget* UIBuilder::createBlock(IdentityModel::IdentityBlock *block)
     QFrame* pFrame = new QFrame();
     pFrame->setObjectName(objectName);
     pFrame->setFrameStyle(QFrame::Box | QFrame::Raised);
-    QString styleSheet = "QFrame#";
-    styleSheet += objectName;
-    styleSheet += " { background: ";
-    styleSheet += block->color.c_str();
-    styleSheet += "; border-radius: 6px; }";
+    QString styleSheet = QString("QFrame#") + objectName +
+            " { background: " +
+            block->color.c_str() +
+            "; border-radius: 6px; }";
     pFrame->setStyleSheet(styleSheet);
     QGridLayout* pFrameLayout = new QGridLayout();
     pFrameLayout->setSpacing(3);
@@ -49,9 +48,7 @@ QWidget* UIBuilder::createBlock(IdentityModel::IdentityBlock *block)
     // Add items
     for (size_t i=0; i<block->items.size(); i++)
     {
-        QWidget* pItemWidget = createBlockItem(
-                    QString::fromUtf8(block->items[i].name.c_str()),
-                    QString::fromUtf8(block->items[i].value.c_str()));
+        QWidget* pItemWidget = createBlockItem(&block->items[i]);
         pFrameLayout->addWidget(pItemWidget);
     }
 
@@ -81,20 +78,20 @@ QWidget* UIBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
 
 
 
-QWidget* UIBuilder::createBlockItem(QString label, QString data)
+QWidget* UIBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 {
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
 
     pLayout->setContentsMargins(0,0,0,0);
 
-    QLabel* wLabel = new QLabel(label + ":");
+    QLabel* wLabel = new QLabel(item->name.c_str());
     wLabel->setWordWrap(true);
     wLabel->setMaximumWidth(150);
     wLabel->setMinimumWidth(150);
     pLayout->addWidget(wLabel);
 
-    QLabel* wData = new QLabel(data);
+    QLabel* wData = new QLabel(item->value.c_str());
     wData->setObjectName("wDataLabel");
     wData->setStyleSheet("QLabel#wDataLabel { background: rgb(237, 237, 237); border-radius: 6px; }");
     wData->setMinimumWidth(300);
@@ -106,9 +103,24 @@ QWidget* UIBuilder::createBlockItem(QString label, QString data)
     wButton->setMaximumWidth(30);
     wLabel->setMinimumWidth(30);
     wButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
-    pLayout->addWidget(wButton);
+    EditButtonConnector* pEditButtonConnector = new EditButtonConnector(item);
+    wButton->setUserData(0, pEditButtonConnector);
+    connect(wButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
 
+    pLayout->addWidget(wButton);
     pWidget->setLayout(pLayout);
 
     return pWidget;
+}
+
+void UIBuilder::editButtonClicked()
+{
+    EditButtonConnector* pEditButtonConnector =
+            static_cast<EditButtonConnector*>(sender()->userData(0));
+
+    std:: string name = pEditButtonConnector->item->name;
+
+    QMessageBox msgBox;
+    msgBox.setText(name.c_str());
+    msgBox.exec();
 }
