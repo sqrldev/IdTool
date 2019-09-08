@@ -150,7 +150,7 @@
     <addaction name="actionOpenFile"/>
     <addaction name="actionPasteIdentityData"/>
     <addaction name="separator"/>
-    <addaction name="actionSaveIdentityFile"/>
+    <addaction name="actionSaveIdentityFileAs"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuInfo">
@@ -171,7 +171,7 @@
    </attribute>
    <addaction name="actionOpenFile"/>
    <addaction name="actionPasteIdentityData"/>
-   <addaction name="actionSaveIdentityFile"/>
+   <addaction name="actionSaveIdentityFileAs"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpenFile">
@@ -201,13 +201,13 @@
     <string>About</string>
    </property>
   </action>
-  <action name="actionSaveIdentityFile">
+  <action name="actionSaveIdentityFileAs">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/res/img/SaveAs_16x.png</normaloff>:/res/img/SaveAs_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Save identity file</string>
+    <string>Save identity file as</string>
    </property>
   </action>
  </widget>

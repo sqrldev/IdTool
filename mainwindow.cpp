@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pScrollArea->setWidgetResizable(true);
 
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
+    connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::saveFile);
 }
 
 MainWindow::~MainWindow()

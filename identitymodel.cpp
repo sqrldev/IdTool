@@ -1,8 +1,9 @@
 #include "identitymodel.h"
+#include "identityparser.h"
 
 void IdentityModel::writeToFile(QString fileName)
 {
-    QByteArray ba;
+    QByteArray ba(IdentityParser::HEADER.toUtf8());
 
     for (size_t i=0; i<blocks.size(); i++)
     {
