@@ -43,7 +43,7 @@ void MainWindow::openFile()
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open Image"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
 
-    if (fileName == nullptr) return;
+    if (fileName.isEmpty()) return;
 
     QByteArray ba = fileName.toLocal8Bit();
     char *pszFileName = ba.data();
@@ -54,6 +54,33 @@ void MainWindow::openFile()
         m_pUiBuilder->build();
 
         //m_pHeaderFrame->setVisible(true);
+    }
+    catch (std::exception e)
+    {
+        QMessageBox msgBox;
+        msgBox.setText(e.what());
+        msgBox.exec();
+    }
+}
+
+void MainWindow::saveFile()
+{
+    QString dir = nullptr;
+
+    const QStringList dirs = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+    if (dirs.count() > 0)
+    {
+        dir = QDir(dirs[0]).filePath("SQRL/");
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Open Image"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
+
+    if (fileName.isEmpty()) return;
+
+    try
+    {
+        m_pIdentityModel->writeToFile(fileName);
     }
     catch (std::exception e)
     {

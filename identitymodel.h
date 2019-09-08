@@ -5,33 +5,37 @@
 #include <map>
 #include <string>
 #include <QObject>
+#include <QFile>
 
 class IdentityModel
 {     
-public:
-    // Forward declarations
+public: // Forward declarations
+
     class IdentityBlock;
     class IdentityBlockItem;
 
-public:
-    // Public member variables
+public: // Public member variables
     std::vector<IdentityBlock> blocks;
 
-public:
-    // Internal classes
+public: // Public methods
+    void writeToFile(QString fileName);
+
+public: // Internal classes
     class IdentityBlock
     {
-    public:
+    public: // Public vars
         int blockType = -1;
         QString description = "";
         QString color = "rgb(214, 201, 163)";
         std::vector<IdentityBlockItem> items;
+
+    public: // Public methods
+        QByteArray toByteArray();
     };
 
     class IdentityBlockItem
     {
-    public:
-        // Public enums
+    public: // Public enums
         enum EDataType
         {
             UINT_8,
@@ -42,8 +46,7 @@ public:
             UNDEFINED
         };
 
-    public:
-        // Public member variables
+    public: // Public member variables
         QString name = "";
         QString description = "";
         QString type = "UNDEFINED";
