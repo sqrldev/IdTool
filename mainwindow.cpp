@@ -57,6 +57,8 @@ void MainWindow::openFile()
     }
     catch (std::exception e)
     {
-        //TODO: Error handling
+        QMessageBox msgBox;
+        msgBox.setText(e.what());
+        msgBox.exec();
     }
 }

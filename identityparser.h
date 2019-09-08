@@ -11,9 +11,8 @@
 class IdentityParser
 {
 public:
-    const char* HEADER = "sqrldata";
-    const char* HEADER_BASE64 = "SQRLDATA";
-    const size_t HEADER_SIZE = strlen(HEADER);
+    const QString HEADER = "sqrldata";
+    const QString HEADER_BASE64 = "SQRLDATA";
 
 private:
     bool m_bIsBase64 = false;
@@ -21,72 +20,60 @@ private:
 public:
     IdentityParser(){}
 
-    void parseFile(const char* fileName, IdentityModel* model)
+    void parseFile(QString fileName, IdentityModel* model)
     {
-        if (!fileName || !model)
+        if (fileName.isEmpty() || !model)
         {
-            throw std::invalid_argument("Both filename and model must be valid pointers!");
+            throw std::invalid_argument("Both filename and model must be valid arguments!");
         }
 
-        std::ifstream file(fileName, std::ios::binary | std::ios::ate);
-        std::streamsize size = static_cast<std::streamsize>(file.tellg());
-        file.seekg(0, std::ios::beg);
+        QFile identityFile(fileName);
+        if (!identityFile.open(QIODevice::ReadOnly)) throw std::runtime_error("Error reading identity file!");
+        QByteArray ba = identityFile.readAll();
+        identityFile.close();
 
-        char buffer[size];
-        if (!file.read(buffer, size))
-        {
-            throw std::runtime_error("Error reading the identity file!");
-        }
-
-        file.close();
-        parse(buffer, static_cast<size_t>(size), model);
+        parse(ba, model);
     }
 
-    void parseText(const char* identityText, IdentityModel* model)
+    void parseText(QByteArray identityText, IdentityModel* model)
     {
-        if (!identityText || !model)
+        if (identityText.isEmpty() || !model)
         {
-            throw std::invalid_argument("Both filename and model must be valid pointers!");
+            throw std::invalid_argument("Both filename and model must be valid arguments!");
         }
 
-        size_t len = strlen(identityText);
-        parse(identityText, len, model);
+        parse(identityText, model);
     }
 
 
 private:
-    void parse(const char *data, size_t length, IdentityModel* model)
+    void parse(QByteArray data, IdentityModel* model)
     {
-        const char* myData = data;
-
-        if (!checkHeader(myData))
+        if (!checkHeader(data))
         {
             throw std::runtime_error("Invalid header!");
         }
 
         if (m_bIsBase64)
         {
-            QByteArray ba(myData, static_cast<int>(length));
-            QString decoded = QString::fromLocal8Bit(ba.toBase64());
+            QString decoded = QString::fromLocal8Bit(data.toBase64());
             if (decoded.isEmpty()) throw std::runtime_error("Invalid base64-format on identity!");
 
             decoded = HEADER + decoded;
-            myData = decoded.toLocal8Bit().data();
-            length = static_cast<size_t>(decoded.length());
+            data = decoded.toLocal8Bit().data();
         }
 
-        size_t i = HEADER_SIZE; // skip header
+        int i = HEADER.length(); // skip header
 
-        while (i < length)
+        while (i < data.length())
         {
-            uint16_t blockLength = getBlockLength(&myData[i]);
-            uint16_t blockType = getBlockType(&myData[i]);
+            uint16_t blockLength = getBlockLength(&(data.data()[i]));
+            uint16_t blockType = getBlockType(&(data.data()[i]));
 
             QByteArray sBlockDef = getBlockDefinition(blockType);
-            QJsonParseError e;
-            QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, &e);
+            QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, nullptr);
 
-            IdentityModel::IdentityBlock block = parseBlock(&myData[i], &blockDef);
+            IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef);
             model->blocks.push_back(block);
 
             i += blockLength;
@@ -160,15 +147,14 @@ private:
         return newBlock;
     }
 
-    bool checkHeader(const char* data)
+    bool checkHeader(QByteArray data)
     {
-        char header[HEADER_SIZE + 1];
-        memset(header, 0, HEADER_SIZE + 1);
-        memcpy(header, data, HEADER_SIZE);
+        QString header(data);
+        header = header.left(HEADER.length());
 
-        if (strcmp(HEADER, header) != 0)
+        if (header != HEADER)
         {
-            if (strcmp(HEADER_BASE64, header) == 0)
+            if (header == HEADER_BASE64)
             {
                 this->m_bIsBase64 = true;
                 return true;
@@ -190,7 +176,10 @@ private:
 
         QFile file(sFullPath);
         if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Error reading block definition file!");
-        return file.readAll();
+        QByteArray ba = file.readAll();
+        file.close();
+
+        return ba;
     }
 
     uint16_t getBlockLength(const char* data)
@@ -223,12 +212,6 @@ private:
     {
         QByteArray ba(&data[offset], bytes);
         return QString::fromLocal8Bit(ba.toBase64());
-
-        /*
-        return QString::fromUtf8(
-                    base64_encode(reinterpret_cast<const unsigned char*>(&data[offset]), static_cast<unsigned int>(bytes)).c_str()
-                    );
-        */
     }
 };
 
