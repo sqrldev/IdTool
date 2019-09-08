@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "s4parser.h"
+#include "identityparser.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -14,9 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_pHeaderFrame = this->findChild<QFrame*>("headerFrame");
     m_pScrollArea = this->findChild<QScrollArea*>("scrollArea");
-    m_pParser = new S4Parser();
+    m_pIdentityParser = new IdentityParser();
     m_pIdentityModel = new IdentityModel();
-    m_pUiBuilder = new UIBuilder(m_pScrollArea, m_pIdentityModel);
+    m_pUiBuilder = new UiBuilder(m_pScrollArea, m_pIdentityModel);
     m_pHeaderFrame->setVisible(false);
 
     m_pScrollArea->setWidgetResizable(true);
@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete m_pParser;
+    delete m_pIdentityParser;
     delete m_pIdentityModel;
     delete m_pUiBuilder;
 }
@@ -52,7 +52,7 @@ void MainWindow::openFile()
 
     try
     {
-        m_pParser->parseIdentityFile(pszFileName, m_pIdentityModel);
+        m_pIdentityParser->parseFile(pszFileName, m_pIdentityModel);
         m_pUiBuilder->build();
 
         //m_pHeaderFrame->setVisible(true);

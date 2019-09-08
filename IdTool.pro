@@ -33,9 +33,9 @@ SOURCES += \
 HEADERS += \
         base64.h \
         identitymodel.h \
+        identityparser.h \
         json.hpp \
         mainwindow.h \
-        s4parser.h \
         uibuilder.h
 
 FORMS += \

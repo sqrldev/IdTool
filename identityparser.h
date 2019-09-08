@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-class S4Parser
+class IdentityParser
 {
 public:
     const char* HEADER = "sqrldata";
@@ -20,9 +20,9 @@ private:
     bool m_bIsBase64 = false;
 
 public:
-    S4Parser(){}
+    IdentityParser(){}
 
-    void parseIdentityFile(const char* fileName, IdentityModel* model)
+    void parseFile(const char* fileName, IdentityModel* model)
     {
         if (!fileName || !model)
         {
@@ -40,10 +40,10 @@ public:
         }
 
         file.close();
-        parseIdentity(buffer, static_cast<size_t>(size), model);
+        parse(buffer, static_cast<size_t>(size), model);
     }
 
-    void parseIdentityText(const char* identityText, IdentityModel* model)
+    void parseText(const char* identityText, IdentityModel* model)
     {
         if (!identityText || !model)
         {
@@ -51,12 +51,12 @@ public:
         }
 
         size_t len = strlen(identityText);
-        parseIdentity(identityText, len, model);
+        parse(identityText, len, model);
     }
 
 
 private:
-    void parseIdentity(const char *data, size_t length, IdentityModel* model)
+    void parse(const char *data, size_t length, IdentityModel* model)
     {
         const char* myData = data;
 

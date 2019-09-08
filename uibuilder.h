@@ -12,12 +12,12 @@
 #include <QMessageBox>
 #include "identitymodel.h"
 
-class UIBuilder : public QObject
+class UiBuilder : public QObject
 {
     Q_OBJECT
 
 public:
-    UIBuilder(QScrollArea* scrollArea, IdentityModel* model);
+    UiBuilder(QScrollArea* scrollArea, IdentityModel* model);
     void build();
 
 private:

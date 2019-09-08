@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "identitymodel.h"
-#include "s4parser.h"
+#include "identityparser.h"
 #include "uibuilder.h"
 #include <string>
 #include <fstream>
@@ -31,8 +31,8 @@ private:
     QFrame* m_pHeaderFrame = nullptr;
     QScrollArea* m_pScrollArea = nullptr;
     IdentityModel *m_pIdentityModel = nullptr;
-    S4Parser* m_pParser = nullptr;
-    UIBuilder* m_pUiBuilder = nullptr;
+    IdentityParser* m_pIdentityParser = nullptr;
+    UiBuilder* m_pUiBuilder = nullptr;
 
 };
 

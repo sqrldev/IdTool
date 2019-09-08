@@ -1,12 +1,12 @@
 #include "uibuilder.h"
 
-UIBuilder::UIBuilder(QScrollArea* scrollArea, IdentityModel* model)
+UiBuilder::UiBuilder(QScrollArea* scrollArea, IdentityModel* model)
 {
     m_pScrollArea = scrollArea;
     m_pModel = model;
 }
 
-void UIBuilder::build()
+void UiBuilder::build()
 {
     if (!m_pScrollArea || !m_pModel)
     {
@@ -27,7 +27,7 @@ void UIBuilder::build()
     m_pScrollArea->setWidget(pWidget);
 }
 
-QWidget* UIBuilder::createBlock(IdentityModel::IdentityBlock *block)
+QWidget* UiBuilder::createBlock(IdentityModel::IdentityBlock *block)
 {
     QString objectName = "obj_" + QUuid::createUuid().toString(QUuid::Id128);
 
@@ -57,7 +57,7 @@ QWidget* UIBuilder::createBlock(IdentityModel::IdentityBlock *block)
     return pFrame;
 }
 
-QWidget* UIBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
+QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
 {
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
@@ -78,7 +78,7 @@ QWidget* UIBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
 
 
 
-QWidget* UIBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
+QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 {
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
@@ -113,7 +113,7 @@ QWidget* UIBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
     return pWidget;
 }
 
-void UIBuilder::editButtonClicked()
+void UiBuilder::editButtonClicked()
 {
     EditButtonConnector* pEditButtonConnector =
             static_cast<EditButtonConnector*>(sender()->userData(0));
