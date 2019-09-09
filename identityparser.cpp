@@ -208,5 +208,5 @@ QString IdentityParser::parseUint32(const char* data, int offset)
 QString IdentityParser::parseByteArray(const char* data, int offset, int bytes)
 {
     QByteArray ba(&data[offset], bytes);
-    return QString::fromLocal8Bit(ba.toBase64(QByteArray::OmitTrailingEquals));
+    return QString::fromLocal8Bit(ba.toHex());
 }

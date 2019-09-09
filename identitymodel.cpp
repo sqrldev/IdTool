@@ -46,8 +46,7 @@ QByteArray IdentityModel::IdentityBlock::toByteArray()
         }
         else if (items[i].type == "BYTE_ARRAY")
         {
-            QByteArray baTemp = QByteArray::fromBase64(items[i].value.toUtf8(), QByteArray::OmitTrailingEquals);
-            qDebug() << baTemp;
+            QByteArray baTemp = QByteArray::fromHex(items[i].value.toUtf8());
             ba.append(baTemp);
         }
     }
