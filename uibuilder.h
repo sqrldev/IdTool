@@ -5,6 +5,7 @@
 #include <QScrollArea>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QSizePolicy>
 #include <QUuid>
@@ -38,10 +39,10 @@ public:
     {
     public:
         IdentityModel::IdentityBlockItem* item = nullptr;
-        QLabel* valueLabel = nullptr;
+        QLineEdit* valueLabel = nullptr;
 
     public:
-        EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLabel* valueLabel);
+        EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel);
     };
 };
 

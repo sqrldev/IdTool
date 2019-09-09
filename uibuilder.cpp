@@ -82,6 +82,13 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 {
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
+    QString value = item->value;
+
+    if (value.length() > 50)
+    {
+        value = value.left(50);
+        value += "...";
+    }
 
     pLayout->setContentsMargins(0,0,0,0);
 
@@ -91,12 +98,13 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
     wLabel->setMinimumWidth(150);
     pLayout->addWidget(wLabel);
 
-    QLabel* wData = new QLabel(item->value);
+    QLineEdit* wData = new QLineEdit(value);
     wData->setObjectName("wDataLabel");
-    wData->setStyleSheet("QLabel#wDataLabel { background: rgb(237, 237, 237); border-radius: 6px; }");
-    wData->setMinimumWidth(300);
-    wData->setMargin(5);
-    wData->setWordWrap(true);
+    wData->setStyleSheet("QLineEdit#wDataLabel { background: rgb(237, 237, 237); border-radius: 6px; }");
+    wData->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    wData->setTextMargins(5, 0, 5, 0);
+    wData->setReadOnly(true);
+    if (item->value.length() > 0) wData->setCursorPosition(0);
     pLayout->addWidget(wData);
 
     QPushButton* wButton = new QPushButton();
@@ -118,10 +126,9 @@ void UiBuilder::editButtonClicked()
     EditButtonConnector* pConnector =
             static_cast<EditButtonConnector*>(sender()->userData(0));
 
-    bool ok = false;
-    QString result = QInputDialog::getText(
-                nullptr, tr("Edit value"), tr("New value:"), QLineEdit::Normal,
-                pConnector->item->value, &ok);
+    bool ok = false;    
+    QString result = QInputDialog::getMultiLineText(
+                nullptr, tr("Edit value"), tr("New value for \"%1\":").arg(pConnector->item->name), pConnector->item->value, &ok);
 
     if (ok)
     {
@@ -130,7 +137,7 @@ void UiBuilder::editButtonClicked()
     }
 }
 
-UiBuilder::EditButtonConnector::EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLabel* valueLabel)
+UiBuilder::EditButtonConnector::EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel)
 {
     this->item = item;
     this->valueLabel = valueLabel;
