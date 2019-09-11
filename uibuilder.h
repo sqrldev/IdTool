@@ -34,11 +34,13 @@ private:
     QWidget* createBlock(IdentityModel::IdentityBlock* block);
     QWidget* createBlockHeader(IdentityModel::IdentityBlock *block);
     QWidget* createBlockItem(IdentityModel::IdentityBlockItem* item);
+    void clearLayout(QLayout* layout, bool deleteWidgets = true);
 
 public slots:
     void editButtonClicked();
     void copyButtonClicked();
     void blockOptionsButtonClicked();
+    void deleteBlock();
 
 public:
     // Helper classes

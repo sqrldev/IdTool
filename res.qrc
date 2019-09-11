@@ -11,5 +11,6 @@
         <file>res/img/InformationSymbol_16x.png</file>
         <file>res/img/InfoRule_16x.png</file>
         <file>res/img/OptionsDropdown_16x.png</file>
+        <file>res/img/DeleteBlock_16x.png</file>
     </qresource>
 </RCC>

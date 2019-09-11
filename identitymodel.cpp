@@ -60,3 +60,15 @@ QByteArray IdentityModel::IdentityBlock::toByteArray()
 
     return ba;
 }
+
+void IdentityModel::deleteBlock(IdentityBlock* block)
+{
+    for (size_t i=0; i<blocks.size(); i++)
+    {
+        if (&blocks[i] == block)
+        {
+            blocks.erase(blocks.begin()+i);
+            break;
+        }
+    }
+}

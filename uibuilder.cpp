@@ -14,6 +14,9 @@ void UiBuilder::build()
                                  .toStdString());
     }
 
+    // clearLayout(m_pScrollArea->layout());
+    delete m_pScrollArea->layout();
+
     QWidget* pWidget = new QWidget();
     QVBoxLayout *pLayout = new QVBoxLayout();
     pLayout->setSpacing(10);
@@ -191,11 +194,14 @@ void UiBuilder::blockOptionsButtonClicked()
     BlockConnector* pConnector =
             static_cast<BlockConnector*>(sender()->userData(0));
 
-    QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
-    menu->addAction("Test");
-    menu->addAction("Test2");
-    menu->addAction("Test3");
+    QAction* pActionDeleteBlock = new QAction(QIcon(":/res/img/DeleteBlock_16x.png"), tr("Delete block"));
+    pActionDeleteBlock->setUserData(0, new BlockConnector(pConnector->block));
 
+    QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
+    menu->addAction(pActionDeleteBlock);
+
+
+    connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::deleteBlock);
 
     menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
@@ -210,4 +216,28 @@ UiBuilder::ItemConnector::ItemConnector(IdentityModel::IdentityBlockItem* item, 
 UiBuilder::BlockConnector::BlockConnector(IdentityModel::IdentityBlock* block)
 {
     this->block = block;
+}
+
+void UiBuilder::deleteBlock()
+{
+    BlockConnector* pConnector =
+            static_cast<BlockConnector*>(sender()->userData(0));
+
+    m_pModel->deleteBlock(pConnector->block);
+    build();
+}
+
+void UiBuilder::clearLayout(QLayout* layout, bool deleteWidgets)
+{
+    while (QLayoutItem* item = layout->takeAt(0))
+    {
+        if (deleteWidgets)
+        {
+            if (QWidget* widget = item->widget())
+                widget->deleteLater();
+        }
+        if (QLayout* childLayout = item->layout())
+            clearLayout(childLayout, deleteWidgets);
+        delete item;
+    }
 }
