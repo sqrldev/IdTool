@@ -66,16 +66,23 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     QHBoxLayout* pLayout = new QHBoxLayout();
 
     pLayout->setContentsMargins(5,10,5,30);
+    pLayout->setAlignment(Qt::AlignTop);
 
-    QLabel* wLabel = new QLabel(block->description);
-    QFont font = wLabel->font();
+    QLabel* pBlockDescLabel = new QLabel(block->description);
+    QFont font = pBlockDescLabel->font();
     font.setPointSize(14);
-    wLabel->setFont(font);
-    wLabel->setWordWrap(true);
+    pBlockDescLabel->setFont(font);
+    pBlockDescLabel->setWordWrap(true);
+    pLayout->addWidget(pBlockDescLabel);
 
+    QLabel* pBlockMenuLabel = new QLabel();
+    pBlockMenuLabel->setToolTip(tr("Block actions"));
+    pBlockMenuLabel->setMaximumWidth(30);
+    pBlockMenuLabel->setMinimumWidth(30);
+    QPixmap mypix (":/res/img/OptionsDropdown_16x.png");
+    pBlockMenuLabel->setPixmap(mypix);;
+    pLayout->addWidget(pBlockMenuLabel);
 
-
-    pLayout->addWidget(wLabel);
     pWidget->setLayout(pLayout);
 
     return pWidget;
