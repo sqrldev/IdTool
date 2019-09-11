@@ -79,6 +79,7 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     pBlockOptionsButton->setMaximumWidth(30);
     pBlockOptionsButton->setMinimumWidth(30);
     pBlockOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
+    pBlockOptionsButton->setUserData(0, new BlockConnector(block));
     connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(blockOptionsButtonClicked()));
     pLayout->addWidget(pBlockOptionsButton);
 
@@ -133,7 +134,7 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
     pEditButton->setMaximumWidth(30);
     pNameLable->setMinimumWidth(30);
     pEditButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
-    EditButtonConnector* pEditButtonConnector = new EditButtonConnector(item, pValueLineEdit);
+    ItemConnector* pEditButtonConnector = new ItemConnector(item, pValueLineEdit);
     pEditButton->setUserData(0, pEditButtonConnector);
     connect(pEditButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
     pLayout->addWidget(pEditButton);
@@ -154,8 +155,8 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 
 void UiBuilder::editButtonClicked()
 {
-    EditButtonConnector* pConnector =
-            static_cast<EditButtonConnector*>(sender()->userData(0));
+    ItemConnector* pConnector =
+            static_cast<ItemConnector*>(sender()->userData(0));
 
     bool ok = false;    
     QString result = QInputDialog::getMultiLineText(
@@ -173,8 +174,8 @@ void UiBuilder::editButtonClicked()
 
 void UiBuilder::copyButtonClicked()
 {
-    EditButtonConnector* pConnector =
-            static_cast<EditButtonConnector*>(sender()->userData(0));
+    ItemConnector* pConnector =
+            static_cast<ItemConnector*>(sender()->userData(0));
 
         QClipboard* pClipboard = QApplication::clipboard();
         pClipboard->setText(pConnector->item->value);
@@ -187,17 +188,26 @@ void UiBuilder::copyButtonClicked()
 
 void UiBuilder::blockOptionsButtonClicked()
 {
+    BlockConnector* pConnector =
+            static_cast<BlockConnector*>(sender()->userData(0));
+
     QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
     menu->addAction("Test");
+    menu->addAction("Test2");
+    menu->addAction("Test3");
+
 
     menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
 }
 
-
-
-UiBuilder::EditButtonConnector::EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel)
+UiBuilder::ItemConnector::ItemConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel)
 {
     this->item = item;
     this->valueLabel = valueLabel;
+}
+
+UiBuilder::BlockConnector::BlockConnector(IdentityModel::IdentityBlock* block)
+{
+    this->block = block;
 }

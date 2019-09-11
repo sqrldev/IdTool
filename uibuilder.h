@@ -42,14 +42,23 @@ public slots:
 
 public:
     // Helper classes
-    class EditButtonConnector : public QObjectUserData
+    class BlockConnector : public QObjectUserData
+    {
+    public:
+        IdentityModel::IdentityBlock* block = nullptr;
+
+    public:
+        BlockConnector(IdentityModel::IdentityBlock* block);
+    };
+
+    class ItemConnector : public QObjectUserData
     {
     public:
         IdentityModel::IdentityBlockItem* item = nullptr;
         QLineEdit* valueLabel = nullptr;
 
     public:
-        EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel);
+        ItemConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel);
     };
 };
 
