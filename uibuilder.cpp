@@ -73,6 +73,8 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     wLabel->setFont(font);
     wLabel->setWordWrap(true);
 
+
+
     pLayout->addWidget(wLabel);
     pWidget->setLayout(pLayout);
 
