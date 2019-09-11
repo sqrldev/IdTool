@@ -16,7 +16,7 @@ void UiBuilder::build()
 
     QWidget* pWidget = new QWidget();
     QVBoxLayout *pLayout = new QVBoxLayout();
-    pLayout->setSpacing(20);
+    pLayout->setSpacing(10);
 
     for (size_t i=0; i<m_pModel->blocks.size(); i++)
     {
@@ -43,7 +43,7 @@ QWidget* UiBuilder::createBlock(IdentityModel::IdentityBlock *block)
             "; border-radius: 6px; }";
     pFrame->setStyleSheet(styleSheet);
     QGridLayout* pFrameLayout = new QGridLayout();
-    pFrameLayout->setSpacing(3);
+    pFrameLayout->setSpacing(1);
 
     QWidget* pBlockHeader = createBlockHeader(block);
     pFrameLayout->addWidget(pBlockHeader);
@@ -65,9 +65,9 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
 
-    pLayout->setContentsMargins(10,10,10,30);
+    pLayout->setContentsMargins(5,10,5,30);
 
-    QLabel* wLabel = new QLabel("Block " + block->description);
+    QLabel* wLabel = new QLabel(block->description);
     QFont font = wLabel->font();
     font.setPointSize(14);
     wLabel->setFont(font);
