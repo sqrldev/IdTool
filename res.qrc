@@ -6,5 +6,6 @@
         <file>res/img/About_16x.png</file>
         <file>res/img/Edit_16x.png</file>
         <file>res/img/SaveAs_16x.png</file>
+        <file>res/file/unknown_blockdef.json</file>
     </qresource>
 </RCC>

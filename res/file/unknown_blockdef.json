@@ -1,0 +1,19 @@
+{
+  "block_type": -1,
+  "description": "Unknown block type",
+  "color": "rgb(110, 110, 110)",
+  "items": [
+    {
+      "name": "Length",
+      "description": "Inclusive length of the entire outer block",
+      "type": "UINT_16",
+      "bytes": 2
+    },
+    {
+      "name": "Type",
+      "description": "Block type",
+      "type": "UINT_16",
+      "bytes": 2
+    }
+  ]
+}

@@ -23,9 +23,10 @@ public:
 
 private:
     void parse(QByteArray data, IdentityModel* model);
-    IdentityModel::IdentityBlock parseBlock(const char* data, QJsonDocument* blockDef);
+    IdentityModel::IdentityBlock parseBlock(const char* data, QJsonDocument* blockDef, bool isUnknownBlock);
     bool checkHeader(QByteArray data);
     QByteArray getBlockDefinition(uint16_t blockType);
+    QByteArray getUnknownBlockDefinition();
     uint16_t getBlockLength(const char* data);
     uint16_t getBlockType(const char* data);
     QString parseUint8(const char* data, int offset);

@@ -56,17 +56,25 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
         uint16_t blockLength = getBlockLength(&(data.data()[i]));
         uint16_t blockType = getBlockType(&(data.data()[i]));
 
-        QByteArray sBlockDef = getBlockDefinition(blockType);
-        QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, nullptr);
+        bool isUnknownBlock = false;
+        QByteArray sBlockDef;
+        sBlockDef = getBlockDefinition(blockType);
+        if (sBlockDef.isEmpty())
+        {
+            sBlockDef = getUnknownBlockDefinition();
+            isUnknownBlock = true;
+        }
 
-        IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef);
+        QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, nullptr);
+        IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef, isUnknownBlock);
+
         model->blocks.push_back(block);
 
         i += blockLength;
     }
 }
 
-IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef)
+IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef, bool isUnknownBlock)
 {
     IdentityModel::IdentityBlock newBlock;
     int index = 0;
@@ -160,13 +168,33 @@ QByteArray IdentityParser::getBlockDefinition(uint16_t blockType)
     QDir fullPath = path.filePath(QString("blockdef/") + QString::number(blockType) + ".json");
     QString sFullPath = fullPath.absolutePath();
 
+    QByteArray ba;
     QFile file(sFullPath);
-    if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Error reading block definition file!");
-    QByteArray ba = file.readAll();
+    if (!file.exists() || !file.open(QIODevice::ReadOnly))
+    {
+        return ba;
+    }
+    ba = file.readAll();
+    file.close();
+
+    return ba;    
+}
+
+QByteArray IdentityParser::getUnknownBlockDefinition()
+{
+    QByteArray ba;
+    QString resFile = ":/res/file/unknown_blockdef.json";
+    QFile file(resFile);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly))
+    {
+        throw std::runtime_error("Error accessing resource file " + resFile.toStdString());
+    }
+    ba = file.readAll();
     file.close();
 
     return ba;
 }
+
 
 uint16_t IdentityParser::getBlockLength(const char* data)
 {
