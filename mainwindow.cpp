@@ -10,6 +10,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QSize desktopSize = QDesktopWidget().availableGeometry(this).size() * 0.9;
+    resize(geometry().width(), desktopSize.height());
+
     m_pHeaderFrame = this->findChild<QFrame*>("headerFrame");
     m_pScrollArea = this->findChild<QScrollArea*>("scrollArea");
     m_pIdentityParser = new IdentityParser();

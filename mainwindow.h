@@ -10,6 +10,7 @@
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QtGui>
+#include <QDesktopWidget>
 
 namespace Ui {
 class MainWindow;
