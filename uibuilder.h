@@ -12,6 +12,9 @@
 #include <QObjectUserData>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QApplication>
+#include <QClipboard>
+#include <QToolTip>
 #include "identitymodel.h"
 
 class UiBuilder : public QObject
@@ -32,6 +35,7 @@ private:
 
 public slots:
     void editButtonClicked();
+    void copyButtonClicked();
 
 public:
     // Helper classes
