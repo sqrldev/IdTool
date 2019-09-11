@@ -10,7 +10,8 @@ void UiBuilder::build()
 {
     if (!m_pScrollArea || !m_pModel)
     {
-        throw std::runtime_error("Invalid container or model pointers!");
+        throw std::runtime_error(tr("Invalid container or model pointers!")
+                                 .toStdString());
     }
 
     QWidget* pWidget = new QWidget();

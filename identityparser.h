@@ -23,7 +23,7 @@ public:
 
 private:
     void parse(QByteArray data, IdentityModel* model);
-    IdentityModel::IdentityBlock parseBlock(const char* data, QJsonDocument* blockDef, bool isUnknownBlock);
+    IdentityModel::IdentityBlock parseBlock(const char* data, QJsonDocument* blockDef);
     bool checkHeader(QByteArray data);
     QByteArray getBlockDefinition(uint16_t blockType);
     QByteArray getUnknownBlockDefinition();

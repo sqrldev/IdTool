@@ -7,11 +7,19 @@ void IdentityParser::parseFile(QString fileName, IdentityModel* model)
 {
     if (fileName.isEmpty() || !model)
     {
-        throw std::invalid_argument("Both filename and model must be valid arguments!");
+        throw std::invalid_argument(
+                    QObject::tr("Both filename and model must be valid arguments!")
+                    .toStdString());
     }
 
     QFile identityFile(fileName);
-    if (!identityFile.open(QIODevice::ReadOnly)) throw std::runtime_error("Error reading identity file!");
+
+    if (!identityFile.open(QIODevice::ReadOnly))
+    {
+        throw std::runtime_error(QObject::tr("Error reading identity file!")
+                .toStdString());
+    }
+
     QByteArray ba = identityFile.readAll();
     identityFile.close();
 
@@ -22,7 +30,9 @@ void IdentityParser::parseText(QByteArray identityText, IdentityModel* model)
 {
     if (identityText.isEmpty() || !model)
     {
-        throw std::invalid_argument("Both filename and model must be valid arguments!");
+        throw std::invalid_argument(
+                    QObject::tr("Both filename and model must be valid arguments!")
+                    .toStdString());
     }
 
     parse(identityText, model);
@@ -32,7 +42,8 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 {
     if (!checkHeader(data))
     {
-        throw std::runtime_error("Invalid header!");
+        throw std::runtime_error(QObject::tr("Invalid header!")
+                                 .toStdString());
     }
 
     if (m_bIsBase64)
@@ -43,7 +54,13 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
                     QByteArray::fromBase64(
                         decoded.toLocal8Bit(),
                         QByteArray::OmitTrailingEquals | QByteArray::Base64UrlEncoding));
-        if (decoded.isEmpty()) throw std::runtime_error("Invalid base64-format on identity!");
+
+        if (decoded.isEmpty())
+        {
+            throw std::runtime_error(
+                        QObject::tr("Invalid base64-format on identity!")
+                        .toStdString());
+        }
 
         decoded = HEADER + decoded;
         data = decoded.toLocal8Bit();
@@ -56,13 +73,11 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
         uint16_t blockLength = getBlockLength(&(data.data()[i]));
         uint16_t blockType = getBlockType(&(data.data()[i]));
 
-        bool isUnknownBlock = false;
         QByteArray sBlockDef;
         sBlockDef = getBlockDefinition(blockType);
         if (sBlockDef.isEmpty())
         {
             sBlockDef = getUnknownBlockDefinition();
-            isUnknownBlock = true;
         }
 
         QJsonParseError error;
@@ -70,7 +85,7 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
         if (error.error == QJsonParseError::NoError)
         {
-            IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef, isUnknownBlock);
+            IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef);
             model->blocks.push_back(block);
         }
 
@@ -78,7 +93,7 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
     }
 }
 
-IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef, bool isUnknownBlock)
+IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef)
 {
     IdentityModel::IdentityBlock newBlock;
     int index = 0;
@@ -114,17 +129,23 @@ IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonD
         {
             if (newItem.type == "UINT_8")
             {
-                if (newItem.bytes != 1) throw std::runtime_error("Invalid byte count for datatype UINT_8!");
+                if (newItem.bytes != 1) throw std::runtime_error(
+                            QObject::tr("Invalid byte count for datatype UINT_8!")
+                            .toStdString());
                 newItem.value = parseUint8(data, index);
             }
             else if (newItem.type == "UINT_16")
             {
-                if (newItem.bytes != 2) throw std::runtime_error("Invalid byte count for datatype UINT_16!");
+                if (newItem.bytes != 2) throw std::runtime_error(
+                            QObject::tr("Invalid byte count for datatype UINT_16!")
+                            .toStdString());
                 newItem.value = parseUint16(data, index);
             }
             else if (newItem.type == "UINT_32")
             {
-                if (newItem.bytes != 4) throw std::runtime_error("Invalid byte count for datatype UINT_32!");
+                if (newItem.bytes != 4) throw std::runtime_error(
+                            QObject::tr("Invalid byte count for datatype UINT_32!")
+                            .toStdString());
                 newItem.value = parseUint32(data, index);
             }
             else if (newItem.type == "BYTE_ARRAY")
@@ -199,7 +220,9 @@ QByteArray IdentityParser::getUnknownBlockDefinition()
     QFile file(resFile);
     if (!file.exists() || !file.open(QIODevice::ReadOnly))
     {
-        throw std::runtime_error("Error accessing resource file " + resFile.toStdString());
+        throw std::runtime_error(
+                    QObject::tr("Error accessing resource file for unknown block definition!")
+                    .toStdString());
     }
     ba = file.readAll();
     file.close();

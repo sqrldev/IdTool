@@ -11,7 +11,14 @@ void IdentityModel::writeToFile(QString fileName)
     }
 
     QFile file(fileName);
-    if (!file.open(QFile::WriteOnly)) throw std::runtime_error("Error writing identity file!");
+
+    if (!file.open(QFile::WriteOnly))
+    {
+        throw std::runtime_error(
+                QObject::tr("Error opening identity file for writing!")
+                    .toStdString());
+    }
+
     file.write(ba);
     file.close();
 }
