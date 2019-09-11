@@ -23,6 +23,8 @@ void UiBuilder::build()
         pLayout->addWidget(pBlock);
     }
 
+    pLayout->addStretch();
+
     pWidget->setLayout(pLayout);
     m_pScrollArea->setWidget(pWidget);
 }
@@ -86,7 +88,7 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 
     if (value.length() > 50)
     {
-        value = value.left(50);
+        value = value.left(40);
         value += "...";
     }
 
@@ -99,6 +101,8 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
     pLayout->addWidget(wLabel);
 
     QLineEdit* wData = new QLineEdit(value);
+    wData->setToolTip(item->value);
+    wData->setToolTipDuration(-1);
     wData->setObjectName("wDataLabel");
     wData->setStyleSheet("QLineEdit#wDataLabel { background: rgb(237, 237, 237); border-radius: 6px; }");
     wData->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);

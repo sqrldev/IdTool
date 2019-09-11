@@ -65,10 +65,14 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
             isUnknownBlock = true;
         }
 
-        QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, nullptr);
-        IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef, isUnknownBlock);
+        QJsonParseError error;
+        QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, &error);
 
-        model->blocks.push_back(block);
+        if (error.error == QJsonParseError::NoError)
+        {
+            IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef, isUnknownBlock);
+            model->blocks.push_back(block);
+        }
 
         i += blockLength;
     }
@@ -125,7 +129,15 @@ IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonD
             }
             else if (newItem.type == "BYTE_ARRAY")
             {
-                if (newItem.bytes < 1) throw std::runtime_error("Invalid byte count for datatype BYTE_ARRAY!");
+                // If "bytes is set to -1, we shall use all the remaining bytes in the block
+                if (newItem.bytes < 0)
+                {
+                    if (newBlock.items.size() > 0 &&
+                            newBlock.items.at(0).name.toLower() == "length")
+                    {
+                        newItem.bytes = newBlock.items.at(0).value.toInt() - index;
+                    }
+                }
                 newItem.value = parseByteArray(data, index, newItem.bytes);
             }
             else
@@ -234,7 +246,7 @@ QString IdentityParser::parseUint32(const char* data, int offset)
 }
 
 QString IdentityParser::parseByteArray(const char* data, int offset, int bytes)
-{
+{    
     QByteArray ba(&data[offset], bytes);
     return QString::fromLocal8Bit(ba.toHex());
 }

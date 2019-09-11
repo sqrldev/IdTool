@@ -59,6 +59,7 @@ void MainWindow::openFile()
     catch (std::exception e)
     {
         QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error"));
         msgBox.setText(e.what());
         msgBox.exec();
     }

@@ -1,6 +1,6 @@
 {
   "block_type": -1,
-  "description": "Unknown block type",
+  "description": "Unknown block type (missing the block definition?)",
   "color": "rgb(110, 110, 110)",
   "items": [
     {
@@ -14,6 +14,12 @@
       "description": "Block type",
       "type": "UINT_16",
       "bytes": 2
+    },
+    {
+      "name": "Data",
+      "description": "The raw remaining data of the unknown block",
+      "type": "BYTE_ARRAY",
+      "bytes": -1
     }
   ]
 }
