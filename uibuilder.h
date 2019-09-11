@@ -16,6 +16,7 @@
 #include <QClipboard>
 #include <QToolTip>
 #include <QPicture>
+#include <QMenu>
 #include "identitymodel.h"
 
 class UiBuilder : public QObject
@@ -37,6 +38,7 @@ private:
 public slots:
     void editButtonClicked();
     void copyButtonClicked();
+    void blockOptionsButtonClicked();
 
 public:
     // Helper classes

@@ -66,7 +66,6 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     QHBoxLayout* pLayout = new QHBoxLayout();
 
     pLayout->setContentsMargins(5,10,5,30);
-    pLayout->setAlignment(Qt::AlignTop);
 
     QLabel* pBlockDescLabel = new QLabel(block->description);
     QFont font = pBlockDescLabel->font();
@@ -75,13 +74,13 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     pBlockDescLabel->setWordWrap(true);
     pLayout->addWidget(pBlockDescLabel);
 
-    QLabel* pBlockMenuLabel = new QLabel();
-    pBlockMenuLabel->setToolTip(tr("Block actions"));
-    pBlockMenuLabel->setMaximumWidth(30);
-    pBlockMenuLabel->setMinimumWidth(30);
-    QPixmap mypix (":/res/img/OptionsDropdown_16x.png");
-    pBlockMenuLabel->setPixmap(mypix);;
-    pLayout->addWidget(pBlockMenuLabel);
+    QPushButton* pBlockOptionsButton = new QPushButton();
+    pBlockOptionsButton->setToolTip(tr("Block options"));
+    pBlockOptionsButton->setMaximumWidth(30);
+    pBlockOptionsButton->setMinimumWidth(30);
+    pBlockOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
+    connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(blockOptionsButtonClicked()));
+    pLayout->addWidget(pBlockOptionsButton);
 
     pWidget->setLayout(pLayout);
 
@@ -185,6 +184,17 @@ void UiBuilder::copyButtonClicked()
                     tr("Value copied to clipboard!"),
                     static_cast<QWidget*>(sender()));
 }
+
+void UiBuilder::blockOptionsButtonClicked()
+{
+    QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
+    menu->addAction("Test");
+
+    menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
+                    QPoint(0, 0)));
+}
+
+
 
 UiBuilder::EditButtonConnector::EditButtonConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel)
 {
