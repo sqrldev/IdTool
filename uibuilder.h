@@ -15,6 +15,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QToolTip>
+#include <QPicture>
 #include "identitymodel.h"
 
 class UiBuilder : public QObject

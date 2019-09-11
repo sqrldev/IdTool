@@ -95,6 +95,14 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 
     pLayout->setContentsMargins(0,0,0,0);
 
+    QLabel* pDescImageLabel = new QLabel();
+    pDescImageLabel->setToolTip(item->description);
+    pDescImageLabel->setMaximumWidth(30);
+    pDescImageLabel->setMinimumWidth(30);
+    QPixmap mypix (":/res/img/InfoRule_16x.png");
+    pDescImageLabel->setPixmap(mypix);
+    pLayout->addWidget(pDescImageLabel);
+
     QLabel* pNameLable = new QLabel(item->name);
     pNameLable->setWordWrap(true);
     pNameLable->setMaximumWidth(150);
