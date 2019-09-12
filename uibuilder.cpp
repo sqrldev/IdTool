@@ -14,7 +14,7 @@ void UiBuilder::build()
                                  .toStdString());
     }
 
-    if (m_pLastWidget) m_pScrollArea->layout()->removeWidget(m_pLastWidget);
+    if (m_pLastLayout) m_pLastLayout->deleteLater();
 
     QWidget* pWidget = new QWidget();
     QVBoxLayout *pLayout = new QVBoxLayout();
@@ -30,7 +30,9 @@ void UiBuilder::build()
 
     pWidget->setLayout(pLayout);
     m_pScrollArea->setWidget(pWidget);
+
     m_pLastWidget = pWidget;
+    m_pLastLayout = pLayout;
 }
 
 QWidget* UiBuilder::createBlock(IdentityModel::IdentityBlock *block)
@@ -225,19 +227,4 @@ void UiBuilder::deleteBlock()
 
     m_pModel->deleteBlock(pConnector->block);
     build();
-}
-
-void UiBuilder::clearLayout(QLayout* layout, bool deleteWidgets)
-{
-    while (QLayoutItem* item = layout->takeAt(0))
-    {
-        if (deleteWidgets)
-        {
-            if (QWidget* widget = item->widget())
-                widget->deleteLater();
-        }
-        if (QLayout* childLayout = item->layout())
-            clearLayout(childLayout, deleteWidgets);
-        delete item;
-    }
 }

@@ -30,12 +30,12 @@ public:
 private:
     QScrollArea* m_pScrollArea = nullptr;
     QWidget* m_pLastWidget = nullptr;
+    QLayout* m_pLastLayout = nullptr;
     IdentityModel* m_pModel = nullptr;
 
     QWidget* createBlock(IdentityModel::IdentityBlock* block);
     QWidget* createBlockHeader(IdentityModel::IdentityBlock *block);
     QWidget* createBlockItem(IdentityModel::IdentityBlockItem* item);
-    void clearLayout(QLayout* layout, bool deleteWidgets = true);
 
 public slots:
     void editButtonClicked();
