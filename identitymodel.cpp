@@ -67,8 +67,37 @@ void IdentityModel::deleteBlock(IdentityBlock* block)
     {
         if (&blocks[i] == block)
         {
-            blocks.erase(blocks.begin()+i);
-            break;
+            blocks.erase(blocks.begin()+ static_cast<long long>(i));
+            return;
         }
     }
+}
+
+bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
+{
+    if (blocks.size() < 2) return false;
+
+    for (size_t i=0; i<blocks.size(); i++)
+    {
+        if (&blocks[i] == block)
+        {
+            long long swapWith;
+
+            if (up)
+            {
+                if (i == 0) return false;
+                swapWith = static_cast<long long>(i) - 1;
+            }
+            else
+            {
+                if (i == (blocks.size() - 1)) return false;
+                swapWith = static_cast<long long>(i) + 1;
+            }
+
+            iter_swap(blocks.begin() + static_cast<long long>(i), blocks.begin() + swapWith);
+            return true;
+        }
+    }
+
+    return false;
 }

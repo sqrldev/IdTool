@@ -6,7 +6,7 @@ UiBuilder::UiBuilder(QScrollArea* scrollArea, IdentityModel* model)
     m_pModel = model;
 }
 
-void UiBuilder::build()
+void UiBuilder::rebuild()
 {
     if (!m_pScrollArea || !m_pModel)
     {
@@ -196,13 +196,26 @@ void UiBuilder::blockOptionsButtonClicked()
     BlockConnector* pConnector =
             static_cast<BlockConnector*>(sender()->userData(0));
 
+    QAction* pActionMoveBlockUp = new QAction(QIcon(":/res/img/DoubleUp_24x.png"), tr("Move up"));
+    pActionMoveBlockUp->setUserData(0, new BlockConnector(pConnector->block, true));
+
+    QAction* pActionMoveBlockDown = new QAction(QIcon(":/res/img/DoubleDown_24x.png"), tr("Move down"));
+    pActionMoveBlockDown->setUserData(0, new BlockConnector(pConnector->block, false));
+
+    QAction* pActionSeparator = new QAction();
+    pActionSeparator->setSeparator(true);
+
     QAction* pActionDeleteBlock = new QAction(QIcon(":/res/img/DeleteBlock_16x.png"), tr("Delete block"));
     pActionDeleteBlock->setUserData(0, new BlockConnector(pConnector->block));
 
     QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
+    menu->addAction(pActionMoveBlockUp);
+    menu->addAction(pActionMoveBlockDown);
+    menu->addAction(pActionSeparator);
     menu->addAction(pActionDeleteBlock);
 
-
+    connect(pActionMoveBlockUp, &QAction::triggered, this, &UiBuilder::moveBlock);
+    connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::moveBlock);
     connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::deleteBlock);
 
     menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
@@ -215,9 +228,10 @@ UiBuilder::ItemConnector::ItemConnector(IdentityModel::IdentityBlockItem* item, 
     this->valueLabel = valueLabel;
 }
 
-UiBuilder::BlockConnector::BlockConnector(IdentityModel::IdentityBlock* block)
+UiBuilder::BlockConnector::BlockConnector(IdentityModel::IdentityBlock* block, bool moveUp)
 {
     this->block = block;
+    this->moveUp = moveUp;
 }
 
 void UiBuilder::deleteBlock()
@@ -226,5 +240,16 @@ void UiBuilder::deleteBlock()
             static_cast<BlockConnector*>(sender()->userData(0));
 
     m_pModel->deleteBlock(pConnector->block);
-    build();
+    rebuild();
+}
+
+void UiBuilder::moveBlock()
+{
+    BlockConnector* pConnector =
+            static_cast<BlockConnector*>(sender()->userData(0));
+
+    if (m_pModel->moveBlock(pConnector->block, pConnector->moveUp))
+    {
+        rebuild();
+    }
 }

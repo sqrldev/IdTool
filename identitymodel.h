@@ -22,6 +22,7 @@ public: // Public member variables
 public: // Public methods
     void writeToFile(QString fileName);
     void deleteBlock(IdentityBlock* block);
+    bool moveBlock(IdentityBlock* block, bool up);
 
 public: // Internal classes
     class IdentityBlock

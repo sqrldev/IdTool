@@ -25,7 +25,7 @@ class UiBuilder : public QObject
 
 public:
     UiBuilder(QScrollArea* scrollArea, IdentityModel* model);
-    void build();
+    void rebuild();
 
 private:
     QScrollArea* m_pScrollArea = nullptr;
@@ -42,6 +42,7 @@ public slots:
     void copyButtonClicked();
     void blockOptionsButtonClicked();
     void deleteBlock();
+    void moveBlock();
 
 public:
     // Helper classes
@@ -49,9 +50,10 @@ public:
     {
     public:
         IdentityModel::IdentityBlock* block = nullptr;
+        bool moveUp = true;
 
     public:
-        BlockConnector(IdentityModel::IdentityBlock* block);
+        BlockConnector(IdentityModel::IdentityBlock* block, bool moveUp = true);
     };
 
     class ItemConnector : public QObjectUserData
