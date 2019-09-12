@@ -29,6 +29,7 @@ public:
 
 private:
     QScrollArea* m_pScrollArea = nullptr;
+    QWidget* m_pLastWidget = nullptr;
     IdentityModel* m_pModel = nullptr;
 
     QWidget* createBlock(IdentityModel::IdentityBlock* block);

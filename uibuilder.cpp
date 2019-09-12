@@ -14,8 +14,7 @@ void UiBuilder::build()
                                  .toStdString());
     }
 
-    // clearLayout(m_pScrollArea->layout());
-    delete m_pScrollArea->layout();
+    if (m_pLastWidget) m_pScrollArea->layout()->removeWidget(m_pLastWidget);
 
     QWidget* pWidget = new QWidget();
     QVBoxLayout *pLayout = new QVBoxLayout();
@@ -31,6 +30,7 @@ void UiBuilder::build()
 
     pWidget->setLayout(pLayout);
     m_pScrollArea->setWidget(pWidget);
+    m_pLastWidget = pWidget;
 }
 
 QWidget* UiBuilder::createBlock(IdentityModel::IdentityBlock *block)

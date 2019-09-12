@@ -73,15 +73,15 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
         uint16_t blockLength = getBlockLength(&(data.data()[i]));
         uint16_t blockType = getBlockType(&(data.data()[i]));
 
-        QByteArray sBlockDef;
-        sBlockDef = getBlockDefinition(blockType);
-        if (sBlockDef.isEmpty())
+        QByteArray baBlockDef;
+        baBlockDef = getBlockDefinition(blockType);
+        if (baBlockDef.isEmpty())
         {
-            sBlockDef = getUnknownBlockDefinition();
+            baBlockDef = getUnknownBlockDefinition();
         }
 
         QJsonParseError error;
-        QJsonDocument blockDef = QJsonDocument::fromJson(sBlockDef, &error);
+        QJsonDocument blockDef = QJsonDocument::fromJson(baBlockDef, &error);
 
         if (error.error == QJsonParseError::NoError)
         {
