@@ -46,7 +46,7 @@ void MainWindow::openFile()
     }
 
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open Image"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
+        tr("Open identity file"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
 
     if (fileName.isEmpty()) return;
 
@@ -91,7 +91,7 @@ void MainWindow::saveFile()
     }
     catch (std::exception e)
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setText(e.what());
         msgBox.exec();
     }
@@ -99,7 +99,7 @@ void MainWindow::saveFile()
 
 void MainWindow::showAboutDialog()
 {
-    QMessageBox messageBox;
+    QMessageBox messageBox(this);
     messageBox.setWindowTitle(tr("About"));
     messageBox.setText(tr("IdTool\n\nVersion: ") + APP_VERSION);
     messageBox.exec();
