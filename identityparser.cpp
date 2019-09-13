@@ -85,7 +85,7 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
         if (error.error == QJsonParseError::NoError)
         {
-            IdentityModel::IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef);
+            IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef);
             model->blocks.push_back(block);
         }
 
@@ -93,9 +93,9 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
     }
 }
 
-IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef)
+IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef)
 {
-    IdentityModel::IdentityBlock newBlock;
+    IdentityBlock newBlock;
     int index = 0;
     auto bd = (*blockDef);
 
@@ -107,7 +107,7 @@ IdentityModel::IdentityBlock IdentityParser::parseBlock(const char* data, QJsonD
 
     for (int i=0; i<items.size(); i++)
     {
-        IdentityModel::IdentityBlockItem newItem;
+        IdentityBlockItem newItem;
         QJsonObject item = items.at(i).toObject();
 
         int repeat_count = 1;

@@ -35,7 +35,7 @@ void UiBuilder::rebuild()
     m_pLastLayout = pLayout;
 }
 
-QWidget* UiBuilder::createBlock(IdentityModel::IdentityBlock *block)
+QWidget* UiBuilder::createBlock(IdentityBlock *block)
 {
     QString objectName = "obj_" + QUuid::createUuid().toString(QUuid::Id128);
 
@@ -65,7 +65,7 @@ QWidget* UiBuilder::createBlock(IdentityModel::IdentityBlock *block)
     return pFrame;
 }
 
-QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
+QWidget* UiBuilder::createBlockHeader(IdentityBlock *block)
 {
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
@@ -84,7 +84,8 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     pBlockOptionsButton->setMaximumWidth(30);
     pBlockOptionsButton->setMinimumWidth(30);
     pBlockOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
-    pBlockOptionsButton->setUserData(0, new BlockConnector(block));
+    QVariant blockConnectorContainer = QVariant::fromValue(BlockConnector(block));
+    pBlockOptionsButton->setProperty("0", blockConnectorContainer );
     connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(blockOptionsButtonClicked()));
     pLayout->addWidget(pBlockOptionsButton);
 
@@ -93,9 +94,7 @@ QWidget* UiBuilder::createBlockHeader(IdentityModel::IdentityBlock *block)
     return pWidget;
 }
 
-
-
-QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
+QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item)
 {
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
@@ -139,8 +138,8 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
     pEditButton->setMaximumWidth(30);
     pNameLable->setMinimumWidth(30);
     pEditButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
-    ItemConnector* pEditButtonConnector = new ItemConnector(item, pValueLineEdit);
-    pEditButton->setUserData(0, pEditButtonConnector);
+    QVariant itemConnectorContainer = QVariant::fromValue(ItemConnector(item, pValueLineEdit));
+    pEditButton->setProperty("0", itemConnectorContainer);
     connect(pEditButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
     pLayout->addWidget(pEditButton);
 
@@ -149,7 +148,7 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
     pCopyButton->setMaximumWidth(30);
     pCopyButton->setMinimumWidth(30);
     pCopyButton->setIcon(QIcon(":/res/img/CopyToClipboard_16x.png"));
-    pCopyButton->setUserData(0, pEditButtonConnector);
+    pCopyButton->setProperty("0", itemConnectorContainer);
     connect(pCopyButton, SIGNAL(clicked()), this, SLOT(copyButtonClicked()));
     pLayout->addWidget(pCopyButton);
 
@@ -160,30 +159,30 @@ QWidget* UiBuilder::createBlockItem(IdentityModel::IdentityBlockItem* item)
 
 void UiBuilder::editButtonClicked()
 {
-    ItemConnector* pConnector =
-            static_cast<ItemConnector*>(sender()->userData(0));
+    ItemConnector connector =
+            sender()->property("0").value<ItemConnector>();
 
     bool ok = false;    
     QString result = QInputDialog::getMultiLineText(
                 nullptr,
                 tr("Edit value"),
-                tr("New value for \"%1\":").arg(pConnector->item->name),
-                pConnector->item->value, &ok);
+                tr("New value for \"%1\":").arg(connector.item->name),
+                connector.item->value, &ok);
 
     if (ok)
     {
-        pConnector->item->value = result;
-        pConnector->valueLabel->setText(result);
+        connector.item->value = result;
+        connector.valueLabel->setText(result);
     }
 }
 
 void UiBuilder::copyButtonClicked()
 {
-    ItemConnector* pConnector =
-            static_cast<ItemConnector*>(sender()->userData(0));
+    ItemConnector connector =
+            sender()->property("0").value<ItemConnector>();
 
         QClipboard* pClipboard = QApplication::clipboard();
-        pClipboard->setText(pConnector->item->value);
+        pClipboard->setText(connector.item->value);
 
         QToolTip::showText(
                     static_cast<QWidget*>(sender())->mapToGlobal(QPoint(0,0)),
@@ -193,20 +192,23 @@ void UiBuilder::copyButtonClicked()
 
 void UiBuilder::blockOptionsButtonClicked()
 {
-    BlockConnector* pConnector =
-            static_cast<BlockConnector*>(sender()->userData(0));
+    BlockConnector connector =
+            sender()->property("0").value<BlockConnector>();
 
     QAction* pActionMoveBlockUp = new QAction(QIcon(":/res/img/DoubleUp_24x.png"), tr("Move up"));
-    pActionMoveBlockUp->setUserData(0, new BlockConnector(pConnector->block, true));
+    QVariant upBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block, true));
+    pActionMoveBlockUp->setProperty("0", upBlockConnectorContainer);
 
     QAction* pActionMoveBlockDown = new QAction(QIcon(":/res/img/DoubleDown_24x.png"), tr("Move down"));
-    pActionMoveBlockDown->setUserData(0, new BlockConnector(pConnector->block, false));
+    QVariant downBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block, false));
+    pActionMoveBlockDown->setProperty("0", downBlockConnectorContainer);
 
     QAction* pActionSeparator = new QAction();
     pActionSeparator->setSeparator(true);
 
     QAction* pActionDeleteBlock = new QAction(QIcon(":/res/img/DeleteBlock_16x.png"), tr("Delete block"));
-    pActionDeleteBlock->setUserData(0, new BlockConnector(pConnector->block));
+    QVariant deleteBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block));
+    pActionDeleteBlock->setProperty("0", deleteBlockConnectorContainer);
 
     QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
     menu->addAction(pActionMoveBlockUp);
@@ -222,61 +224,63 @@ void UiBuilder::blockOptionsButtonClicked()
                     QPoint(0, 0)));
 }
 
-UiBuilder::BlockConnector::BlockConnector()
+BlockConnector::BlockConnector() :
+block(nullptr), moveUp(true)
 {
 }
 
-UiBuilder::BlockConnector::BlockConnector(IdentityModel::IdentityBlock* block, bool moveUp)
+BlockConnector::BlockConnector(IdentityBlock* block, bool moveUp)
 {
     this->block = block;
     this->moveUp = moveUp;
 }
 
-UiBuilder::BlockConnector::BlockConnector(BlockConnector& other)
+BlockConnector::BlockConnector(const BlockConnector& other)
 {
     this->block = other.block;
     this->moveUp = other.moveUp;
 }
 
-UiBuilder::BlockConnector::~BlockConnector()
+BlockConnector::~BlockConnector()
 {
 }
 
-UiBuilder::ItemConnector::ItemConnector()
+ItemConnector::ItemConnector() :
+    item(nullptr), valueLabel(nullptr)
 {
 }
 
-UiBuilder::ItemConnector::ItemConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel)
+ItemConnector::ItemConnector(IdentityBlockItem* item, QLineEdit* valueLabel)
 {
     this->item = item;
     this->valueLabel = valueLabel;
 }
 
-UiBuilder::ItemConnector::ItemConnector(ItemConnector& other)
+ItemConnector::ItemConnector(const ItemConnector& other)
 {
     this->item = other.item;
     this->valueLabel = other.valueLabel;
 }
 
-UiBuilder::ItemConnector::~ItemConnector()
+ItemConnector::~ItemConnector()
 {
 }
 
 void UiBuilder::deleteBlock()
 {
-    BlockConnector* pConnector =
-            static_cast<BlockConnector*>(sender()->userData(0));
+    BlockConnector connector =
+            sender()->property("0").value<BlockConnector>();
 
-    m_pModel->deleteBlock(pConnector->block);
+    m_pModel->deleteBlock(connector.block);
     rebuild();
 }
 
 void UiBuilder::moveBlock()
 {
-    BlockConnector* pConnector =
-            static_cast<BlockConnector*>(sender()->userData(0));
+    BlockConnector connector =
+            sender()->property("0").value<BlockConnector>();
 
-    if (m_pModel->moveBlock(pConnector->block, pConnector->moveUp))
+    if (m_pModel->moveBlock(connector.block, connector.moveUp))
     {
         rebuild();
     }

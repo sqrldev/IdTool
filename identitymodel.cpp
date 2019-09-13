@@ -23,7 +23,7 @@ void IdentityModel::writeToFile(QString fileName)
     file.close();
 }
 
-QByteArray IdentityModel::IdentityBlock::toByteArray()
+QByteArray IdentityBlock::toByteArray()
 {
     QByteArray ba;
 

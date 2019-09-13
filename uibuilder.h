@@ -17,6 +17,8 @@
 #include <QToolTip>
 #include <QPicture>
 #include <QMenu>
+#include <QMetaType>
+#include <QVariant>
 #include "identitymodel.h"
 
 class UiBuilder : public QObject
@@ -33,9 +35,9 @@ private:
     QLayout* m_pLastLayout = nullptr;
     IdentityModel* m_pModel = nullptr;
 
-    QWidget* createBlock(IdentityModel::IdentityBlock* block);
-    QWidget* createBlockHeader(IdentityModel::IdentityBlock *block);
-    QWidget* createBlockItem(IdentityModel::IdentityBlockItem* item);
+    QWidget* createBlock(IdentityBlock* block);
+    QWidget* createBlockHeader(IdentityBlock *block);
+    QWidget* createBlockItem(IdentityBlockItem* item);
 
 public slots:
     void editButtonClicked();
@@ -43,37 +45,35 @@ public slots:
     void blockOptionsButtonClicked();
     void deleteBlock();
     void moveBlock();
-
-public:
-    // Helper classes
-    class BlockConnector
-    {
-    public:
-        IdentityModel::IdentityBlock* block = nullptr;
-        bool moveUp = true;
-
-    public:
-        BlockConnector();
-        BlockConnector(BlockConnector& other);
-        BlockConnector(IdentityModel::IdentityBlock* block, bool moveUp = true);
-        ~BlockConnector();
-    };
-
-    class ItemConnector
-    {
-    public:
-        IdentityModel::IdentityBlockItem* item = nullptr;
-        QLineEdit* valueLabel = nullptr;
-
-    public:
-        ItemConnector();
-        ItemConnector(ItemConnector& other);
-        ItemConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel);
-        ~ItemConnector();
-    };
 };
 
-Q_DECLARE_METATYPE(UiBuilder::BlockConnector);
-Q_DECLARE_METATYPE(UiBuilder::ItemConnector);
+class BlockConnector
+{
+public:
+    IdentityBlock* block = nullptr;
+    bool moveUp = true;
+
+public:
+    BlockConnector();
+    BlockConnector(const BlockConnector& other);
+    BlockConnector(IdentityBlock* block, bool moveUp = true);
+    ~BlockConnector();
+};
+
+class ItemConnector
+{
+public:
+    IdentityBlockItem* item = nullptr;
+    QLineEdit* valueLabel = nullptr;
+
+public:
+    ItemConnector();
+    ItemConnector(const ItemConnector& other);
+    ItemConnector(IdentityBlockItem* item, QLineEdit* valueLabel);
+    ~ItemConnector();
+};
+
+Q_DECLARE_METATYPE(BlockConnector);
+Q_DECLARE_METATYPE(ItemConnector);
 
 #endif // UIBUILDER_H
