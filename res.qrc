@@ -14,5 +14,6 @@
         <file>res/img/DeleteBlock_16x.png</file>
         <file>res/img/DoubleDown_24x.png</file>
         <file>res/img/DoubleUp_24x.png</file>
+        <file>res/img/Add_16x.png</file>
     </qresource>
 </RCC>

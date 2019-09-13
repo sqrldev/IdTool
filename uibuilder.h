@@ -19,7 +19,9 @@
 #include <QMenu>
 #include <QMetaType>
 #include <QVariant>
+#include <QDir>
 #include "identitymodel.h"
+#include "identityparser.h"
 
 class UiBuilder : public QObject
 {    
@@ -43,6 +45,7 @@ public slots:
     void editButtonClicked();
     void copyButtonClicked();
     void blockOptionsButtonClicked();
+    void addBlock();
     void deleteBlock();
     void moveBlock();
 };

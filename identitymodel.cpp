@@ -101,3 +101,21 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
 
     return false;
 }
+
+bool IdentityModel::insertBlock(IdentityBlock item, IdentityBlock* after)
+{
+    auto iter = blocks.begin();
+
+    for (size_t i=0; i<blocks.size(); i++)
+    {
+        if (&blocks[i] == after)
+        {
+            blocks.insert(iter + 1, item);
+            return true;
+        }
+
+        iter++;
+    }
+
+    return false;
+}

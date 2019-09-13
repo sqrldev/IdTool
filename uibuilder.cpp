@@ -206,6 +206,10 @@ void UiBuilder::blockOptionsButtonClicked()
     QAction* pActionSeparator = new QAction();
     pActionSeparator->setSeparator(true);
 
+    QAction* pActionAddBlock = new QAction(QIcon(":/res/img/Add_16x.png"), tr("Add block"));
+    QVariant addBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block));
+    pActionAddBlock->setProperty("0", addBlockConnectorContainer);
+
     QAction* pActionDeleteBlock = new QAction(QIcon(":/res/img/DeleteBlock_16x.png"), tr("Delete block"));
     QVariant deleteBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block));
     pActionDeleteBlock->setProperty("0", deleteBlockConnectorContainer);
@@ -214,10 +218,12 @@ void UiBuilder::blockOptionsButtonClicked()
     menu->addAction(pActionMoveBlockUp);
     menu->addAction(pActionMoveBlockDown);
     menu->addAction(pActionSeparator);
+    menu->addAction(pActionAddBlock);
     menu->addAction(pActionDeleteBlock);
 
     connect(pActionMoveBlockUp, &QAction::triggered, this, &UiBuilder::moveBlock);
     connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::moveBlock);
+    connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::addBlock);
     connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::deleteBlock);
 
     menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
@@ -284,4 +290,31 @@ void UiBuilder::moveBlock()
     {
         rebuild();
     }
+}
+
+void UiBuilder::addBlock()
+{
+    BlockConnector connector =
+            sender()->property("0").value<BlockConnector>();
+
+    QDir currentPath = QDir::currentPath();
+    QDir fullPath = currentPath.filePath(QString("blockdef/"));
+    QStringList fileNames = fullPath.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
+    QStringList blockDefs;
+
+    foreach(QString fileName, fileNames) {
+        blockDefs.append(
+                    fileName.mid(0, fileName.indexOf('.'))
+                    );
+    }
+
+    bool ok = false;
+    QString sType = QInputDialog::getItem(nullptr, tr("Choose block type"), tr("Block type"), blockDefs, 0, true, &ok);
+
+    if (!ok) return;
+
+    IdentityBlock block = IdentityParser::createEmptyBlock(sType.toUShort());
+    m_pModel->insertBlock(block, connector.block);
+
+    rebuild();
 }

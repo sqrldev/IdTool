@@ -75,7 +75,7 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
         QByteArray baBlockDef;
         baBlockDef = getBlockDefinition(blockType);
-        if (baBlockDef.isEmpty())
+        if (baBlockDef.isNull() || baBlockDef.isEmpty())
         {
             baBlockDef = getUnknownBlockDefinition();
         }
@@ -228,6 +228,45 @@ QByteArray IdentityParser::getUnknownBlockDefinition()
     file.close();
 
     return ba;
+}
+
+IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
+{
+    IdentityBlock result;
+
+    QByteArray jsonData = getBlockDefinition(blockType);
+    if (jsonData.isNull() || jsonData.isEmpty()) return result;
+
+    QJsonParseError error;
+    QJsonDocument blockDef = QJsonDocument::fromJson(jsonData, &error);
+
+    if (error.error != QJsonParseError::NoError) return result;
+
+    QJsonObject json = blockDef.object();
+
+    if (json.isEmpty()) return result;
+
+    result.blockType = json["block_type"].toInt(-1);
+    result.description = json["description"].toString("");
+    result.color = json["color"].toString("rgb(0,0,0)");
+
+    QJsonArray jsonItems = json["items"].toArray();
+
+    foreach (QJsonValue jsonItem, jsonItems)
+    {
+        QJsonObject jsonItemObj = jsonItem.toObject();
+
+        IdentityBlockItem item;
+        item.name = jsonItemObj["name"].toString("");
+        item.description = jsonItemObj["description"].toString("");
+        item.type = jsonItemObj["type"].toString("UINT_8");
+        item.bytes = jsonItemObj["name"].toInt(1);
+        item.value = "";
+
+        result.items.push_back(item);
+    }
+
+    return result;
 }
 
 

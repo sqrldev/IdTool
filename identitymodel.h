@@ -22,6 +22,7 @@ public: // Public methods
     void writeToFile(QString fileName);
     void deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
+    bool insertBlock(IdentityBlock item, IdentityBlock* after);
 };
 
 class IdentityBlock

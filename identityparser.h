@@ -20,12 +20,13 @@ private:
 public:
     void parseFile(QString fileName, IdentityModel* model);
     void parseText(QByteArray identityText, IdentityModel* model);
+    static QByteArray getBlockDefinition(uint16_t blockType);
+    static IdentityBlock createEmptyBlock(uint16_t blockType);
 
 private:
     void parse(QByteArray data, IdentityModel* model);
     IdentityBlock parseBlock(const char* data, QJsonDocument* blockDef);
     bool checkHeader(QByteArray data);
-    QByteArray getBlockDefinition(uint16_t blockType);
     QByteArray getUnknownBlockDefinition();
     uint16_t getBlockLength(const char* data);
     uint16_t getBlockType(const char* data);
