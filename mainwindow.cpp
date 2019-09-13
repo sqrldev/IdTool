@@ -54,6 +54,7 @@ void MainWindow::openFile()
 
     try
     {
+        m_pIdentityModel->clear();
         m_pIdentityParser->parseFile(pszFileName, m_pIdentityModel);
         m_pUiBuilder->rebuild();
 

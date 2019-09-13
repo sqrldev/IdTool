@@ -119,3 +119,8 @@ bool IdentityModel::insertBlock(IdentityBlock item, IdentityBlock* after)
 
     return false;
 }
+
+void IdentityModel::clear()
+{
+    blocks.clear();
+}

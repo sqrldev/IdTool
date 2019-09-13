@@ -23,6 +23,7 @@ public: // Public methods
     void deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
     bool insertBlock(IdentityBlock item, IdentityBlock* after);
+    void clear();
 };
 
 class IdentityBlock
