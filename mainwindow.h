@@ -27,6 +27,7 @@ public:
 private slots:
     void openFile();
     void saveFile();
+    void showAboutDialog();
 
 private:
     Ui::MainWindow *ui;

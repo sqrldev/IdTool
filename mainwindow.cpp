@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
     connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::saveFile);
+    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
 }
 
 MainWindow::~MainWindow()
@@ -94,4 +95,12 @@ void MainWindow::saveFile()
         msgBox.setText(e.what());
         msgBox.exec();
     }
+}
+
+void MainWindow::showAboutDialog()
+{
+    QMessageBox messageBox;
+    messageBox.setWindowTitle(tr("About"));
+    messageBox.setText(tr("IdTool\n\nVersion: ") + APP_VERSION);
+    messageBox.exec();
 }
