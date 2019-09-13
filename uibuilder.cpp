@@ -222,16 +222,44 @@ void UiBuilder::blockOptionsButtonClicked()
                     QPoint(0, 0)));
 }
 
-UiBuilder::ItemConnector::ItemConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel)
+UiBuilder::BlockConnector::BlockConnector()
 {
-    this->item = item;
-    this->valueLabel = valueLabel;
 }
 
 UiBuilder::BlockConnector::BlockConnector(IdentityModel::IdentityBlock* block, bool moveUp)
 {
     this->block = block;
     this->moveUp = moveUp;
+}
+
+UiBuilder::BlockConnector::BlockConnector(BlockConnector& other)
+{
+    this->block = other.block;
+    this->moveUp = other.moveUp;
+}
+
+UiBuilder::BlockConnector::~BlockConnector()
+{
+}
+
+UiBuilder::ItemConnector::ItemConnector()
+{
+}
+
+UiBuilder::ItemConnector::ItemConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel)
+{
+    this->item = item;
+    this->valueLabel = valueLabel;
+}
+
+UiBuilder::ItemConnector::ItemConnector(ItemConnector& other)
+{
+    this->item = other.item;
+    this->valueLabel = other.valueLabel;
+}
+
+UiBuilder::ItemConnector::~ItemConnector()
+{
 }
 
 void UiBuilder::deleteBlock()

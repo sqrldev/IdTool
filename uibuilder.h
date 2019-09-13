@@ -20,7 +20,7 @@
 #include "identitymodel.h"
 
 class UiBuilder : public QObject
-{
+{    
     Q_OBJECT
 
 public:
@@ -46,25 +46,34 @@ public slots:
 
 public:
     // Helper classes
-    class BlockConnector : public QObjectUserData
+    class BlockConnector
     {
     public:
         IdentityModel::IdentityBlock* block = nullptr;
         bool moveUp = true;
 
     public:
+        BlockConnector();
+        BlockConnector(BlockConnector& other);
         BlockConnector(IdentityModel::IdentityBlock* block, bool moveUp = true);
+        ~BlockConnector();
     };
 
-    class ItemConnector : public QObjectUserData
+    class ItemConnector
     {
     public:
         IdentityModel::IdentityBlockItem* item = nullptr;
         QLineEdit* valueLabel = nullptr;
 
     public:
+        ItemConnector();
+        ItemConnector(ItemConnector& other);
         ItemConnector(IdentityModel::IdentityBlockItem* item, QLineEdit* valueLabel);
+        ~ItemConnector();
     };
 };
+
+Q_DECLARE_METATYPE(UiBuilder::BlockConnector);
+Q_DECLARE_METATYPE(UiBuilder::ItemConnector);
 
 #endif // UIBUILDER_H
