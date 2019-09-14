@@ -126,10 +126,15 @@ void MainWindow::saveFile()
 
 void MainWindow::showAboutDialog()
 {
-    QMessageBox messageBox(this);
-    messageBox.setWindowTitle(tr("About"));
-    messageBox.setText(tr("IdTool\n\nVersion: ") + APP_VERSION);
-    messageBox.exec();
+    QString message = "<b>IdTool</b><br>";
+    message.append(tr("Version") + ": ");
+    message.append(QString(APP_VERSION) + "<br><br>");
+    message.append(tr("Author") + ": ");
+    message.append("Alex Hauser<br><br>");
+    message.append(tr("IdTool is open source software") + ":<br>");
+    message.append("<a href=\"https://github.com/alexhauser/IdTool\">https://github.com/alexhauser/IdTool</a>");
+
+    QMessageBox::about(this, "About", message);
 }
 
 void MainWindow::pasteIdentityText()
