@@ -74,22 +74,20 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
     if (m_bIsBase64)
     {
-        QString decoded = QString::fromLocal8Bit(data);
-        decoded = decoded.mid(HEADER.length());
-        decoded = QString::fromLocal8Bit(
-                    QByteArray::fromBase64(
-                        decoded.toLocal8Bit(),
-                        QByteArray::OmitTrailingEquals | QByteArray::Base64UrlEncoding));
+        QByteArray dataWithoutHeader = data.mid(HEADER.length());
+        QByteArray decodedData = QByteArray::fromBase64(
+                    dataWithoutHeader,
+                    QByteArray::OmitTrailingEquals |
+                    QByteArray::Base64UrlEncoding);
 
-        if (decoded.isEmpty())
+        if (decodedData.isEmpty())
         {
             throw std::runtime_error(
                         QObject::tr("Invalid base64-format on identity!")
                         .toStdString());
         }
 
-        decoded = HEADER + decoded;
-        data = decoded.toLocal8Bit();
+        data = HEADER.toLocal8Bit() + decodedData;
     }
 
     int i = HEADER.length(); // skip header
@@ -99,8 +97,7 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
         uint16_t blockLength = getBlockLength(&(data.data()[i]));
         uint16_t blockType = getBlockType(&(data.data()[i]));
 
-        QByteArray baBlockDef;
-        baBlockDef = getBlockDefinition(blockType);
+        QByteArray baBlockDef = getBlockDefinition(blockType);
         if (baBlockDef.isNull() || baBlockDef.isEmpty())
         {
             baBlockDef = getUnknownBlockDefinition();

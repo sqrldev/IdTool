@@ -146,5 +146,6 @@ void MainWindow::pasteIdentityText()
     {
         m_pIdentityModel->clear();
         m_pIdentityParser->parseText(result.toLocal8Bit(), m_pIdentityModel);
+        m_pUiBuilder->rebuild();
     }
 }
