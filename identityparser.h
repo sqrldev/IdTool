@@ -52,15 +52,15 @@ public:
 
 private:
     void parse(QByteArray data, IdentityModel* model);
-    IdentityBlock parseBlock(const char* data, QJsonDocument* blockDef);
+    IdentityBlock parseBlock(QByteArray data, QJsonDocument* blockDef);
     bool checkHeader(QByteArray data);
     QByteArray getUnknownBlockDefinition();
-    uint16_t getBlockLength(const char* data);
-    uint16_t getBlockType(const char* data);
-    QString parseUint8(const char* data, int offset);
-    QString parseUint16(const char* data, int offset);
-    QString parseUint32(const char* data, int offset);
-    QString parseByteArray(const char* data, int offset, int bytes);
+    uint16_t getBlockLength(QByteArray data);
+    uint16_t getBlockType(QByteArray data);
+    QString parseUint8(QByteArray data, int offset);
+    QString parseUint16(QByteArray data, int offset);
+    QString parseUint32(QByteArray data, int offset);
+    QString parseByteArray(QByteArray data, int offset, int bytes);
 };
 
 #endif // S4PARSER_H

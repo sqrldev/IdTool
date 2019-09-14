@@ -80,12 +80,18 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
         data = base64DecodeIdentity(data);
     }
 
-    int i = HEADER.length(); // skip header
+    data = data.mid(HEADER.length()); // skip header
 
-    while (i < data.length())
+    while (data.length() > 0)
     {
-        uint16_t blockLength = getBlockLength(&(data.data()[i]));
-        uint16_t blockType = getBlockType(&(data.data()[i]));
+        if (data.length() < 4)
+        {
+            throw std::runtime_error(
+                        QObject::tr("Not enough data in block to read length and type!")
+                                     .toStdString());
+        }
+        uint16_t blockLength = getBlockLength(data);
+        uint16_t blockType = getBlockType(data);
 
         QByteArray baBlockDef = getBlockDefinition(blockType);
         if (baBlockDef.isNull() || baBlockDef.isEmpty())
@@ -98,11 +104,11 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
         if (error.error == QJsonParseError::NoError)
         {
-            IdentityBlock block = parseBlock(&(data.data()[i]), &blockDef);
+            IdentityBlock block = parseBlock(data, &blockDef);
             model->blocks.push_back(block);
         }
 
-        i += blockLength;
+        data = data.mid(blockLength);
     }
 }
 
@@ -140,7 +146,7 @@ QByteArray IdentityParser::base64DecodeIdentity(QByteArray data)
     return (HEADER.toLocal8Bit() + decodedData);
 }
 
-IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef)
+IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDef)
 {
     IdentityBlock newBlock;
     int index = 0;
@@ -321,26 +327,26 @@ IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
 }
 
 
-uint16_t IdentityParser::getBlockLength(const char* data)
+uint16_t IdentityParser::getBlockLength(QByteArray data)
 {
     unsigned char c1 = static_cast<unsigned char>(data[0]);
     unsigned char c2 = static_cast<unsigned char>(data[1]);
     return static_cast<uint16_t>(c1 | (c2 << 8));
 }
 
-uint16_t IdentityParser::getBlockType(const char* data)
+uint16_t IdentityParser::getBlockType(QByteArray data)
 {
     unsigned char c1 = static_cast<unsigned char>(data[2]);
     unsigned char c2 = static_cast<unsigned char>(data[3]);
     return static_cast<uint16_t>(c1 | (c2 << 8));
 }
 
-QString IdentityParser::parseUint8(const char* data, int offset)
+QString IdentityParser::parseUint8(QByteArray data, int offset)
 {
     return QString::number(static_cast<unsigned char>(data[offset]));
 }
 
-QString IdentityParser::parseUint16(const char* data, int offset)
+QString IdentityParser::parseUint16(QByteArray data, int offset)
 {
     unsigned char c1 = static_cast<unsigned char>(data[offset]);
     unsigned char c2 = static_cast<unsigned char>(data[offset+1]);
@@ -348,7 +354,7 @@ QString IdentityParser::parseUint16(const char* data, int offset)
     return QString::number(num);
 }
 
-QString IdentityParser::parseUint32(const char* data, int offset)
+QString IdentityParser::parseUint32(QByteArray data, int offset)
 {
     unsigned char c1 = static_cast<unsigned char>(data[offset]);
     unsigned char c2 = static_cast<unsigned char>(data[offset+1]);
@@ -358,8 +364,7 @@ QString IdentityParser::parseUint32(const char* data, int offset)
     return QString::number(num);
 }
 
-QString IdentityParser::parseByteArray(const char* data, int offset, int bytes)
+QString IdentityParser::parseByteArray(QByteArray data, int offset, int bytes)
 {    
-    QByteArray ba(&data[offset], bytes);
-    return QString::fromLocal8Bit(ba.toHex());
+    return QString::fromLocal8Bit(data.mid(offset, bytes).toHex());
 }
