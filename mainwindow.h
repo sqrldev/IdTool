@@ -54,6 +54,7 @@ private slots:
     void openFile();
     void saveFile();
     void showAboutDialog();
+    void pasteIdentityText();
 
 private:
     Ui::MainWindow *ui;

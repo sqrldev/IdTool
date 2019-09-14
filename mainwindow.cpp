@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
     connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::saveFile);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
+    connect(ui->actionPasteIdentityData, &QAction::triggered, this, &MainWindow::pasteIdentityText);
 }
 
 MainWindow::~MainWindow()
@@ -129,4 +130,21 @@ void MainWindow::showAboutDialog()
     messageBox.setWindowTitle(tr("About"));
     messageBox.setText(tr("IdTool\n\nVersion: ") + APP_VERSION);
     messageBox.exec();
+}
+
+void MainWindow::pasteIdentityText()
+{
+    bool ok = false;
+    QString result = QInputDialog::getMultiLineText(
+                this,
+                tr("Paste identity data"),
+                tr("Paste base64-encoded identity data here:"),
+                "",
+                &ok);
+
+    if (ok)
+    {
+        m_pIdentityModel->clear();
+        m_pIdentityParser->parseText(result.toLocal8Bit(), m_pIdentityModel);
+    }
 }
