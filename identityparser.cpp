@@ -52,7 +52,7 @@ void IdentityParser::parseFile(QString fileName, IdentityModel* model)
     parse(ba, model);
 }
 
-void IdentityParser::parseText(QByteArray identityText, IdentityModel* model)
+void IdentityParser::parseText(QString identityText, IdentityModel* model)
 {
     if (identityText.isEmpty() || !model)
     {
@@ -61,7 +61,7 @@ void IdentityParser::parseText(QByteArray identityText, IdentityModel* model)
                     .toStdString());
     }
 
-    parse(identityText, model);
+    parse(identityText.toLocal8Bit(), model);
 }
 
 void IdentityParser::parse(QByteArray data, IdentityModel* model)
