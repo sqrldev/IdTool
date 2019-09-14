@@ -146,6 +146,12 @@ void MainWindow::pasteIdentityText()
 
     try
     {
+        if (result.isEmpty())
+        {
+            throw std::runtime_error(tr("Invalid identity data!")
+                                     .toStdString());
+        }
+
         m_pIdentityModel->clear();
         m_pIdentityParser->parseText(result, m_pIdentityModel);
         m_pUiBuilder->rebuild();
