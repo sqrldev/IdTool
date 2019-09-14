@@ -125,8 +125,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>580</width>
-         <height>543</height>
+         <width>576</width>
+         <height>511</height>
         </rect>
        </property>
       </widget>
@@ -140,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -152,6 +152,7 @@
     <addaction name="separator"/>
     <addaction name="actionSaveIdentityFileAs"/>
     <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuInfo">
     <property name="title">
@@ -208,6 +209,15 @@
    </property>
    <property name="text">
     <string>Save identity file as</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/Exit_16x.png</normaloff>:/res/img/Exit_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::saveFile);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
     connect(ui->actionPasteIdentityData, &QAction::triggered, this, &MainWindow::pasteIdentityText);
+    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
 }
 
 MainWindow::~MainWindow()
@@ -168,4 +169,9 @@ void MainWindow::pasteIdentityText()
         msgBox.setText(e.what());
         msgBox.exec();
     }
+}
+
+void MainWindow::quit()
+{
+    QApplication::quit();
 }
