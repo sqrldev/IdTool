@@ -57,7 +57,7 @@ This is an example of how such a template looks like:
 }
 ```
 
-If you are interested in creating your own block templates, I recommend to look at the standard templates provided with the app to get a sense for how data types, repitition and dynamic item lengths are handled.
+If you are interested in creating your own block templates, I recommend to look at the standard templates provided with the app (within the _blockdev/_ subdirectory) to get a sense for how data types, repitition and dynamic item lengths are handled.
 
 
 ## Platforms
