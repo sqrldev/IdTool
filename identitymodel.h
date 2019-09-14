@@ -41,10 +41,10 @@ class IdentityBlockItem;
 
 class IdentityModel
 {     
-public: // Public member variables
+public:
     std::vector<IdentityBlock> blocks;
 
-public: // Public methods
+public:
     void writeToFile(QString fileName);
     void deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
@@ -54,19 +54,19 @@ public: // Public methods
 
 class IdentityBlock
 {
-public: // Public vars
+public:
     int blockType = -1;
     QString description = "";
     QString color = "rgb(214, 201, 163)";
     std::vector<IdentityBlockItem> items;
 
-public: // Public methods
+public:
     QByteArray toByteArray();
 };
 
 class IdentityBlockItem
 {
-public: // Public enums
+public:
     enum EDataType
     {
         UINT_8,
@@ -77,7 +77,7 @@ public: // Public enums
         UNDEFINED
     };
 
-public: // Public member variables
+public:
     QString name = "";
     QString description = "";
     QString type = "UNDEFINED";
