@@ -88,7 +88,7 @@ void MainWindow::openFile()
 
         //m_pHeaderFrame->setVisible(true);
     }
-    catch (std::exception e)
+    catch (std::exception& e)
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error"));
@@ -116,7 +116,7 @@ void MainWindow::saveFile()
     {
         m_pIdentityModel->writeToFile(fileName);
     }
-    catch (std::exception e)
+    catch (std::exception& e)
     {
         QMessageBox msgBox(this);
         msgBox.setText(e.what());
@@ -150,7 +150,7 @@ void MainWindow::pasteIdentityText()
         m_pIdentityParser->parseText(result, m_pIdentityModel);
         m_pUiBuilder->rebuild();
     }
-    catch (std::exception e)
+    catch (std::exception& e)
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error"));
