@@ -56,6 +56,7 @@ class UiBuilder : public QObject
 public:
     UiBuilder(QScrollArea* scrollArea, IdentityModel* model);
     void rebuild();
+    void clear();
 
 private:
     QScrollArea* m_pScrollArea = nullptr;

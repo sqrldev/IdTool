@@ -40,7 +40,7 @@ void UiBuilder::rebuild()
                                  .toStdString());
     }
 
-    if (m_pLastLayout) m_pLastLayout->deleteLater();
+    clear();
 
     QWidget* pWidget = new QWidget();
     QVBoxLayout *pLayout = new QVBoxLayout();
@@ -59,6 +59,11 @@ void UiBuilder::rebuild()
 
     m_pLastWidget = pWidget;
     m_pLastLayout = pLayout;
+}
+
+void UiBuilder::clear()
+{
+    if (m_pLastLayout) m_pLastLayout->deleteLater();
 }
 
 QWidget* UiBuilder::createBlock(IdentityBlock *block)

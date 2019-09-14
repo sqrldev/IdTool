@@ -67,6 +67,8 @@ void IdentityParser::parseText(QString identityText, IdentityModel* model)
 
 void IdentityParser::parse(QByteArray data, IdentityModel* model)
 {
+    m_bIsBase64 = false;
+
     if (!checkHeader(data))
     {
         throw std::runtime_error(QObject::tr("Invalid header!")
@@ -75,20 +77,7 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
     if (m_bIsBase64)
     {
-        QByteArray dataWithoutHeader = data.mid(HEADER.length());
-        QByteArray decodedData = QByteArray::fromBase64(
-                    dataWithoutHeader,
-                    QByteArray::OmitTrailingEquals |
-                    QByteArray::Base64UrlEncoding);
-
-        if (decodedData.isEmpty())
-        {
-            throw std::runtime_error(
-                        QObject::tr("Invalid base64-format on identity!")
-                        .toStdString());
-        }
-
-        data = HEADER.toLocal8Bit() + decodedData;
+        data = base64DecodeIdentity(data);
     }
 
     int i = HEADER.length(); // skip header
@@ -115,6 +104,40 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
         i += blockLength;
     }
+}
+
+QByteArray IdentityParser::base64DecodeIdentity(QByteArray data)
+{
+    // base64url-illegal line ending and whitespace characters —
+    // CR, LF, TAB and SPACE — should be silently
+    // ignored for line wrap tolerance.
+
+    QByteArray cleanData;
+    for (int i=0; i<data.length(); i++)
+    {
+        if (static_cast<unsigned char>(data[i]) != 9 ||  // TAB
+            static_cast<unsigned char>(data[i]) != 10 || // LF
+            static_cast<unsigned char>(data[i]) != 13 || // CR
+            static_cast<unsigned char>(data[i]) != 32)   // SPACE
+        {
+            cleanData.append(static_cast<char>(data[i]));
+        }
+    }
+
+    QByteArray withoutHeader = cleanData.mid(HEADER.length());
+    QByteArray decodedData = QByteArray::fromBase64(
+                withoutHeader,
+                QByteArray::OmitTrailingEquals |
+                QByteArray::Base64UrlEncoding);
+
+    if (decodedData.isEmpty())
+    {
+        throw std::runtime_error(
+                    QObject::tr("Invalid base64-format on identity!")
+                    .toStdString());
+    }
+
+    return (HEADER.toLocal8Bit() + decodedData);
 }
 
 IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockDef)
