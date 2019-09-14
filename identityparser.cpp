@@ -61,7 +61,8 @@ void IdentityParser::parseText(QString identityText, IdentityModel* model)
                     .toStdString());
     }
 
-    parse(identityText.toLocal8Bit(), model);
+    QByteArray ba = identityText.toLocal8Bit();
+    parse(ba, model);
 }
 
 void IdentityParser::parse(QByteArray data, IdentityModel* model)
@@ -199,8 +200,12 @@ IdentityBlock IdentityParser::parseBlock(const char* data, QJsonDocument* blockD
 
 bool IdentityParser::checkHeader(QByteArray data)
 {
-    QString header(data);
-    header = header.left(HEADER.length());
+    if (data.length() < HEADER.length())
+    {
+        return false;
+    }
+
+    QString header(data.left(HEADER.length()));
 
     if (header != HEADER)
     {

@@ -108,7 +108,7 @@ void MainWindow::saveFile()
     }
 
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Open Image"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
+        tr("Save identity file"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
 
     if (fileName.isEmpty()) return;
 
@@ -142,10 +142,19 @@ void MainWindow::pasteIdentityText()
                 "",
                 &ok);
 
-    if (ok)
+    if (!ok) return;
+
+    try
     {
         m_pIdentityModel->clear();
         m_pIdentityParser->parseText(result, m_pIdentityModel);
         m_pUiBuilder->rebuild();
+    }
+    catch (std::exception e)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error"));
+        msgBox.setText(e.what());
+        msgBox.exec();
     }
 }
