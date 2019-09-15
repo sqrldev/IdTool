@@ -26,7 +26,7 @@
       "description": "Encrypted previous identity unlock key",
       "type": "BYTE_ARRAY",
       "bytes": 32,
-	  "repeat_index" : 2
+      "repeat_index" : 2
     },
     {
       "name": "Verification tag",

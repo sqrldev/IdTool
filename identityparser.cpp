@@ -172,6 +172,10 @@ IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDe
                 repeat_count = newBlock.items[repeat_index].value.toInt();
             }
         }
+        else if (item.contains("repeat_count"))
+        {
+            repeat_count = item["repeat_count"].toInt(1);
+        }
 
         newItem.name = item["name"].toString();
         newItem.description = item["description"].toString();
@@ -319,6 +323,13 @@ IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
         item.type = jsonItemObj["type"].toString("UINT_8");
         item.bytes = jsonItemObj["name"].toInt(1);
         item.value = "";
+
+        if (jsonItemObj.contains("repeat_index"))
+            item.repeatIndex = jsonItemObj["repeat_index"].toInt(-1);
+
+        if (jsonItemObj.contains("repeat_count") &&
+                jsonItemObj["repeat_count"].toInt(1) > 1)
+            item.repeatCount = jsonItemObj["repeat_count"].toInt(1);
 
         result.items.push_back(item);
     }

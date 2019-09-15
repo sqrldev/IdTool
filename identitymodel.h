@@ -83,6 +83,8 @@ public:
     QString type = "UNDEFINED";
     int bytes = 0;
     QString value = "";
+    int repeatIndex = -1;
+    int repeatCount = 1;
 };
 
 #endif // IDENTITYMODEL_H
