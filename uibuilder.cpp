@@ -70,9 +70,11 @@ bool UiBuilder::showGetBlockTypeDialog(QString *result)
 {
     QDir currentPath = QDir::currentPath();
     QDir fullPath = currentPath.filePath(QString("blockdef/"));
-    QStringList fileNames = fullPath.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
-    QStringList blockDefs;
+    QStringList fileNames = fullPath.entryList(
+                QStringList() << "*.json" << "*.JSON",
+                QDir::Files);
 
+    QStringList blockDefs;
     foreach(QString fileName, fileNames) {
         blockDefs.append(
                     fileName.mid(0, fileName.indexOf('.'))
@@ -80,7 +82,14 @@ bool UiBuilder::showGetBlockTypeDialog(QString *result)
     }
 
     bool ok = false;
-    QString sType = QInputDialog::getItem(nullptr, tr("Choose block type"), tr("Block type"), blockDefs, 0, true, &ok);
+    QString sType = QInputDialog::getItem(
+                nullptr,
+                tr("Choose block type"),
+                tr("Block type"),
+                blockDefs,
+                0,
+                false,
+                &ok);
 
     if (ok) *result = sType;
     return ok;
