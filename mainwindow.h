@@ -55,6 +55,7 @@ private slots:
     void saveFile();
     void showAboutDialog();
     void pasteIdentityText();
+    void createNewIdentity();
     void quit();
 
 private:

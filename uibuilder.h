@@ -57,6 +57,7 @@ public:
     UiBuilder(QScrollArea* scrollArea, IdentityModel* model);
     void rebuild();
     void clear();
+    static bool showGetBlockTypeDialog(QString* result);
 
 private:
     QScrollArea* m_pScrollArea = nullptr;

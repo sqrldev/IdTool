@@ -66,6 +66,26 @@ void UiBuilder::clear()
     if (m_pLastLayout) m_pLastLayout->deleteLater();
 }
 
+bool UiBuilder::showGetBlockTypeDialog(QString *result)
+{
+    QDir currentPath = QDir::currentPath();
+    QDir fullPath = currentPath.filePath(QString("blockdef/"));
+    QStringList fileNames = fullPath.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
+    QStringList blockDefs;
+
+    foreach(QString fileName, fileNames) {
+        blockDefs.append(
+                    fileName.mid(0, fileName.indexOf('.'))
+                    );
+    }
+
+    bool ok = false;
+    QString sType = QInputDialog::getItem(nullptr, tr("Choose block type"), tr("Block type"), blockDefs, 0, true, &ok);
+
+    if (ok) *result = sType;
+    return ok;
+}
+
 QWidget* UiBuilder::createBlock(IdentityBlock *block)
 {
     QString objectName = "obj_" + QUuid::createUuid().toString(QUuid::Id128);
@@ -328,23 +348,15 @@ void UiBuilder::addBlock()
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
 
-    QDir currentPath = QDir::currentPath();
-    QDir fullPath = currentPath.filePath(QString("blockdef/"));
-    QStringList fileNames = fullPath.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
-    QStringList blockDefs;
-
-    foreach(QString fileName, fileNames) {
-        blockDefs.append(
-                    fileName.mid(0, fileName.indexOf('.'))
-                    );
-    }
-
     bool ok = false;
-    QString sType = QInputDialog::getItem(nullptr, tr("Choose block type"), tr("Block type"), blockDefs, 0, true, &ok);
-
+    QString sBlockType;
+    ok = showGetBlockTypeDialog(&sBlockType);
     if (!ok) return;
 
-    IdentityBlock block = IdentityParser::createEmptyBlock(sType.toUShort());
+    ushort blockType = sBlockType.toUShort(&ok);
+    if (!ok) return;
+
+    IdentityBlock block = IdentityParser::createEmptyBlock(blockType);
     m_pModel->insertBlock(block, connector.block);
 
     rebuild();

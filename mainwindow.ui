@@ -125,8 +125,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>576</width>
-         <height>511</height>
+         <width>580</width>
+         <height>543</height>
         </rect>
        </property>
       </widget>
@@ -140,13 +140,14 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionCreateNewIdentity"/>
     <addaction name="actionOpenFile"/>
     <addaction name="actionPasteIdentityData"/>
     <addaction name="separator"/>
@@ -170,6 +171,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionCreateNewIdentity"/>
    <addaction name="actionOpenFile"/>
    <addaction name="actionPasteIdentityData"/>
    <addaction name="actionSaveIdentityFileAs"/>
@@ -183,6 +185,9 @@
    <property name="text">
     <string>Open identity file</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionPasteIdentityData">
    <property name="icon">
@@ -191,6 +196,9 @@
    </property>
    <property name="text">
     <string>Paste identity data</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+V</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -201,6 +209,9 @@
    <property name="text">
     <string>About</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
   </action>
   <action name="actionSaveIdentityFileAs">
    <property name="icon">
@@ -210,6 +221,9 @@
    <property name="text">
     <string>Save identity file as</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="actionExit">
    <property name="icon">
@@ -218,6 +232,18 @@
    </property>
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionCreateNewIdentity">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/NewFile_16x.png</normaloff>:/res/img/NewFile_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create new identity</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

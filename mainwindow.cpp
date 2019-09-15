@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
     connect(ui->actionPasteIdentityData, &QAction::triggered, this, &MainWindow::pasteIdentityText);
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
+    connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
 }
 
 MainWindow::~MainWindow()
@@ -169,6 +170,24 @@ void MainWindow::pasteIdentityText()
         msgBox.setText(e.what());
         msgBox.exec();
     }
+}
+
+void MainWindow::createNewIdentity()
+{
+    QString sBlockType;
+
+    bool ok = UiBuilder::showGetBlockTypeDialog(&sBlockType);
+    if (!ok) return;
+
+    ushort blockType = sBlockType.toUShort(&ok);
+    if (!ok) return;
+
+    IdentityBlock block = m_pIdentityParser->
+            createEmptyBlock(blockType);
+
+    m_pIdentityModel->clear();
+    m_pIdentityModel->blocks.push_back(block);
+    m_pUiBuilder->rebuild();
 }
 
 void MainWindow::quit()

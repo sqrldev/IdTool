@@ -16,5 +16,6 @@
         <file>res/img/DoubleUp_24x.png</file>
         <file>res/img/Add_16x.png</file>
         <file>res/img/Exit_16x.png</file>
+        <file>res/img/NewFile_16x.png</file>
     </qresource>
 </RCC>
