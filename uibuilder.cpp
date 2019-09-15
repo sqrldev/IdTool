@@ -212,6 +212,15 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item)
     connect(pCopyButton, SIGNAL(clicked()), this, SLOT(copyButtonClicked()));
     pLayout->addWidget(pCopyButton);
 
+    QPushButton* pOptionsButton = new QPushButton();
+    pOptionsButton->setToolTip(tr("Item options"));
+    pOptionsButton->setMaximumWidth(30);
+    pOptionsButton->setMinimumWidth(30);
+    pOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
+    pOptionsButton->setProperty("0", itemConnectorContainer);
+    connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(optionsButtonClicked()));
+    pLayout->addWidget(pOptionsButton);
+
     pWidget->setLayout(pLayout);
 
     return pWidget;
