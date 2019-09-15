@@ -58,6 +58,7 @@ public:
     void rebuild();
     void clear();
     static bool showGetBlockTypeDialog(QString* result);
+    static bool showGetRepeatCountDialog(QString itemName, int* result);
 
 private:
     QScrollArea* m_pScrollArea = nullptr;

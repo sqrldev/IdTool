@@ -61,6 +61,7 @@ public:
     std::vector<IdentityBlockItem> items;
 
 public:
+    bool duplicateItem(IdentityBlockItem* item);
     QByteArray toByteArray();
 };
 

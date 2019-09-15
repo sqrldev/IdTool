@@ -361,3 +361,21 @@ void UiBuilder::addBlock()
 
     rebuild();
 }
+
+bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
+{
+    bool ok;
+    int repititons = QInputDialog::getInt(
+                nullptr,
+                tr("Item repitition"),
+                tr("How many \"%1\" fields should be created?").arg(itemName),
+                1,
+                1,
+                1024,
+                1,
+                &ok);
+
+    if (ok) *result = repititons;
+
+    return ok;
+}

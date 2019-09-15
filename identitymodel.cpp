@@ -150,3 +150,18 @@ void IdentityModel::clear()
 {
     blocks.clear();
 }
+
+bool IdentityBlock::duplicateItem(IdentityBlockItem* item)
+{
+    for (auto iter=items.begin(); iter!=items.end(); iter++)
+    {
+        if (&(*iter) == item)
+        {
+            IdentityBlockItem tempItem = *iter;
+            items.insert(iter, tempItem);
+            return true;
+        }
+    }
+
+    return false;
+}
