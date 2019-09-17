@@ -218,7 +218,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item)
     pOptionsButton->setMinimumWidth(30);
     pOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
     pOptionsButton->setProperty("0", itemConnectorContainer);
-    connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(optionsButtonClicked()));
+    connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(itemOptionsButtonClicked()));
     pLayout->addWidget(pOptionsButton);
 
     pWidget->setLayout(pLayout);
@@ -396,4 +396,74 @@ bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
     if (ok) *result = repititons;
 
     return ok;
+}
+
+void UiBuilder::itemOptionsButtonClicked()
+{
+    ItemConnector connector =
+            sender()->property("0").value<ItemConnector>();
+
+    QAction* pActionMoveItemUp = new QAction(QIcon(":/res/img/DoubleUp_24x.png"), tr("Move up"));
+    QVariant upItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    pActionMoveItemUp->setProperty("0", upItemConnectorContainer);
+
+    QAction* pActionMoveItemDown = new QAction(QIcon(":/res/img/DoubleDown_24x.png"), tr("Move down"));
+    QVariant downItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    pActionMoveItemDown->setProperty("0", downItemConnectorContainer);
+
+    QAction* pActionSeparator = new QAction();
+    pActionSeparator->setSeparator(true);
+
+    QAction* pActionAddItem = new QAction(QIcon(":/res/img/Add_16x.png"), tr("Add item"));
+    QVariant addItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    pActionAddItem->setProperty("0", addItemConnectorContainer);
+
+    QAction* pActionDeleteItem = new QAction(QIcon(":/res/img/DeleteBlock_16x.png"), tr("Delete item"));
+    QVariant deleteItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    pActionDeleteItem->setProperty("0", deleteItemConnectorContainer);
+
+    QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
+    menu->addAction(pActionMoveItemUp);
+    menu->addAction(pActionMoveItemDown);
+    menu->addAction(pActionSeparator);
+    menu->addAction(pActionAddItem);
+    menu->addAction(pActionDeleteItem);
+
+    connect(pActionMoveItemUp, &QAction::triggered, this, &UiBuilder::moveItem);
+    connect(pActionMoveItemDown, &QAction::triggered, this, &UiBuilder::moveItem);
+    connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::addNewItem);
+    connect(pActionDeleteItem, &QAction::triggered, this, &UiBuilder::deleteItem);
+
+    menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
+                    QPoint(0, 0)));
+}
+
+void UiBuilder::deleteItem()
+{
+    ItemConnector connector =
+            sender()->property("0").value<ItemConnector>();
+
+    //TODO
+
+    rebuild();
+}
+
+void UiBuilder::moveItem()
+{
+    ItemConnector connector =
+            sender()->property("0").value<ItemConnector>();
+
+    //TODO
+
+    rebuild();
+}
+
+void UiBuilder::addNewItem()
+{
+    ItemConnector connector =
+            sender()->property("0").value<ItemConnector>();
+
+    //TODO
+
+    rebuild();
 }

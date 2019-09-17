@@ -74,9 +74,13 @@ public slots:
     void editButtonClicked();
     void copyButtonClicked();
     void blockOptionsButtonClicked();
+    void itemOptionsButtonClicked();
     void addBlock();
     void deleteBlock();
     void moveBlock();
+    void addNewItem();
+    void deleteItem();
+    void moveItem();
 };
 
 class BlockConnector
