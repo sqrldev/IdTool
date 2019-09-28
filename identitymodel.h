@@ -35,6 +35,22 @@
 #include <QDataStream>
 #include <QDebug>
 
+struct ItemDataTypeInfo
+{
+    QString name;
+    int nrOfBytes;
+};
+
+enum ItemDataType
+{
+    UINT_8,
+    UINT_16,
+    UINT_32,
+    BYTE_ARRAY,
+    STRING,
+    UNDEFINED
+};
+
 // Forward declarations
 class IdentityBlock;
 class IdentityBlockItem;
@@ -71,21 +87,13 @@ public:
 class IdentityBlockItem
 {
 public:
-    enum EDataType
-    {
-        UINT_8,
-        UINT_16,
-        UINT_32,
-        BYTE_ARRAY,
-        STRING,
-        UNDEFINED
-    };
+    static std::map<ItemDataType, ItemDataTypeInfo> DataTypeMap;
 
 public:
     QString name = "";
     QString description = "";
-    QString type = "UNDEFINED";
-    int bytes = 0;
+    QString dataType = "UNDEFINED";
+    int nrOfBytes = -1;
     QString value = "";
     int repeatIndex = -1;
     int repeatCount = 1;

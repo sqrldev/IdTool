@@ -179,44 +179,44 @@ IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDe
 
         newItem.name = item["name"].toString();
         newItem.description = item["description"].toString();
-        newItem.type = item["type"].toString();
-        newItem.bytes = item["bytes"].toInt();
+        newItem.dataType = item["type"].toString();
+        newItem.nrOfBytes = item["bytes"].toInt();
 
         for (int j=0; j<repeat_count; j++)
         {
-            if (newItem.type == "UINT_8")
+            if (newItem.dataType == "UINT_8")
             {
-                if (newItem.bytes != 1) throw std::runtime_error(
+                if (newItem.nrOfBytes != 1) throw std::runtime_error(
                             QObject::tr("Invalid byte count for datatype UINT_8!")
                             .toStdString());
                 newItem.value = parseUint8(data, index);
             }
-            else if (newItem.type == "UINT_16")
+            else if (newItem.dataType == "UINT_16")
             {
-                if (newItem.bytes != 2) throw std::runtime_error(
+                if (newItem.nrOfBytes != 2) throw std::runtime_error(
                             QObject::tr("Invalid byte count for datatype UINT_16!")
                             .toStdString());
                 newItem.value = parseUint16(data, index);
             }
-            else if (newItem.type == "UINT_32")
+            else if (newItem.dataType == "UINT_32")
             {
-                if (newItem.bytes != 4) throw std::runtime_error(
+                if (newItem.nrOfBytes != 4) throw std::runtime_error(
                             QObject::tr("Invalid byte count for datatype UINT_32!")
                             .toStdString());
                 newItem.value = parseUint32(data, index);
             }
-            else if (newItem.type == "BYTE_ARRAY")
+            else if (newItem.dataType == "BYTE_ARRAY")
             {
                 // If "bytes is set to -1, we shall use all the remaining bytes in the block
-                if (newItem.bytes < 0)
+                if (newItem.nrOfBytes < 0)
                 {
                     if (newBlock.items.size() > 0 &&
                             newBlock.items.at(0).name.toLower() == "length")
                     {
-                        newItem.bytes = newBlock.items.at(0).value.toInt() - index;
+                        newItem.nrOfBytes = newBlock.items.at(0).value.toInt() - index;
                     }
                 }
-                newItem.value = parseByteArray(data, index, newItem.bytes);
+                newItem.value = parseByteArray(data, index, newItem.nrOfBytes);
             }
             else
             {
@@ -224,7 +224,7 @@ IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDe
             }
 
             newBlock.items.push_back(newItem);
-            index += newItem.bytes;
+            index += newItem.nrOfBytes;
         }
     }
 
@@ -320,8 +320,8 @@ IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
         IdentityBlockItem item;
         item.name = jsonItemObj["name"].toString("");
         item.description = jsonItemObj["description"].toString("");
-        item.type = jsonItemObj["type"].toString("UINT_8");
-        item.bytes = jsonItemObj["name"].toInt(1);
+        item.dataType = jsonItemObj["type"].toString("UINT_8");
+        item.nrOfBytes = jsonItemObj["name"].toInt(1);
         item.value = "";
 
         if (jsonItemObj.contains("repeat_index"))
@@ -341,7 +341,7 @@ IdentityBlockItem IdentityParser::createEmptyItem(QString name, QString dataType
 {
     IdentityBlockItem item;
     item.name = name;
-    item.type = dataType;
+    item.dataType = dataType;
 
     return item;
 }
