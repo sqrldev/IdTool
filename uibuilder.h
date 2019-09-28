@@ -46,25 +46,32 @@
 #include <QMetaType>
 #include <QVariant>
 #include <QDir>
+#include <QMainWindow>
 #include "identitymodel.h"
 #include "identityparser.h"
+
+namespace Ui {
+    class MainWindow;
+}
 
 class UiBuilder : public QObject
 {    
     Q_OBJECT
 
 public:
-    UiBuilder(QScrollArea* scrollArea, IdentityModel* model);
+    UiBuilder(QMainWindow* ui, IdentityModel* model);
     void rebuild();
-    void clear();
+    void clearLayout();
     static bool showGetBlockTypeDialog(QString* result);
     static bool showGetRepeatCountDialog(QString itemName, int* result);
 
 private:
+    QMainWindow *m_pMainWindow = nullptr;
     QScrollArea* m_pScrollArea = nullptr;
     QWidget* m_pLastWidget = nullptr;
     QLayout* m_pLastLayout = nullptr;
     IdentityModel* m_pModel = nullptr;
+    bool m_bNeedsRebuild = false;
 
     QWidget* createBlock(IdentityBlock* block);
     QWidget* createBlockHeader(IdentityBlock *block);

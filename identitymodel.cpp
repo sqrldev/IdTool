@@ -87,16 +87,18 @@ QByteArray IdentityBlock::toByteArray()
     return ba;
 }
 
-void IdentityModel::deleteBlock(IdentityBlock* block)
+bool IdentityModel::deleteBlock(IdentityBlock* block)
 {
     for (size_t i=0; i<blocks.size(); i++)
     {
         if (&blocks[i] == block)
         {
             blocks.erase(blocks.begin()+ static_cast<long long>(i));
-            return;
+            return true;
         }
     }
+
+    return false;
 }
 
 bool IdentityModel::moveBlock(IdentityBlock* block, bool up)

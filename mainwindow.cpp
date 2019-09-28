@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pScrollArea = this->findChild<QScrollArea*>("scrollArea");
     m_pIdentityParser = new IdentityParser();
     m_pIdentityModel = new IdentityModel();
-    m_pUiBuilder = new UiBuilder(m_pScrollArea, m_pIdentityModel);
+    m_pUiBuilder = new UiBuilder(this, m_pIdentityModel);
     m_pHeaderFrame->setVisible(false);
 
     m_pScrollArea->setWidgetResizable(true);

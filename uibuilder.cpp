@@ -26,9 +26,10 @@
 
 #include "uibuilder.h"
 
-UiBuilder::UiBuilder(QScrollArea* scrollArea, IdentityModel* model)
+UiBuilder::UiBuilder(QMainWindow* mainWindow, IdentityModel* model)
 {
-    m_pScrollArea = scrollArea;
+    m_pMainWindow = mainWindow;
+    m_pScrollArea = mainWindow->findChild<QScrollArea*>("scrollArea");
     m_pModel = model;
 }
 
@@ -40,7 +41,7 @@ void UiBuilder::rebuild()
                                  .toStdString());
     }
 
-    clear();
+    clearLayout();
 
     QWidget* pWidget = new QWidget();
     QVBoxLayout *pLayout = new QVBoxLayout();
@@ -61,7 +62,7 @@ void UiBuilder::rebuild()
     m_pLastLayout = pLayout;
 }
 
-void UiBuilder::clear()
+void UiBuilder::clearLayout()
 {
     if (m_pLastLayout) m_pLastLayout->deleteLater();
 }
@@ -297,8 +298,10 @@ void UiBuilder::blockOptionsButtonClicked()
     connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::addBlock);
     connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::deleteBlock);
 
-    menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
+    menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
+
+    if (m_bNeedsRebuild) rebuild();
 }
 
 BlockConnector::BlockConnector() :
@@ -352,8 +355,10 @@ void UiBuilder::deleteBlock()
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
 
-    m_pModel->deleteBlock(connector.block);
-    rebuild();
+    if (m_pModel->deleteBlock(connector.block))
+    {
+        m_bNeedsRebuild = true;
+    }
 }
 
 void UiBuilder::moveBlock()
@@ -363,7 +368,7 @@ void UiBuilder::moveBlock()
 
     if (m_pModel->moveBlock(connector.block, connector.moveUp))
     {
-        rebuild();
+        m_bNeedsRebuild = true;
     }
 }
 
@@ -383,7 +388,7 @@ void UiBuilder::addBlock()
     IdentityBlock block = IdentityParser::createEmptyBlock(blockType);
     m_pModel->insertBlock(block, connector.block);
 
-    rebuild();
+    m_bNeedsRebuild = true;
 }
 
 bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
@@ -444,8 +449,10 @@ void UiBuilder::itemOptionsButtonClicked()
     connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::addNewItem);
     connect(pActionDeleteItem, &QAction::triggered, this, &UiBuilder::deleteItem);
 
-    menu->popup(static_cast<QWidget*>(sender())->mapToGlobal(
+    menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
+
+    if (m_bNeedsRebuild) rebuild();
 }
 
 void UiBuilder::deleteItem()
@@ -455,7 +462,7 @@ void UiBuilder::deleteItem()
 
     bool ok = connector.block->deleteItem(connector.item);
 
-    if (ok) rebuild();
+    if (ok) m_bNeedsRebuild = true;
 }
 
 void UiBuilder::moveItem()
@@ -463,9 +470,9 @@ void UiBuilder::moveItem()
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
 
-    //TODO
+    bool ok = true; //TODO
 
-    rebuild();
+    m_bNeedsRebuild = true;
 }
 
 void UiBuilder::addNewItem()
@@ -473,7 +480,7 @@ void UiBuilder::addNewItem()
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
 
-    //TODO
+    bool ok = true; //TODO
 
-    rebuild();
+    m_bNeedsRebuild = true;
 }

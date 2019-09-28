@@ -46,7 +46,7 @@ public:
 
 public:
     void writeToFile(QString fileName);
-    void deleteBlock(IdentityBlock* block);
+    bool deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
     bool insertBlock(IdentityBlock item, IdentityBlock* after);
     void clear();
