@@ -60,6 +60,8 @@ void UiBuilder::rebuild()
 
     m_pLastWidget = pWidget;
     m_pLastLayout = pLayout;
+
+    m_bNeedsRebuild = false;
 }
 
 void UiBuilder::clearLayout()
