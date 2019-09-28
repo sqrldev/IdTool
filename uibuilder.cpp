@@ -116,7 +116,7 @@ QWidget* UiBuilder::createBlock(IdentityBlock *block)
     // Add items
     for (size_t i=0; i<block->items.size(); i++)
     {
-        QWidget* pItemWidget = createBlockItem(&block->items[i]);
+        QWidget* pItemWidget = createBlockItem(&block->items[i], block);
         pFrameLayout->addWidget(pItemWidget);
     }
 
@@ -154,7 +154,7 @@ QWidget* UiBuilder::createBlockHeader(IdentityBlock *block)
     return pWidget;
 }
 
-QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item)
+QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* block)
 {
     QWidget* pWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout();
@@ -193,12 +193,14 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item)
     if (item->value.length() > 0) pValueLineEdit->setCursorPosition(0);
     pLayout->addWidget(pValueLineEdit);
 
+    ItemConnector ic(block, item, pValueLineEdit);
+
     QPushButton* pEditButton = new QPushButton();
     pEditButton->setToolTip(tr("Edit value"));
     pEditButton->setMaximumWidth(30);
     pNameLable->setMinimumWidth(30);
     pEditButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
-    QVariant itemConnectorContainer = QVariant::fromValue(ItemConnector(item, pValueLineEdit));
+    QVariant itemConnectorContainer = QVariant::fromValue(ic);
     pEditButton->setProperty("0", itemConnectorContainer);
     connect(pEditButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
     pLayout->addWidget(pEditButton);
@@ -321,20 +323,24 @@ BlockConnector::~BlockConnector()
 }
 
 ItemConnector::ItemConnector() :
-    item(nullptr), valueLabel(nullptr)
+    block(nullptr), item(nullptr), valueLabel(nullptr), moveUp(true)
 {
 }
 
-ItemConnector::ItemConnector(IdentityBlockItem* item, QLineEdit* valueLabel)
+ItemConnector::ItemConnector(IdentityBlock* block, IdentityBlockItem* item, QLineEdit* valueLabel, bool moveUp)
 {
+    this->block = block;
     this->item = item;
     this->valueLabel = valueLabel;
+    this->moveUp = moveUp;
 }
 
 ItemConnector::ItemConnector(const ItemConnector& other)
 {
+    this->block = other.block;
     this->item = other.item;
     this->valueLabel = other.valueLabel;
+    this->moveUp = other.moveUp;
 }
 
 ItemConnector::~ItemConnector()
@@ -404,22 +410,26 @@ void UiBuilder::itemOptionsButtonClicked()
             sender()->property("0").value<ItemConnector>();
 
     QAction* pActionMoveItemUp = new QAction(QIcon(":/res/img/DoubleUp_24x.png"), tr("Move up"));
-    QVariant upItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    QVariant upItemConnectorContainer = QVariant::fromValue(
+                ItemConnector(connector.block, connector.item, nullptr));
     pActionMoveItemUp->setProperty("0", upItemConnectorContainer);
 
     QAction* pActionMoveItemDown = new QAction(QIcon(":/res/img/DoubleDown_24x.png"), tr("Move down"));
-    QVariant downItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    QVariant downItemConnectorContainer = QVariant::fromValue(
+               ItemConnector(connector.block, connector.item, nullptr));
     pActionMoveItemDown->setProperty("0", downItemConnectorContainer);
 
     QAction* pActionSeparator = new QAction();
     pActionSeparator->setSeparator(true);
 
     QAction* pActionAddItem = new QAction(QIcon(":/res/img/Add_16x.png"), tr("Add item"));
-    QVariant addItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    QVariant addItemConnectorContainer = QVariant::fromValue(
+                ItemConnector(connector.block, connector.item, nullptr));
     pActionAddItem->setProperty("0", addItemConnectorContainer);
 
     QAction* pActionDeleteItem = new QAction(QIcon(":/res/img/DeleteBlock_16x.png"), tr("Delete item"));
-    QVariant deleteItemConnectorContainer = QVariant::fromValue(ItemConnector(connector.item, nullptr));
+    QVariant deleteItemConnectorContainer = QVariant::fromValue(
+                ItemConnector(connector.block, connector.item, nullptr));
     pActionDeleteItem->setProperty("0", deleteItemConnectorContainer);
 
     QMenu* menu = new QMenu(static_cast<QWidget*>(sender()));
@@ -443,9 +453,9 @@ void UiBuilder::deleteItem()
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
 
-    //TODO
+    bool ok = connector.block->deleteItem(connector.item);
 
-    rebuild();
+    if (ok) rebuild();
 }
 
 void UiBuilder::moveItem()

@@ -68,8 +68,7 @@ private:
 
     QWidget* createBlock(IdentityBlock* block);
     QWidget* createBlockHeader(IdentityBlock *block);
-    QWidget* createBlockItem(IdentityBlockItem* item);
-
+    QWidget* createBlockItem(IdentityBlockItem* item, IdentityBlock* block = nullptr);
 public slots:
     void editButtonClicked();
     void copyButtonClicked();
@@ -99,13 +98,15 @@ public:
 class ItemConnector
 {
 public:
+    IdentityBlock* block = nullptr;
     IdentityBlockItem* item = nullptr;
     QLineEdit* valueLabel = nullptr;
+    bool moveUp = true;
 
 public:
     ItemConnector();
     ItemConnector(const ItemConnector& other);
-    ItemConnector(IdentityBlockItem* item, QLineEdit* valueLabel);
+    ItemConnector(IdentityBlock* block, IdentityBlockItem* item, QLineEdit* valueLabel, bool moveUp = true);
     ~ItemConnector();
 };
 

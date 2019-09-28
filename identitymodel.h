@@ -62,6 +62,7 @@ public:
 
 public:
     bool duplicateItem(IdentityBlockItem* item);
+    bool deleteItem(IdentityBlockItem* item);
     QByteArray toByteArray();
 };
 

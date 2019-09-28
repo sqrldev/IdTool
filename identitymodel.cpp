@@ -165,3 +165,17 @@ bool IdentityBlock::duplicateItem(IdentityBlockItem* item)
 
     return false;
 }
+
+bool IdentityBlock::deleteItem(IdentityBlockItem* item)
+{
+    for (auto iter=items.begin(); iter!=items.end(); iter++)
+    {
+        if (&(*iter) == item)
+        {
+            items.erase(iter);
+            return true;
+        }
+    }
+
+    return false;
+}
