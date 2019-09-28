@@ -484,11 +484,8 @@ void UiBuilder::insertItem()
             sender()->property("0").value<ItemConnector>();
 
     bool ok = false;
-    QStringList dataTypes;
-    dataTypes.append("UINT_8");
-    dataTypes.append("UINT_16");
-    dataTypes.append("UINT_32");
-    dataTypes.append("BYTE_ARRAY");
+    QStringList dataTypes = IdentityBlockItem::getDataTypeList();
+
     QString sDataType = QInputDialog::getItem(
                 nullptr,
                 tr("Choose data type"),
@@ -500,6 +497,25 @@ void UiBuilder::insertItem()
 
     if (!ok) return;
 
+    ItemDataType dataType = IdentityBlockItem::findDataType(sDataType);
+
+    int nrOfBytes = IdentityBlockItem::DataTypeMap[dataType].nrOfBytes;
+
+    if (nrOfBytes == 0)
+    {
+        nrOfBytes = QInputDialog::getInt(
+                    nullptr,
+                    tr("Choose number of bytes"),
+                    tr("Number of bytes:"),
+                    1,
+                    1,
+                    2147483647,
+                    1,
+                    &ok);
+
+        if (!ok) return;
+    }
+
     QString sName = QInputDialog::getText(
                 nullptr,
                 tr("Choose name"),
@@ -510,7 +526,18 @@ void UiBuilder::insertItem()
 
     if (!ok) return;
 
-    IdentityBlockItem item = IdentityParser::createEmptyItem(sName, sDataType);
+    QString sDescription = QInputDialog::getText(
+                nullptr,
+                tr("Choose description"),
+                tr("Item description:"),
+                QLineEdit::Normal,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    IdentityBlockItem item = IdentityParser::createEmptyItem(
+                sName, sDescription, dataType, nrOfBytes);
 
     if (connector.block->insertItem(item, connector.item))
     {

@@ -233,7 +233,37 @@ std::map<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
     {ItemDataType::UINT_8, {"UINT_8", 1}},
     {ItemDataType::UINT_16, {"UINT_16", 2}},
     {ItemDataType::UINT_32, {"UINT_32", 4}},
-    {ItemDataType::BYTE_ARRAY, {"BYTE_ARRAY", -1}},
-    {ItemDataType::STRING, {"STRING", -1}},
-    {ItemDataType::UNDEFINED, {"UNDEFINED", -1}}
+    {ItemDataType::BYTE_ARRAY, {"BYTE_ARRAY", 0}},
+    {ItemDataType::STRING, {"STRING", 0}},
+    {ItemDataType::UNDEFINED, {"UNDEFINED", 0}}
 };
+
+ItemDataType IdentityBlockItem::findDataType(QString dataType)
+{
+    std::map<ItemDataType, ItemDataTypeInfo>::const_iterator it;
+    ItemDataType key = ItemDataType::UNDEFINED;
+
+    for (it = DataTypeMap.begin(); it != DataTypeMap.end(); ++it)
+    {
+        if (it->second.name == dataType)
+        {
+            key = it->first;
+            break;
+        }
+    }
+
+    return key;
+}
+
+QStringList IdentityBlockItem::getDataTypeList()
+{
+    std::map<ItemDataType, ItemDataTypeInfo>::const_iterator it;
+    QStringList result;
+
+    for (it = DataTypeMap.begin(); it != DataTypeMap.end(); ++it)
+    {
+        result.append(it->second.name);
+    }
+
+    return result;
+}

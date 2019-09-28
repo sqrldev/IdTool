@@ -88,12 +88,14 @@ class IdentityBlockItem
 {
 public:
     static std::map<ItemDataType, ItemDataTypeInfo> DataTypeMap;
+    static ItemDataType findDataType(QString dataType);
+    static QStringList getDataTypeList();
 
 public:
     QString name = "";
     QString description = "";
-    QString dataType = "UNDEFINED";
-    int nrOfBytes = -1;
+    ItemDataType dataType = ItemDataType::UNDEFINED;
+    int nrOfBytes = 0;
     QString value = "";
     int repeatIndex = -1;
     int repeatCount = 1;

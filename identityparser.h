@@ -48,7 +48,7 @@ public:
     void parseText(QString identityText, IdentityModel* model);
     static QByteArray getBlockDefinition(uint16_t blockType);
     static IdentityBlock createEmptyBlock(uint16_t blockType);
-    static IdentityBlockItem createEmptyItem(QString name, QString dataType);
+    static IdentityBlockItem createEmptyItem(QString name, QString description, ItemDataType dataType, int nrOfBytes);
     static QByteArray base64DecodeIdentity(QByteArray data);
 
 private:
