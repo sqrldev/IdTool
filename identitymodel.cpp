@@ -130,7 +130,7 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
     return false;
 }
 
-bool IdentityModel::insertBlock(IdentityBlock item, IdentityBlock* after)
+bool IdentityModel::insertBlock(IdentityBlock block, IdentityBlock* after)
 {
     auto iter = blocks.begin();
 
@@ -138,7 +138,7 @@ bool IdentityModel::insertBlock(IdentityBlock item, IdentityBlock* after)
     {
         if (&blocks[i] == after)
         {
-            blocks.insert(iter + 1, item);
+            blocks.insert(iter + 1, block);
             return true;
         }
 
@@ -177,6 +177,53 @@ bool IdentityBlock::deleteItem(IdentityBlockItem* item)
             items.erase(iter);
             return true;
         }
+    }
+
+    return false;
+}
+
+bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
+{
+    if (items.size() < 2) return false;
+
+    for (size_t i=0; i<items.size(); i++)
+    {
+        if (&items[i] == item)
+        {
+            long long swapWith;
+
+            if (up)
+            {
+                if (i == 0) return false;
+                swapWith = static_cast<long long>(i) - 1;
+            }
+            else
+            {
+                if (i == (items.size() - 1)) return false;
+                swapWith = static_cast<long long>(i) + 1;
+            }
+
+            iter_swap(items.begin() + static_cast<long long>(i), items.begin() + swapWith);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
+{
+    auto iter = items.begin();
+
+    for (size_t i=0; i<items.size(); i++)
+    {
+        if (&items[i] == after)
+        {
+            items.insert(iter + 1, item);
+            return true;
+        }
+
+        iter++;
     }
 
     return false;

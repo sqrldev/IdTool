@@ -295,7 +295,7 @@ void UiBuilder::blockOptionsButtonClicked()
 
     connect(pActionMoveBlockUp, &QAction::triggered, this, &UiBuilder::moveBlock);
     connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::moveBlock);
-    connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::addBlock);
+    connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::insertBlock);
     connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::deleteBlock);
 
     menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
@@ -372,7 +372,7 @@ void UiBuilder::moveBlock()
     }
 }
 
-void UiBuilder::addBlock()
+void UiBuilder::insertBlock()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -386,9 +386,11 @@ void UiBuilder::addBlock()
     if (!ok) return;
 
     IdentityBlock block = IdentityParser::createEmptyBlock(blockType);
-    m_pModel->insertBlock(block, connector.block);
 
-    m_bNeedsRebuild = true;
+    if (m_pModel->insertBlock(block, connector.block))
+    {
+        m_bNeedsRebuild = true;
+    }
 }
 
 bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
@@ -416,12 +418,12 @@ void UiBuilder::itemOptionsButtonClicked()
 
     QAction* pActionMoveItemUp = new QAction(QIcon(":/res/img/DoubleUp_24x.png"), tr("Move up"));
     QVariant upItemConnectorContainer = QVariant::fromValue(
-                ItemConnector(connector.block, connector.item, nullptr));
+                ItemConnector(connector.block, connector.item, nullptr, true));
     pActionMoveItemUp->setProperty("0", upItemConnectorContainer);
 
     QAction* pActionMoveItemDown = new QAction(QIcon(":/res/img/DoubleDown_24x.png"), tr("Move down"));
     QVariant downItemConnectorContainer = QVariant::fromValue(
-               ItemConnector(connector.block, connector.item, nullptr));
+               ItemConnector(connector.block, connector.item, nullptr, false));
     pActionMoveItemDown->setProperty("0", downItemConnectorContainer);
 
     QAction* pActionSeparator = new QAction();
@@ -446,7 +448,7 @@ void UiBuilder::itemOptionsButtonClicked()
 
     connect(pActionMoveItemUp, &QAction::triggered, this, &UiBuilder::moveItem);
     connect(pActionMoveItemDown, &QAction::triggered, this, &UiBuilder::moveItem);
-    connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::addNewItem);
+    connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::insertItem);
     connect(pActionDeleteItem, &QAction::triggered, this, &UiBuilder::deleteItem);
 
     menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
@@ -470,17 +472,48 @@ void UiBuilder::moveItem()
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
 
-    bool ok = true; //TODO
-
-    m_bNeedsRebuild = true;
+    if (connector.block->moveItem(connector.item, connector.moveUp))
+    {
+        m_bNeedsRebuild = true;
+    }
 }
 
-void UiBuilder::addNewItem()
+void UiBuilder::insertItem()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
 
-    bool ok = true; //TODO
+    bool ok = false;
+    QStringList dataTypes;
+    dataTypes.append("UINT_8");
+    dataTypes.append("UINT_16");
+    dataTypes.append("UINT_32");
+    dataTypes.append("BYTE_ARRAY");
+    QString sDataType = QInputDialog::getItem(
+                nullptr,
+                tr("Choose data type"),
+                tr("Data type for item:"),
+                dataTypes,
+                0,
+                false,
+                &ok);
 
-    m_bNeedsRebuild = true;
+    if (!ok) return;
+
+    QString sName = QInputDialog::getText(
+                nullptr,
+                tr("Choose name"),
+                tr("Item name:"),
+                QLineEdit::Normal,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    IdentityBlockItem item = IdentityParser::createEmptyItem(sName, sDataType);
+
+    if (connector.block->insertItem(item, connector.item))
+    {
+        m_bNeedsRebuild = true;
+    }
 }

@@ -48,7 +48,7 @@ public:
     void writeToFile(QString fileName);
     bool deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
-    bool insertBlock(IdentityBlock item, IdentityBlock* after);
+    bool insertBlock(IdentityBlock block, IdentityBlock* after);
     void clear();
 };
 
@@ -63,6 +63,8 @@ public:
 public:
     bool duplicateItem(IdentityBlockItem* item);
     bool deleteItem(IdentityBlockItem* item);
+    bool moveItem(IdentityBlockItem* item, bool up);
+    bool insertItem(IdentityBlockItem item, IdentityBlockItem* after);
     QByteArray toByteArray();
 };
 

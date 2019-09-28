@@ -337,6 +337,15 @@ IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
     return result;
 }
 
+IdentityBlockItem IdentityParser::createEmptyItem(QString name, QString dataType)
+{
+    IdentityBlockItem item;
+    item.name = name;
+    item.type = dataType;
+
+    return item;
+}
+
 
 uint16_t IdentityParser::getBlockLength(QByteArray data)
 {

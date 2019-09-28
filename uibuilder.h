@@ -81,10 +81,10 @@ public slots:
     void copyButtonClicked();
     void blockOptionsButtonClicked();
     void itemOptionsButtonClicked();
-    void addBlock();
+    void insertBlock();
     void deleteBlock();
     void moveBlock();
-    void addNewItem();
+    void insertItem();
     void deleteItem();
     void moveItem();
 };
