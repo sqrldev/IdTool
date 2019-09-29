@@ -66,7 +66,7 @@ public:
     IdentityModel* getModel();
 
 public:
-    static bool showGetBlockTypeDialog(QString* result);
+    static bool showGetBlockTypeDialog(QString* result, bool allowEdit = false);
     static bool showGetRepeatCountDialog(QString itemName, int* result);
 
 private:

@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        blockdesignerdialog.cpp \
         identitymodel.cpp \
         identityparser.cpp \
         main.cpp \
@@ -32,12 +33,14 @@ SOURCES += \
         uibuilder.cpp
 
 HEADERS += \
+        blockdesignerdialog.h \
         identitymodel.h \
         identityparser.h \
         mainwindow.h \
         uibuilder.h
 
 FORMS += \
+        blockdesignerdialog.ui \
         mainwindow.ui
 
 # Default rules for deployment.

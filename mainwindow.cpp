@@ -205,7 +205,18 @@ void MainWindow::createNewIdentity()
 
 void MainWindow::createNewBlockType()
 {
+    bool ok = false;
+    QString sBlockType;
 
+    if (!UiBuilder::showGetBlockTypeDialog(&sBlockType, true))
+        return;
+
+    int iBlockType = sBlockType.toInt(&ok);
+
+    if (!ok) return;
+
+    BlockDesignerDialog dialog(iBlockType, this);
+    dialog.exec();
 }
 
 void MainWindow::quit()

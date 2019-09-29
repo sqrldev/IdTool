@@ -30,6 +30,7 @@
 #include "identitymodel.h"
 #include "identityparser.h"
 #include "uibuilder.h"
+#include "blockdesignerdialog.h"
 #include <string>
 #include <fstream>
 #include <streambuf>

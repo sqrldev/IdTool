@@ -80,7 +80,7 @@ IdentityModel *UiBuilder::getModel()
     return m_pModel;
 }
 
-bool UiBuilder::showGetBlockTypeDialog(QString *result)
+bool UiBuilder::showGetBlockTypeDialog(QString *result, bool allowEdit)
 {
     QDir currentPath = QDir::currentPath();
     QDir fullPath = currentPath.filePath(QString("blockdef/"));
@@ -102,7 +102,7 @@ bool UiBuilder::showGetBlockTypeDialog(QString *result)
                 tr("Block type:"),
                 blockDefs,
                 0,
-                false,
+                allowEdit,
                 &ok);
 
     if (ok) *result = sType;
