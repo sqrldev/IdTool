@@ -55,18 +55,18 @@ QByteArray IdentityBlock::toByteArray()
 
     for (size_t i=0; i<items.size(); i++)
     {
-        if (items[i].dataType == "UINT_8")
+        if (items[i].dataType == UINT_8)
         {
             ba.append(static_cast<char>(items[i].value.toInt()));
         }
-        else if (items[i].dataType == "UINT_16")
+        else if (items[i].dataType == UINT_16)
         {
             int value = items[i].value.toInt();
             char* data = static_cast<char*>(static_cast<void*>(&value));
             ba.append(data[0]);
             ba.append(data[1]);
         }
-        else if (items[i].dataType == "UINT_32")
+        else if (items[i].dataType == UINT_32)
         {
             QString v = items[i].value;
             int vi = v.toInt();
@@ -77,7 +77,7 @@ QByteArray IdentityBlock::toByteArray()
             ba.append(data[2]);
             ba.append(data[3]);
         }
-        else if (items[i].dataType == "BYTE_ARRAY")
+        else if (items[i].dataType == BYTE_ARRAY)
         {
             QByteArray baTemp = QByteArray::fromHex(items[i].value.toUtf8());
             ba.append(baTemp);
