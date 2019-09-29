@@ -1,0 +1,15 @@
+Version 0.2.0
+
+Features
+* Create new identity from scratch
+* Add, remove and reorder block items
+
+Version 0.1.0 (initial release)
+
+Features
+* Load SQRL identities from file or paste plain text
+* Dynamically parse identitiy blocks using JSON templates
+* Graphically visualize identitiy
+* Add, remove and reorder identity blocks
+* Show, copy and edit block item values
+* Save changed identity back to file

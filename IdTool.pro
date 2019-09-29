@@ -54,6 +54,7 @@ VERSION = 0.1.0    # major.minor.patch
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 DISTFILES += \
+    CHANGELOG \
     blockdef/1.json \
     blockdef/2.json \
     blockdef/3.json
