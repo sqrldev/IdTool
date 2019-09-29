@@ -50,7 +50,7 @@ RESOURCES += \
 
 RC_FILE = IdTool.rc
 
-VERSION = 0.1.0    # major.minor.patch
+VERSION = 0.2.0    # major.minor.patch
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 DISTFILES += \
