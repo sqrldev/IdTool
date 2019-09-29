@@ -56,6 +56,7 @@ private slots:
     void showAboutDialog();
     void pasteIdentityText();
     void createNewIdentity();
+    void createNewBlockType();
     void quit();
 
 private:

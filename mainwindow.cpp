@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionPasteIdentityData, &QAction::triggered, this, &MainWindow::pasteIdentityText);
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
     connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
+    connect(ui->actionCreateNewBlockType, &QAction::triggered, this, &MainWindow::createNewBlockType);
 }
 
 MainWindow::~MainWindow()
@@ -200,6 +201,11 @@ void MainWindow::createNewIdentity()
     m_pIdentityModel->clear();
     m_pIdentityModel->blocks.push_back(block);
     m_pUiBuilder->rebuild();
+}
+
+void MainWindow::createNewBlockType()
+{
+
 }
 
 void MainWindow::quit()

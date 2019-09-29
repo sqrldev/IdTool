@@ -161,7 +161,14 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionCreateNewBlockType"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuTools"/>
    <addaction name="menuInfo"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -244,6 +251,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionCreateNewBlockType">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/NewBlock_16x.png</normaloff>:/res/img/NewBlock_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create new block type</string>
    </property>
   </action>
  </widget>
