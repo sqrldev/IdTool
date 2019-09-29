@@ -165,7 +165,7 @@
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionCreateNewBlockType"/>
+    <addaction name="actionCreateOrEditBlockType"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -253,13 +253,13 @@
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="actionCreateNewBlockType">
+  <action name="actionCreateOrEditBlockType">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/res/img/NewBlock_16x.png</normaloff>:/res/img/NewBlock_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Create new block type</string>
+    <string>Create or edit block type</string>
    </property>
   </action>
  </widget>

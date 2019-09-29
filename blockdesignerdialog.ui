@@ -11,11 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Block designer</string>
+   <string>Block Designer</string>
   </property>
   <property name="windowIcon">
    <iconset resource="res.qrc">
-    <normaloff>:/res/img/IdTool_Icon.png</normaloff>:/res/img/IdTool_Icon.png</iconset>
+    <normaloff>:/res/img/NewBlock_16x.png</normaloff>:/res/img/NewBlock_16x.png</iconset>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
