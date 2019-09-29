@@ -69,6 +69,17 @@ void UiBuilder::clearLayout()
     if (m_pLastLayout) m_pLastLayout->deleteLater();
 }
 
+bool UiBuilder::hasBlocks()
+{
+    if (m_pModel->blocks.size() > 0) return true;
+    else return false;
+}
+
+IdentityModel *UiBuilder::getModel()
+{
+    return m_pModel;
+}
+
 bool UiBuilder::showGetBlockTypeDialog(QString *result)
 {
     QDir currentPath = QDir::currentPath();
@@ -88,7 +99,7 @@ bool UiBuilder::showGetBlockTypeDialog(QString *result)
     QString sType = QInputDialog::getItem(
                 nullptr,
                 tr("Choose block type"),
-                tr("Block type"),
+                tr("Block type:"),
                 blockDefs,
                 0,
                 false,

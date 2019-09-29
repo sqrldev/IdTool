@@ -176,6 +176,18 @@ void MainWindow::createNewIdentity()
 {
     QString sBlockType;
 
+    if (m_pUiBuilder->hasBlocks())
+    {
+        QMessageBox msgBox;
+        msgBox.setText(tr("This operation will discard any existing identity information!"));
+        msgBox.setInformativeText(tr("Do you really want to create a new identity and discard all changes?"));
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+
+        if (msgBox.exec() != QMessageBox::Ok) return;
+    }
+
     bool ok = UiBuilder::showGetBlockTypeDialog(&sBlockType);
     if (!ok) return;
 

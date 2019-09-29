@@ -62,6 +62,10 @@ public:
     UiBuilder(QMainWindow* ui, IdentityModel* model);
     void rebuild();
     void clearLayout();
+    bool hasBlocks();
+    IdentityModel* getModel();
+
+public:
     static bool showGetBlockTypeDialog(QString* result);
     static bool showGetRepeatCountDialog(QString itemName, int* result);
 
@@ -76,6 +80,7 @@ private:
     QWidget* createBlock(IdentityBlock* block);
     QWidget* createBlockHeader(IdentityBlock *block);
     QWidget* createBlockItem(IdentityBlockItem* item, IdentityBlock* block = nullptr);
+
 public slots:
     void editButtonClicked();
     void copyButtonClicked();
