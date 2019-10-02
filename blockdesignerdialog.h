@@ -16,13 +16,21 @@ class BlockDesignerDialog : public QDialog
 public:
     explicit BlockDesignerDialog(int blockType, QWidget *parent = nullptr);
     ~BlockDesignerDialog();
-    void loadData();
+    void createModel();
+    bool loadBlockDefinition();
+    void reload(bool reloadBlockDefinition=true);
 
 private:
     Ui::BlockDesignerDialog *ui;
     int m_BlockType = -1;
-    QStandardItemModel* m_pItemModel;
-    QJsonDocument* m_pBlockDesign;
+    QStandardItemModel* m_pItemModel = nullptr;
+    QJsonDocument* m_pBlockDesign = nullptr;
+
+public slots:
+    void addItem();
+    void deleteItem();
+    void moveItem();
+    void editItem();
 };
 
 #endif // BLOCKDESIGNERDIALOG_H
