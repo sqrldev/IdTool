@@ -95,6 +95,11 @@ void BlockDesignerDialog::addItem()
 
 void BlockDesignerDialog::deleteItem()
 {
+    if (!ui->tableView->model()) return;
+
+    int rowCount = ui->tableView->model()->rowCount();
+    if (rowCount == 0) return;
+
     QItemSelectionModel *selection = ui->tableView->selectionModel();
     if (!selection->hasSelection()) return;
 
@@ -111,7 +116,7 @@ void BlockDesignerDialog::deleteItem()
 
     reload(false);
 
-    int rowCount = ui->tableView->model()->rowCount();
+    rowCount = ui->tableView->model()->rowCount();
     if (rowCount > 0)
     {
         if (rowIndex >= rowCount) ui->tableView->selectRow(rowCount-1);
@@ -121,6 +126,11 @@ void BlockDesignerDialog::deleteItem()
 
 void BlockDesignerDialog::moveItem()
 {
+    if (!ui->tableView->model()) return;
+
+    int rowCount = ui->tableView->model()->rowCount();
+    if (rowCount == 0) return;
+
     QItemSelectionModel *selection = ui->tableView->selectionModel();
     if (!selection->hasSelection()) return;
 
@@ -156,5 +166,15 @@ void BlockDesignerDialog::moveItem()
 
 void BlockDesignerDialog::editItem()
 {
+    if (!ui->tableView->model()) return;
 
+    int rowCount = ui->tableView->model()->rowCount();
+    if (rowCount == 0) return;
+
+
+    QItemSelectionModel *selection = ui->tableView->selectionModel();
+    if (!selection->hasSelection()) return;
+
+    QModelIndexList selectedRows = selection->selectedRows();
+    int rowIndex = selectedRows[0].row();
 }
