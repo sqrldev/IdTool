@@ -99,30 +99,59 @@ void BlockDesignerDialog::deleteItem()
     if (!selection->hasSelection()) return;
 
     QModelIndexList selectedRows = selection->selectedRows();
+    int rowIndex = selectedRows[0].row();
 
     QJsonArray items = (*m_pBlockDesign)["items"].toArray();
-    items.removeAt(selectedRows[0].row());
+    items.removeAt(rowIndex);
 
     QJsonObject temp = (*m_pBlockDesign)[0].toObject();
     temp.remove("items");
     temp.insert("items", items);
-
     m_pBlockDesign->setObject(temp);
+
     reload(false);
+
+    int rowCount = ui->tableView->model()->rowCount();
+    if (rowCount > 0)
+    {
+        if (rowIndex >= rowCount) ui->tableView->selectRow(rowCount-1);
+        else ui->tableView->selectRow(rowIndex);
+    }
 }
 
 void BlockDesignerDialog::moveItem()
 {
+    QItemSelectionModel *selection = ui->tableView->selectionModel();
+    if (!selection->hasSelection()) return;
 
+    QModelIndexList selectedRows = selection->selectedRows();
+    int rowIndex = selectedRows[0].row();
+
+    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    QJsonObject obj = items[rowIndex].toObject();
 
     if (sender() == ui->btnMoveItemUp)
     {
-
+        if (rowIndex == 0) return;
+        items.removeAt(rowIndex);
+        items.insert(rowIndex-1, obj);
+        rowIndex--;
     }
     else if (sender() == ui->btnMoveItemDown)
     {
-
+        if (rowIndex == items.size()-1) return;
+        items.removeAt(rowIndex);
+        items.insert(rowIndex+1, obj);
+        rowIndex++;
     }
+
+    QJsonObject temp = (*m_pBlockDesign)[0].toObject();
+    temp.remove("items");
+    temp.insert("items", items);
+    m_pBlockDesign->setObject(temp);
+
+    reload(false);
+    ui->tableView->selectRow(rowIndex);
 }
 
 void BlockDesignerDialog::editItem()
