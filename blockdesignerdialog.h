@@ -22,6 +22,7 @@ private:
     Ui::BlockDesignerDialog *ui;
     int m_BlockType = -1;
     QStandardItemModel* m_pItemModel;
+    QJsonDocument* m_pBlockDesign;
 };
 
 #endif // BLOCKDESIGNERDIALOG_H

@@ -28,20 +28,23 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
 BlockDesignerDialog::~BlockDesignerDialog()
 {
     delete ui;
-    delete m_pItemModel;
+    if (m_pItemModel != nullptr) delete m_pItemModel;
+    if (m_pBlockDesign != nullptr) delete m_pBlockDesign;
 }
 
 void BlockDesignerDialog::loadData()
 {
-    QJsonDocument jsonDoc;
+    QJsonDocument* jsonDoc = new QJsonDocument();
 
     bool ok = IdentityParser::getBlockDefinition(
                 IdentityParser::getBlockDefinitionBytes(
-                    static_cast<uint16_t>(m_BlockType)), &jsonDoc);
+                    static_cast<uint16_t>(m_BlockType)), jsonDoc);
 
     if (!ok) return;
 
-    for (QJsonValue item: jsonDoc["items"].toArray())
+    m_pBlockDesign = jsonDoc;
+
+    for (QJsonValue item: (*jsonDoc)["items"].toArray())
     {
         QJsonObject itemObj = item.toObject();
         QList<QStandardItem*> stdItemList = IdentityParser::toStandardItems(
