@@ -8,7 +8,11 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     ui->setupUi(this);
     m_BlockType = blockType;
 
+    connect(ui->btnAddItem, &QPushButton::clicked, this, &BlockDesignerDialog::addItem);
     connect(ui->btnDeleteItem, &QPushButton::clicked, this, &BlockDesignerDialog::deleteItem);
+    connect(ui->btnEditItem, &QPushButton::clicked, this, &BlockDesignerDialog::editItem);
+    connect(ui->btnMoveItemUp, &QPushButton::clicked, this, &BlockDesignerDialog::moveItem);
+    connect(ui->btnMoveItemDown, &QPushButton::clicked, this, &BlockDesignerDialog::moveItem);
 
     ui->labelHeadline->setText(
                 ui->labelHeadline->text().arg(blockType));
