@@ -93,16 +93,15 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
         uint16_t blockLength = getBlockLength(data);
         uint16_t blockType = getBlockType(data);
 
-        QByteArray baBlockDef = getBlockDefinition(blockType);
+        QByteArray baBlockDef = getBlockDefinitionBytes(blockType);
         if (baBlockDef.isNull() || baBlockDef.isEmpty())
         {
             baBlockDef = getUnknownBlockDefinition();
         }
 
-        QJsonParseError error;
-        QJsonDocument blockDef = QJsonDocument::fromJson(baBlockDef, &error);
 
-        if (error.error == QJsonParseError::NoError)
+        QJsonDocument blockDef;
+        if(getBlockDefinition(baBlockDef, &blockDef))
         {
             IdentityBlock block = parseBlock(data, &blockDef);
             model->blocks.push_back(block);
@@ -256,7 +255,7 @@ bool IdentityParser::checkHeader(QByteArray data)
     return true;
 }
 
-QByteArray IdentityParser::getBlockDefinition(uint16_t blockType)
+QByteArray IdentityParser::getBlockDefinitionBytes(uint16_t blockType)
 {
     QDir path = QDir::currentPath();
     QDir fullPath = path.filePath(QString("blockdef/") + QString::number(blockType) + ".json");
@@ -271,7 +270,34 @@ QByteArray IdentityParser::getBlockDefinition(uint16_t blockType)
     ba = file.readAll();
     file.close();
 
-    return ba;    
+    return ba;
+}
+
+bool IdentityParser::getBlockDefinition(QByteArray data, QJsonDocument* jsonDoc)
+{
+    QJsonParseError error;
+    *jsonDoc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error == QJsonParseError::NoError)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+QList<QStandardItem*> IdentityParser::toStandardItems(QJsonObject *item)
+{
+    QList<QStandardItem*> result;
+
+    result.append(new QStandardItem((*item)["name"].toString("")));
+    result.append(new QStandardItem((*item)["description"].toString("")));
+    result.append(new QStandardItem((*item)["type"].toString("UNDEFINED")));
+    result.append(new QStandardItem((*item)["bytes"].toString("0")));
+    result.append(new QStandardItem((*item)["repeat_index"].toString("-1")));
+    result.append(new QStandardItem((*item)["repeat_count"].toString("1")));
+
+    return result;
 }
 
 QByteArray IdentityParser::getUnknownBlockDefinition()
@@ -295,7 +321,7 @@ IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
 {
     IdentityBlock result;
 
-    QByteArray jsonData = getBlockDefinition(blockType);
+    QByteArray jsonData = getBlockDefinitionBytes(blockType);
     if (jsonData.isNull() || jsonData.isEmpty()) return result;
 
     QJsonParseError error;

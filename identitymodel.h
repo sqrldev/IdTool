@@ -34,6 +34,8 @@
 #include <QFile>
 #include <QDataStream>
 #include <QDebug>
+#include <QList>
+#include <QStandardItem>
 
 struct ItemDataTypeInfo
 {
