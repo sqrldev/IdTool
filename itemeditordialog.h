@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QJsonObject>
+#include <QPushButton>
 #include "identitymodel.h"
 
 namespace Ui {
@@ -25,6 +26,7 @@ public:
 public slots:
     void onDataTypeChanged(int currentIndex);
     void onSaveButtonClicked();
+    void onResetButtonClicked();
 
 private:
     void loadDefaults();

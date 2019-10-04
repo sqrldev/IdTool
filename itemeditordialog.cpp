@@ -9,6 +9,7 @@ ItemEditorDialog::ItemEditorDialog(QWidget *parent) :
     loadDefaults();
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
+    connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), SLOT(onResetButtonClicked()));
 }
 
 ItemEditorDialog::ItemEditorDialog(QWidget *parent, QJsonObject *item) :
@@ -65,6 +66,22 @@ void ItemEditorDialog::onSaveButtonClicked()
     if (ui->spnRepeatCount->value() > 1)
     {
         (*m_pItem)["repeat_count"] = ui->spnRepeatCount->value();
+    }
+}
+
+void ItemEditorDialog::onResetButtonClicked()
+{
+    if (m_pItem != nullptr)
+    {
+        loadItemData();
+    }
+    else
+    {
+        ui->txtName->setText("");
+        ui->txtDescription->setText("");
+        ui->cmbDataType->setCurrentIndex(0);
+        ui->spnRepeatIndex->setValue(-1);
+        ui->spnRepeatCount->setValue(1);
     }
 }
 
