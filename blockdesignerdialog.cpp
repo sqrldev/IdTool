@@ -13,6 +13,8 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     connect(ui->btnEditItem, &QPushButton::clicked, this, &BlockDesignerDialog::onEditItemClicked);
     connect(ui->btnMoveItemUp, &QPushButton::clicked, this, &BlockDesignerDialog::onMoveItemClicked);
     connect(ui->btnMoveItemDown, &QPushButton::clicked, this, &BlockDesignerDialog::onMoveItemClicked);
+    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
+    connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), SLOT(onResetButtonClicked()));
 
     ui->labelHeadline->setText(
                 ui->labelHeadline->text().arg(blockType));
@@ -206,4 +208,15 @@ void BlockDesignerDialog::onEditItemClicked()
     m_pBlockDesign->setObject(temp);
 
     reload(false);
+}
+
+void BlockDesignerDialog::onSaveButtonClicked()
+{
+    //TODO!!
+    QByteArray data = m_pBlockDesign->toJson();
+}
+
+void BlockDesignerDialog::onResetButtonClicked()
+{
+    reload(true);
 }

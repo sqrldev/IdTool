@@ -32,6 +32,8 @@ public slots:
     void onDeleteItemClicked();
     void onMoveItemClicked();
     void onEditItemClicked();
+    void onSaveButtonClicked();
+    void onResetButtonClicked();
 };
 
 #endif // BLOCKDESIGNERDIALOG_H
