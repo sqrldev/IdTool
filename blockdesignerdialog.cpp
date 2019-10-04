@@ -90,7 +90,8 @@ void BlockDesignerDialog::reload(bool reloadBlockDefinition)
 
 void BlockDesignerDialog::addItem()
 {
-
+    ItemEditorDialog itemEditor(this);
+    itemEditor.exec();
 }
 
 void BlockDesignerDialog::deleteItem()

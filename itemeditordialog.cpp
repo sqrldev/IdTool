@@ -6,6 +6,7 @@ ItemEditorDialog::ItemEditorDialog(QWidget *parent) :
     ui(new Ui::ItemEditorDialog)
 {
     ui->setupUi(this);
+    loadDefaults();
 }
 
 ItemEditorDialog::ItemEditorDialog(QWidget *parent, QJsonObject *item) :
@@ -43,7 +44,6 @@ void ItemEditorDialog::onDataTypeChanged(int currentIndex)
         ui->spnNrOfBytes->setValue(0);
         ui->spnNrOfBytes->setEnabled(true);
     }
-
 }
 
 void ItemEditorDialog::loadDefaults()
@@ -54,6 +54,7 @@ void ItemEditorDialog::loadDefaults()
     }
 
     connect(ui->cmbDataType, SIGNAL(currentIndexChanged(int)), this, SLOT(onDataTypeChanged(int)));
+    ui->cmbDataType->currentIndexChanged(0);
 }
 
 void ItemEditorDialog::loadItemData()
