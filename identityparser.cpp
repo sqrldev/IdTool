@@ -290,12 +290,16 @@ QList<QStandardItem*> IdentityParser::toStandardItems(QJsonObject *item)
 {
     QList<QStandardItem*> result;
 
+    int nrOfBytes = (*item)["bytes"].toInt(0);
+    int repeatIndex = (*item)["repeat_index"].toInt(-1);
+    int repeatCount = (*item)["repeat_count"].toInt(1);
+
     result.append(new QStandardItem((*item)["name"].toString("")));
     result.append(new QStandardItem((*item)["description"].toString("")));
     result.append(new QStandardItem((*item)["type"].toString("UNDEFINED")));
-    result.append(new QStandardItem((*item)["bytes"].toString("0")));
-    result.append(new QStandardItem((*item)["repeat_index"].toString("-1")));
-    result.append(new QStandardItem((*item)["repeat_count"].toString("1")));
+    result.append(new QStandardItem(QString::number(nrOfBytes)));
+    result.append(new QStandardItem(QString::number(repeatIndex)));
+    result.append(new QStandardItem(QString::number(repeatCount)));
 
     return result;
 }

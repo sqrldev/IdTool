@@ -7,6 +7,8 @@ ItemEditorDialog::ItemEditorDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     loadDefaults();
+
+    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
 }
 
 ItemEditorDialog::ItemEditorDialog(QWidget *parent, QJsonObject *item) :
@@ -43,6 +45,26 @@ void ItemEditorDialog::onDataTypeChanged(int currentIndex)
     {
         ui->spnNrOfBytes->setValue(0);
         ui->spnNrOfBytes->setEnabled(true);
+    }
+}
+
+void ItemEditorDialog::onSaveButtonClicked()
+{
+    if (m_pItem == nullptr) m_pItem = new QJsonObject();
+
+    (*m_pItem)["name"] = ui->txtName->text();
+    (*m_pItem)["description"] = ui->txtDescription->text();
+    (*m_pItem)["type"] = ui->cmbDataType->currentText();
+    (*m_pItem)["bytes"] = ui->spnNrOfBytes->value();
+
+    if (ui->spnRepeatIndex->value() != -1)
+    {
+        (*m_pItem)["repeat_index"] = ui->spnRepeatIndex->value();
+    }
+
+    if (ui->spnRepeatCount->value() > 1)
+    {
+        (*m_pItem)["repeat_count"] = ui->spnRepeatCount->value();
     }
 }
 

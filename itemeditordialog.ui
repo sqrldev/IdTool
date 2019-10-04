@@ -33,7 +33,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Reset|QDialogButtonBox::Save</set>
      </property>
     </widget>
    </item>
@@ -103,12 +103,18 @@
      <property name="maximum">
       <number>9999</number>
      </property>
+     <property name="value">
+      <number>-1</number>
+     </property>
     </widget>
    </item>
    <item row="5" column="2">
     <widget class="QSpinBox" name="spnRepeatCount">
      <property name="maximum">
       <number>9999</number>
+     </property>
+     <property name="value">
+      <number>1</number>
      </property>
     </widget>
    </item>

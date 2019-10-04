@@ -91,7 +91,20 @@ void BlockDesignerDialog::reload(bool reloadBlockDefinition)
 void BlockDesignerDialog::addItem()
 {
     ItemEditorDialog itemEditor(this);
-    itemEditor.exec();
+    if (itemEditor.exec() != Accepted) return;
+
+    QJsonObject* item = itemEditor.getItem();
+
+    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    items.append(*item);
+    QJsonObject temp = (*m_pBlockDesign)[0].toObject();
+    temp.remove("items");
+    temp.insert("items", items);
+    m_pBlockDesign->setObject(temp);
+
+    reload(false);
+
+    delete item;
 }
 
 void BlockDesignerDialog::deleteItem()
@@ -183,6 +196,14 @@ void BlockDesignerDialog::editItem()
     QJsonObject item = items.at(rowIndex).toObject();
 
     ItemEditorDialog itemEditor(this, &item);
-    itemEditor.exec();
+    if (itemEditor.exec() != Accepted) return;
 
+    QJsonObject* updatedItem = itemEditor.getItem();
+    items.replace(rowIndex, *updatedItem);
+    QJsonObject temp = (*m_pBlockDesign)[0].toObject();
+    temp.remove("items");
+    temp.insert("items", items);
+    m_pBlockDesign->setObject(temp);
+
+    reload(false);
 }

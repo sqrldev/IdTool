@@ -24,6 +24,7 @@ public:
 
 public slots:
     void onDataTypeChanged(int currentIndex);
+    void onSaveButtonClicked();
 
 private:
     void loadDefaults();
