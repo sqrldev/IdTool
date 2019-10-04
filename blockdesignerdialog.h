@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QStandardItemModel>
 #include "identityparser.h"
+#include "itemeditordialog.h"
 
 namespace Ui {
 class BlockDesignerDialog;

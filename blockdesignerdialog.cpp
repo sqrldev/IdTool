@@ -177,4 +177,11 @@ void BlockDesignerDialog::editItem()
 
     QModelIndexList selectedRows = selection->selectedRows();
     int rowIndex = selectedRows[0].row();
+
+    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    QJsonObject item = items.at(rowIndex).toObject();
+
+    ItemEditorDialog itemEditor(this, &item);
+    itemEditor.exec();
+
 }
