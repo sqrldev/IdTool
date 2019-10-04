@@ -8,11 +8,11 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     ui->setupUi(this);
     m_BlockType = blockType;
 
-    connect(ui->btnAddItem, &QPushButton::clicked, this, &BlockDesignerDialog::addItem);
-    connect(ui->btnDeleteItem, &QPushButton::clicked, this, &BlockDesignerDialog::deleteItem);
-    connect(ui->btnEditItem, &QPushButton::clicked, this, &BlockDesignerDialog::editItem);
-    connect(ui->btnMoveItemUp, &QPushButton::clicked, this, &BlockDesignerDialog::moveItem);
-    connect(ui->btnMoveItemDown, &QPushButton::clicked, this, &BlockDesignerDialog::moveItem);
+    connect(ui->btnAddItem, &QPushButton::clicked, this, &BlockDesignerDialog::onAddItemClicked);
+    connect(ui->btnDeleteItem, &QPushButton::clicked, this, &BlockDesignerDialog::onDeleteItemClicked);
+    connect(ui->btnEditItem, &QPushButton::clicked, this, &BlockDesignerDialog::onEditItemClicked);
+    connect(ui->btnMoveItemUp, &QPushButton::clicked, this, &BlockDesignerDialog::onMoveItemClicked);
+    connect(ui->btnMoveItemDown, &QPushButton::clicked, this, &BlockDesignerDialog::onMoveItemClicked);
 
     ui->labelHeadline->setText(
                 ui->labelHeadline->text().arg(blockType));
@@ -88,7 +88,7 @@ void BlockDesignerDialog::reload(bool reloadBlockDefinition)
     ui->tableView->resizeColumnToContents(0);
 }
 
-void BlockDesignerDialog::addItem()
+void BlockDesignerDialog::onAddItemClicked()
 {
     ItemEditorDialog itemEditor(this);
     if (itemEditor.exec() != Accepted) return;
@@ -107,7 +107,7 @@ void BlockDesignerDialog::addItem()
     delete item;
 }
 
-void BlockDesignerDialog::deleteItem()
+void BlockDesignerDialog::onDeleteItemClicked()
 {
     if (!ui->tableView->model()) return;
 
@@ -138,7 +138,7 @@ void BlockDesignerDialog::deleteItem()
     }
 }
 
-void BlockDesignerDialog::moveItem()
+void BlockDesignerDialog::onMoveItemClicked()
 {
     if (!ui->tableView->model()) return;
 
@@ -178,7 +178,7 @@ void BlockDesignerDialog::moveItem()
     ui->tableView->selectRow(rowIndex);
 }
 
-void BlockDesignerDialog::editItem()
+void BlockDesignerDialog::onEditItemClicked()
 {
     if (!ui->tableView->model()) return;
 

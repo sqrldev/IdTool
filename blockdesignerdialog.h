@@ -28,10 +28,10 @@ private:
     QJsonDocument* m_pBlockDesign = nullptr;
 
 public slots:
-    void addItem();
-    void deleteItem();
-    void moveItem();
-    void editItem();
+    void onAddItemClicked();
+    void onDeleteItemClicked();
+    void onMoveItemClicked();
+    void onEditItemClicked();
 };
 
 #endif // BLOCKDESIGNERDIALOG_H
