@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include <QStandardItemModel>
+#include <QSaveFile>
+#include <QMessageBox>
 #include "identityparser.h"
 #include "itemeditordialog.h"
 

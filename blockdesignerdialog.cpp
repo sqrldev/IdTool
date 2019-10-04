@@ -212,8 +212,38 @@ void BlockDesignerDialog::onEditItemClicked()
 
 void BlockDesignerDialog::onSaveButtonClicked()
 {
-    //TODO!!
     QByteArray data = m_pBlockDesign->toJson();
+
+    QDir path = QDir::currentPath();
+    QDir fullPath = path.filePath(QString("blockdef/") + QString::number(m_BlockType) + ".json");
+    QString sFullPath = fullPath.absolutePath();
+
+    if (QFile::exists(sFullPath))
+    {
+        QMessageBox::StandardButton result;
+          result = QMessageBox::question(
+                      this,
+                      "File exists",
+                      "This file already exists. Are you sure you want to overwrite it?",
+                      QMessageBox::Yes|QMessageBox::No);
+
+          if (result != QMessageBox::Yes) return;
+    }
+
+    QSaveFile file(sFullPath);
+
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(data);
+        file.commit();
+    }
+    else
+    {
+        QMessageBox msgBox(this);
+        msgBox.setText(tr("Error writing block definition file!"));
+        msgBox.exec();
+    }
+
 }
 
 void BlockDesignerDialog::onResetButtonClicked()
