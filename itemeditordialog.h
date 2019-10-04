@@ -22,6 +22,9 @@ public:
     ~ItemEditorDialog();
     QJsonObject* getItem();
 
+public slots:
+    void onDataTypeChanged(int currentIndex);
+
 private:
     void loadDefaults();
     void loadItemData();

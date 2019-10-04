@@ -27,12 +27,33 @@ QJsonObject *ItemEditorDialog::getItem()
     return m_pItem;
 }
 
+void ItemEditorDialog::onDataTypeChanged(int currentIndex)
+{
+    QString sDataType = ui->cmbDataType->itemText(currentIndex);
+    ItemDataType idt = IdentityBlockItem::findDataType(sDataType);
+    ItemDataTypeInfo idti = IdentityBlockItem::DataTypeMap[idt];
+
+    if (idti.nrOfBytes > 0)
+    {
+        ui->spnNrOfBytes->setValue(idti.nrOfBytes);
+        ui->spnNrOfBytes->setEnabled(false);
+    }
+    else
+    {
+        ui->spnNrOfBytes->setValue(0);
+        ui->spnNrOfBytes->setEnabled(true);
+    }
+
+}
+
 void ItemEditorDialog::loadDefaults()
 {
     for (auto const& dataTypeItem : IdentityBlockItem::DataTypeMap)
     {
         ui->cmbDataType->addItem(dataTypeItem.second.name);
     }
+
+    connect(ui->cmbDataType, SIGNAL(currentIndexChanged(int)), this, SLOT(onDataTypeChanged(int)));
 }
 
 void ItemEditorDialog::loadItemData()
