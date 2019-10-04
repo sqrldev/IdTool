@@ -28,6 +28,7 @@ SOURCES += \
         blockdesignerdialog.cpp \
         identitymodel.cpp \
         identityparser.cpp \
+        itemeditordialog.cpp \
         main.cpp \
         mainwindow.cpp \
         uibuilder.cpp
@@ -36,11 +37,13 @@ HEADERS += \
         blockdesignerdialog.h \
         identitymodel.h \
         identityparser.h \
+        itemeditordialog.h \
         mainwindow.h \
         uibuilder.h
 
 FORMS += \
         blockdesignerdialog.ui \
+        itemeditordialog.ui \
         mainwindow.ui
 
 # Default rules for deployment.
