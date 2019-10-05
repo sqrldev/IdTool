@@ -132,6 +132,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txtName</tabstop>
+  <tabstop>txtDescription</tabstop>
+  <tabstop>cmbDataType</tabstop>
+  <tabstop>spnNrOfBytes</tabstop>
+  <tabstop>spnRepeatIndex</tabstop>
+  <tabstop>spnRepeatCount</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
