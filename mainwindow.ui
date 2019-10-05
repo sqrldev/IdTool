@@ -166,6 +166,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionBlockDesigner"/>
+    <addaction name="actionCreateSiteKey"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -260,6 +261,11 @@
    </property>
    <property name="text">
     <string>Block designer</string>
+   </property>
+  </action>
+  <action name="actionCreateSiteKey">
+   <property name="text">
+    <string>Create site-specific key</string>
    </property>
   </action>
  </widget>

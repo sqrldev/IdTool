@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
     connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
     connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::showBlockDesigner);
+    connect(ui->actionCreateSiteKey, &QAction::triggered, this, &MainWindow::createSiteKey);
 }
 
 MainWindow::~MainWindow()
@@ -217,6 +218,30 @@ void MainWindow::showBlockDesigner()
 
     BlockDesignerDialog dialog(iBlockType, this);
     dialog.exec();
+}
+
+void MainWindow::createSiteKey()
+{
+    if (sodium_init() < 0)
+    {
+        QMessageBox msgBox(this);
+        msgBox.setText(tr("Could not initialize sodium library. Aborting!"));
+        msgBox.exec();
+        return;
+    }
+
+    QString domain = "www.example.com";
+    QByteArray domainBytes = domain.toLocal8Bit();
+    QByteArray imk = QByteArray("00000000000000000000000000000000", 32);
+    unsigned char seed[32];
+
+    int ret = crypto_auth_hmacsha256(
+                seed,
+                reinterpret_cast<const unsigned char*>(domainBytes.constData()),
+                static_cast<unsigned long long>(domainBytes.length()),
+                reinterpret_cast<const unsigned char*>(imk.constData()));
+
+
 }
 
 void MainWindow::quit()

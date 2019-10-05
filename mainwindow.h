@@ -59,6 +59,7 @@ private slots:
     void pasteIdentityText();
     void createNewIdentity();
     void showBlockDesigner();
+    void createSiteKey();
     void quit();
 
 private:
