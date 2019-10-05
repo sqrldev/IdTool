@@ -49,6 +49,17 @@ void IdentityModel::writeToFile(QString fileName)
     file.close();
 }
 
+IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
+{
+    for (size_t i=0; i<blocks.size(); i++)
+    {
+        if (blocks[i].blockType == blockType)
+            return &blocks[i];
+    }
+
+    return nullptr;
+}
+
 QByteArray IdentityBlock::toByteArray()
 {
     QByteArray ba;
@@ -151,6 +162,19 @@ bool IdentityModel::insertBlock(IdentityBlock block, IdentityBlock* after)
 void IdentityModel::clear()
 {
     blocks.clear();
+}
+
+IdentityBlockItem *IdentityBlock::getItem(QString name)
+{
+    for (auto iter=items.begin(); iter!=items.end(); iter++)
+    {
+        if (iter->name == name)
+        {
+            return &(*iter);
+        }
+    }
+
+    return nullptr;
 }
 
 bool IdentityBlock::duplicateItem(IdentityBlockItem* item)

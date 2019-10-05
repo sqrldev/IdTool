@@ -222,6 +222,27 @@ void MainWindow::showBlockDesigner()
 
 void MainWindow::createSiteKey()
 {
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        return;
+    }
+
+    IdentityBlock* pBlock = m_pIdentityModel->getBlock(1);
+    if (pBlock == nullptr) return;
+
+    IdentityBlockItem* pImkItem = pBlock->getItem("Identity Master Key");
+    IdentityBlockItem* pLogNFactorItem = pBlock->getItem("SCrypt log(n) factor");
+    IdentityBlockItem* pIterationCountItem = pBlock->getItem("SCrypt iteration count");
+
+    if (pImkItem == nullptr ||
+        pLogNFactorItem == nullptr ||
+        pIterationCountItem == nullptr) return;
+
+    QByteArray imk = QByteArray::fromHex(pImkItem->value.toLocal8Bit());
+    int logNFactor = pLogNFactorItem->value.toInt();
+    int iterationCount = pIterationCountItem->value.toInt();
+
     if (sodium_init() < 0)
     {
         QMessageBox msgBox(this);
@@ -232,8 +253,7 @@ void MainWindow::createSiteKey()
 
     QString domain = "www.example.com";
     QByteArray domainBytes = domain.toLocal8Bit();
-    QByteArray imk = QByteArray("00000000000000000000000000000000", 32);
-    unsigned char seed[32];
+    unsigned char seed[crypto_sign_SEEDBYTES];
 
     int ret = crypto_auth_hmacsha256(
                 seed,
@@ -241,7 +261,13 @@ void MainWindow::createSiteKey()
                 static_cast<unsigned long long>(domainBytes.length()),
                 reinterpret_cast<const unsigned char*>(imk.constData()));
 
+    unsigned char publicKey[crypto_sign_PUBLICKEYBYTES];
+    unsigned char secretKey[crypto_sign_SECRETKEYBYTES];
 
+    ret = crypto_sign_seed_keypair(
+                publicKey,
+                secretKey,
+                seed);
 }
 
 void MainWindow::quit()

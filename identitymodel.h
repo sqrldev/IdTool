@@ -64,6 +64,7 @@ public:
 
 public:
     void writeToFile(QString fileName);
+    IdentityBlock* getBlock(uint16_t blockType);
     bool deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
     bool insertBlock(IdentityBlock block, IdentityBlock* after);
@@ -79,6 +80,7 @@ public:
     std::vector<IdentityBlockItem> items;
 
 public:
+    IdentityBlockItem* getItem(QString name);
     bool duplicateItem(IdentityBlockItem* item);
     bool deleteItem(IdentityBlockItem* item);
     bool moveItem(IdentityBlockItem* item, bool up);
