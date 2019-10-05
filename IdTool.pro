@@ -57,10 +57,20 @@ RESOURCES += \
 RC_FILE = IdTool.rc
 
 VERSION = 0.2.0    # major.minor.patch
-DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+DEFINES += APP_VERSION=\\\"$$VERSION\\\" \
+    SODIUM_STATIC
 
 DISTFILES += \
     CHANGELOG \
     blockdef/1.json \
     blockdef/2.json \
-    blockdef/3.json
+    blockdef/3.json \
+    lib/sodium/lib/libsodium.lib \
+    lib/sodium/lib/libsodiumd.lib
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/lib/sodium/lib/ -llibsodium
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/sodium/lib/ -llibsodiumd
+else:unix: LIBS += -L$$PWD/lib/sodium/lib/ -llibsodium
+
+INCLUDEPATH += $$PWD/lib/sodium/include
+DEPENDPATH += $$PWD/lib/sodium/include

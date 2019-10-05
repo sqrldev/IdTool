@@ -38,6 +38,7 @@
 #include <QScrollArea>
 #include <QtGui>
 #include <QDesktopWidget>
+#include <sodium.h>
 
 namespace Ui {
 class MainWindow;
