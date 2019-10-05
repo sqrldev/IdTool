@@ -28,6 +28,7 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     if (m_WorkMode == ADD)
     {
         createBlockDefinition();
+        QJsonObject test = m_pBlockDesign->object();
         reload(false);
     }
     else if (m_WorkMode == EDIT)
@@ -67,8 +68,37 @@ void BlockDesignerDialog::createBlockDefinition()
 
     QJsonObject o;
     o["block_type"] = m_BlockType;
-    o["description"] = "";
-    o["color"] = "rgb(0,0,0)";
+
+    bool ok = false;
+    QString sDescription;
+    QString sColor;
+
+    while (!ok)
+    {
+        sDescription = QInputDialog::getText(
+                    this,
+                    tr("Block type description"),
+                    tr("Block type description:"),
+                    QLineEdit::Normal,
+                    "",
+                    &ok);
+    }
+
+    o["description"] = sDescription;
+    ok = false;
+
+    while (!ok)
+    {
+        sColor = QInputDialog::getText(
+                    this,
+                    tr("Block color"),
+                    tr("Block color (RGB): example: \"150, 150, 150\""),
+                    QLineEdit::Normal,
+                    "",
+                    &ok);
+    }
+
+    o["color"] = "rgb(" + sColor  + ")";
     o["items"] = QJsonArray();
 
     m_pBlockDesign->setObject(o);
@@ -129,7 +159,7 @@ void BlockDesignerDialog::onAddItemClicked()
 
     QJsonArray items = (*m_pBlockDesign)["items"].toArray();
     items.append(*item);
-    QJsonObject temp = (*m_pBlockDesign)[0].toObject();
+    QJsonObject temp = (*m_pBlockDesign).object();
     temp.remove("items");
     temp.insert("items", items);
     m_pBlockDesign->setObject(temp);
@@ -155,7 +185,7 @@ void BlockDesignerDialog::onDeleteItemClicked()
     QJsonArray items = (*m_pBlockDesign)["items"].toArray();
     items.removeAt(rowIndex);
 
-    QJsonObject temp = (*m_pBlockDesign)[0].toObject();
+    QJsonObject temp = (*m_pBlockDesign).object();
     temp.remove("items");
     temp.insert("items", items);
     m_pBlockDesign->setObject(temp);
@@ -201,7 +231,7 @@ void BlockDesignerDialog::onMoveItemClicked()
         rowIndex++;
     }
 
-    QJsonObject temp = (*m_pBlockDesign)[0].toObject();
+    QJsonObject temp = (*m_pBlockDesign).object();
     temp.remove("items");
     temp.insert("items", items);
     m_pBlockDesign->setObject(temp);
@@ -232,7 +262,7 @@ void BlockDesignerDialog::onEditItemClicked()
 
     QJsonObject* updatedItem = itemEditor.getItem();
     items.replace(rowIndex, *updatedItem);
-    QJsonObject temp = (*m_pBlockDesign)[0].toObject();
+    QJsonObject temp = (*m_pBlockDesign).object();
     temp.remove("items");
     temp.insert("items", items);
     m_pBlockDesign->setObject(temp);

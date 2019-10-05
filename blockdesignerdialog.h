@@ -6,6 +6,7 @@
 #include <QSaveFile>
 #include <QMessageBox>
 #include <QJsonObject>
+#include <QInputDialog>
 #include "identityparser.h"
 #include "itemeditordialog.h"
 
