@@ -65,6 +65,16 @@ void IdentityParser::parseText(QString identityText, IdentityModel* model)
     parse(ba, model);
 }
 
+bool IdentityParser::hasBlockDefinition(uint16_t blockType)
+{
+    QDir path = QDir::currentPath();
+    QDir fullPath = path.filePath(QString("blockdef/") + QString::number(blockType) + ".json");
+    QString sFullPath = fullPath.absolutePath();
+    QFile file(sFullPath);
+
+    return file.exists();
+}
+
 void IdentityParser::parse(QByteArray data, IdentityModel* model)
 {
     m_bIsBase64 = false;
@@ -101,7 +111,7 @@ void IdentityParser::parse(QByteArray data, IdentityModel* model)
 
 
         QJsonDocument blockDef;
-        if(getBlockDefinition(baBlockDef, &blockDef))
+        if(parseBlockDefinition(baBlockDef, &blockDef))
         {
             IdentityBlock block = parseBlock(data, &blockDef);
             model->blocks.push_back(block);
@@ -273,7 +283,7 @@ QByteArray IdentityParser::getBlockDefinitionBytes(uint16_t blockType)
     return ba;
 }
 
-bool IdentityParser::getBlockDefinition(QByteArray data, QJsonDocument* jsonDoc)
+bool IdentityParser::parseBlockDefinition(QByteArray data, QJsonDocument* jsonDoc)
 {
     QJsonParseError error;
     *jsonDoc = QJsonDocument::fromJson(data, &error);

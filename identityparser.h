@@ -46,8 +46,9 @@ private:
 public:
     void parseFile(QString fileName, IdentityModel* model);
     void parseText(QString identityText, IdentityModel* model);
+    static bool hasBlockDefinition(uint16_t blockType);
     static QByteArray getBlockDefinitionBytes(uint16_t blockType);
-    static bool getBlockDefinition(QByteArray data, QJsonDocument* jsonDoc);
+    static bool parseBlockDefinition(QByteArray data, QJsonDocument* jsonDoc);
     static QList<QStandardItem*> toStandardItems(QJsonObject* item);
     static IdentityBlock createEmptyBlock(uint16_t blockType);
     static IdentityBlockItem createEmptyItem(QString name, QString description, ItemDataType dataType, int nrOfBytes);

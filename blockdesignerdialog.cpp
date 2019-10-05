@@ -8,6 +8,10 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     ui->setupUi(this);
     m_BlockType = blockType;
 
+    if (IdentityParser::hasBlockDefinition(static_cast<uint16_t>(blockType)))
+        m_WorkMode = EDIT;
+    else m_WorkMode = ADD;
+
     connect(ui->btnAddItem, &QPushButton::clicked, this, &BlockDesignerDialog::onAddItemClicked);
     connect(ui->btnDeleteItem, &QPushButton::clicked, this, &BlockDesignerDialog::onDeleteItemClicked);
     connect(ui->btnEditItem, &QPushButton::clicked, this, &BlockDesignerDialog::onEditItemClicked);
@@ -19,8 +23,17 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     ui->labelHeadline->setText(
                 ui->labelHeadline->text().arg(blockType));
 
-    createModel();
-    reload();
+    createModelStub();
+
+    if (m_WorkMode == ADD)
+    {
+        createBlockDefinition();
+        reload(false);
+    }
+    else if (m_WorkMode == EDIT)
+    {
+        reload(true);
+    }
 }
 
 BlockDesignerDialog::~BlockDesignerDialog()
@@ -30,7 +43,7 @@ BlockDesignerDialog::~BlockDesignerDialog()
     if (m_pBlockDesign != nullptr) delete m_pBlockDesign;
 }
 
-void BlockDesignerDialog::createModel()
+void BlockDesignerDialog::createModelStub()
 {
     m_pItemModel = new QStandardItemModel(0, 6);
     m_pItemModel->setHorizontalHeaderLabels(
@@ -44,11 +57,28 @@ void BlockDesignerDialog::createModel()
                             }));
 }
 
+void BlockDesignerDialog::createBlockDefinition()
+{
+    if (m_pBlockDesign != nullptr)
+    {
+        delete m_pBlockDesign;
+    }
+    m_pBlockDesign = new QJsonDocument();
+
+    QJsonObject o;
+    o["block_type"] = m_BlockType;
+    o["description"] = "";
+    o["color"] = "rgb(0,0,0)";
+    o["items"] = QJsonArray();
+
+    m_pBlockDesign->setObject(o);
+}
+
 bool BlockDesignerDialog::loadBlockDefinition()
 {
     if (m_pBlockDesign == nullptr) m_pBlockDesign = new QJsonDocument();
 
-    bool ok = IdentityParser::getBlockDefinition(
+    bool ok = IdentityParser::parseBlockDefinition(
                 IdentityParser::getBlockDefinitionBytes(
                     static_cast<uint16_t>(m_BlockType)), m_pBlockDesign);
 
@@ -73,7 +103,7 @@ void BlockDesignerDialog::reload(bool reloadBlockDefinition)
     }
 
     m_pItemModel->clear();
-    createModel();
+    createModelStub();
 
     QJsonArray items = (*m_pBlockDesign)["items"].toArray();
     for (QJsonValue item: items)
@@ -248,5 +278,13 @@ void BlockDesignerDialog::onSaveButtonClicked()
 
 void BlockDesignerDialog::onResetButtonClicked()
 {
-    reload(true);
+    if (IdentityParser::hasBlockDefinition(static_cast<uint16_t>(m_BlockType)))
+    {
+        reload(true);
+    }
+    else
+    {
+        createBlockDefinition();
+        reload(false);
+    }
 }
