@@ -94,6 +94,7 @@ public:
     static std::map<ItemDataType, ItemDataTypeInfo> DataTypeMap;
     static ItemDataType findDataType(QString dataType);
     static QStringList getDataTypeList();
+    QByteArray toByteArray();
 
 public:
     QString name = "";

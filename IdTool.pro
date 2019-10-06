@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
         blockdesignerdialog.cpp \
+        cryptutil.cpp \
         identitymodel.cpp \
         identityparser.cpp \
         itemeditordialog.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
 
 HEADERS += \
         blockdesignerdialog.h \
+        cryptutil.h \
         identitymodel.h \
         identityparser.h \
         itemeditordialog.h \

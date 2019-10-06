@@ -31,6 +31,7 @@
 #include "identityparser.h"
 #include "uibuilder.h"
 #include "blockdesignerdialog.h"
+#include "cryptutil.h"
 #include <string>
 #include <fstream>
 #include <streambuf>

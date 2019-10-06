@@ -66,33 +66,7 @@ QByteArray IdentityBlock::toByteArray()
 
     for (size_t i=0; i<items.size(); i++)
     {
-        if (items[i].dataType == UINT_8)
-        {
-            ba.append(static_cast<char>(items[i].value.toInt()));
-        }
-        else if (items[i].dataType == UINT_16)
-        {
-            int value = items[i].value.toInt();
-            char* data = static_cast<char*>(static_cast<void*>(&value));
-            ba.append(data[0]);
-            ba.append(data[1]);
-        }
-        else if (items[i].dataType == UINT_32)
-        {
-            QString v = items[i].value;
-            int vi = v.toInt();
-            uint32_t value = static_cast<uint32_t>(vi);
-            char* data = static_cast<char*>(static_cast<void*>(&value));
-            ba.append(data[0]);
-            ba.append(data[1]);
-            ba.append(data[2]);
-            ba.append(data[3]);
-        }
-        else if (items[i].dataType == BYTE_ARRAY)
-        {
-            QByteArray baTemp = QByteArray::fromHex(items[i].value.toUtf8());
-            ba.append(baTemp);
-        }
+        ba.append(items[i].toByteArray());
     }
 
     return ba;
@@ -290,4 +264,37 @@ QStringList IdentityBlockItem::getDataTypeList()
     }
 
     return result;
+}
+
+QByteArray IdentityBlockItem::toByteArray()
+{
+    QByteArray ba;
+
+    if (this->dataType == UINT_8)
+    {
+        ba.append(static_cast<char>(this->value.toInt()));
+    }
+    else if (this->dataType == UINT_16)
+    {
+        int vi = this->value.toInt();
+        char* data = static_cast<char*>(static_cast<void*>(&vi));
+        ba.append(data[0]);
+        ba.append(data[1]);
+    }
+    else if (this->dataType == UINT_32)
+    {
+        uint32_t value32 = static_cast<uint32_t>(this->value.toInt());
+        char* data = static_cast<char*>(static_cast<void*>(&value32));
+        ba.append(data[0]);
+        ba.append(data[1]);
+        ba.append(data[2]);
+        ba.append(data[3]);
+    }
+    else if (this->dataType == BYTE_ARRAY)
+    {
+        QByteArray baTemp = QByteArray::fromHex(this->value.toLocal8Bit());
+        ba.append(baTemp);
+    }
+
+    return ba;
 }
