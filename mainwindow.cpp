@@ -222,6 +222,8 @@ void MainWindow::showBlockDesigner()
 
 void MainWindow::createSiteKey()
 {
+    const int KEYLENGTH = 32;
+
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
     {
@@ -231,45 +233,25 @@ void MainWindow::createSiteKey()
     IdentityBlock* pBlock = m_pIdentityModel->getBlock(1);
     if (pBlock == nullptr) return;
 
-    IdentityBlockItem* pLengthItem = pBlock->getItem("Length");
-    IdentityBlockItem* pTypeItem = pBlock->getItem("Type");
-    IdentityBlockItem* pPlaintextLengthItem = pBlock->getItem("Plaintext length");
-    IdentityBlockItem* pIvItem = pBlock->getItem("AES-GCM IV");
-    IdentityBlockItem* pScryptSaltItem = pBlock->getItem("SCrypt random salt");
-    IdentityBlockItem* pScryptLogNFactorItem = pBlock->getItem("SCrypt log(n) factor");
-    IdentityBlockItem* pScryptIterationCountItem = pBlock->getItem("SCrypt iteration count");
-    IdentityBlockItem* pOptionFlagsItem = pBlock->getItem("Option flags");
-    IdentityBlockItem* pQuickPassLengthItem = pBlock->getItem("QuickPass length");
-    IdentityBlockItem* pPassVerifySecItem = pBlock->getItem("Password verify seconds");
-    IdentityBlockItem* pQuickPassTimeoutItem = pBlock->getItem("QuickPass timeout");
-    IdentityBlockItem* pImkItem = pBlock->getItem("Identity Master Key");
-    IdentityBlockItem* pVerificationTagItem = pBlock->getItem("Verification tag");
-
     QString pass = "test12345678";
-    QByteArray imk = QByteArray::fromHex(pImkItem->value.toLocal8Bit());
-    QByteArray iv = QByteArray::fromHex(pIvItem->value.toLocal8Bit());
-    QByteArray scryptSalt = QByteArray::fromHex(pScryptSaltItem->value.toLocal8Bit());
-    int logNFactor = pScryptLogNFactorItem->value.toInt();
-    int iterationCount = pScryptIterationCountItem->value.toInt();
-    QByteArray verificationTag = QByteArray::fromHex(pVerificationTagItem->value.toLocal8Bit());
-    int plainTextLength = pPlaintextLengthItem->value.toInt();
+
+    int logNFactor = pBlock->items[5].value.toInt();
+    int iterationCount = pBlock->items[6].value.toInt();
+    QByteArray iv = QByteArray::fromHex(pBlock->items[3].value.toLocal8Bit());
+    QByteArray scryptSalt = QByteArray::fromHex(pBlock->items[4].value.toLocal8Bit());
+    QByteArray imk = QByteArray::fromHex(pBlock->items[11].value.toLocal8Bit());
+    QByteArray verificationTag = QByteArray::fromHex(pBlock->items[13].value.toLocal8Bit());
     QByteArray plainText;
-    plainText.append(pLengthItem->toByteArray());
-    plainText.append(pTypeItem->toByteArray());
-    plainText.append(pPlaintextLengthItem->toByteArray());
-    plainText.append(pIvItem->toByteArray());
-    plainText.append(pScryptSaltItem->toByteArray());
-    plainText.append(pScryptLogNFactorItem->toByteArray());
-    plainText.append(pScryptIterationCountItem->toByteArray());
-    plainText.append(pOptionFlagsItem->toByteArray());
-    plainText.append(pQuickPassLengthItem->toByteArray());
-    plainText.append(pPassVerifySecItem->toByteArray());
-    plainText.append(pQuickPassTimeoutItem->toByteArray());
+
+    for (size_t i=0; i<11; i++)
+    {
+        plainText.append(pBlock->items[i].toByteArray());
+    }
 
     if (sodium_init() < 0)
     {
         QMessageBox msgBox(this);
-        msgBox.setText(tr("Could not initialize sodium library. Aborting!"));
+        msgBox.critical(this, tr("Error"), tr("Could not initialize sodium library. Aborting!"));
         msgBox.exec();
         return;
     }
@@ -284,16 +266,48 @@ void MainWindow::createSiteKey()
         return; /* Not available on this CPU */
     }
 
-    unsigned char decrypted[1024];
+    unsigned char decrypted[KEYLENGTH];
+
+    // Test
+    const char* MSG = "TEST";
+    unsigned char c[4];
+    unsigned char mac[16];
+    unsigned long long maclen;
+
+    crypto_aead_aes256gcm_encrypt_detached(
+                c,
+                mac,
+                &maclen,
+                (const unsigned char *)MSG,
+                4,
+                reinterpret_cast<const unsigned char*>(plainText.constData()),
+                static_cast<unsigned long long>(plainText.length()),
+                nullptr,
+                reinterpret_cast<const unsigned char*>(iv.constData()),
+                reinterpret_cast<const unsigned char*>(derivedPwd.constData()));
 
     int ret = crypto_aead_aes256gcm_decrypt_detached(
+                decrypted,
+                nullptr,
+                c,
+                4,
+                mac,
+                reinterpret_cast<const unsigned char*>(plainText.constData()),
+                static_cast<unsigned long long>(plainText.length()),
+                reinterpret_cast<const unsigned char*>(iv.constData()),
+                reinterpret_cast<const unsigned char*>(derivedPwd.constData()));
+
+
+    // End test
+
+    ret = crypto_aead_aes256gcm_decrypt_detached(
                 decrypted,
                 nullptr,
                 reinterpret_cast<const unsigned char*>(imk.constData()),
                 static_cast<unsigned long long>(imk.length()),
                 reinterpret_cast<const unsigned char*>(verificationTag.constData()),
                 reinterpret_cast<const unsigned char*>(plainText.constData()),
-                static_cast<unsigned long long>(plainTextLength),
+                static_cast<unsigned long long>(plainText.length()),
                 reinterpret_cast<const unsigned char*>(iv.constData()),
                 reinterpret_cast<const unsigned char*>(derivedPwd.constData()));
 

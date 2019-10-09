@@ -75,7 +75,7 @@ QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
 
     for (int i = 0; i < a.length(); i++)
     {
-        result[i] = a[i] ^ b[i % (b.length()-1)];
+        result[i] = a[i] ^ b[i % b.length()];
     }
     return result;
 }
