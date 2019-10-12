@@ -38,6 +38,8 @@ QByteArray CryptUtil::enSCryptIterations(QString password, QByteArray randomSalt
     QByteArray pwdBytes = password.toLocal8Bit();
     QByteArray key(KEYLENGTH, 0);
 
+    if (sodium_init() < 0) return NULL;
+
     if (progressDialog != nullptr) progressDialog->setMaximum(iterationCount);
 
     int ret = crypto_pwhash_scryptsalsa208sha256_ll(
@@ -87,7 +89,7 @@ QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
     return result;
 }
 
-bool CryptUtil::decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryptedIlk,
+bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk,
                 IdentityBlock *block, QString password, QProgressDialog* progressDialog)
 {
     QByteArray decryptedIdentityKeys(64, 0);
@@ -133,6 +135,46 @@ bool CryptUtil::decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryp
 
     decryptedImk = decryptedIdentityKeys.left(32);
     decryptedIlk = decryptedIdentityKeys.mid(32);
+
+    return true;
+}
+
+bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog *progressDialog)
+{
+    if (decryptedIuk == nullptr || block == nullptr ||
+            sodium_init() < 0 || crypto_aead_aes256gcm_is_available() == 0)
+    {
+        return false;
+    }
+
+    QByteArray aesGcmIV(12, 0);
+    QByteArray scryptSalt = QByteArray::fromHex(block->items[2].value.toLocal8Bit());
+    int scryptLogNFactor = block->items[3].value.toInt();
+    int scryptIterationCount = block->items[4].value.toInt();
+    QByteArray encryptedIuk = QByteArray::fromHex(block->items[5].value.toLocal8Bit());
+    QByteArray verificationTag = QByteArray::fromHex(block->items[6].value.toLocal8Bit());
+    QByteArray plainText;
+    for (size_t i=0; i<5; i++) plainText.append(block->items[i].toByteArray());
+
+    QByteArray key = CryptUtil::enSCryptIterations(
+                rescueCode,
+                scryptSalt,
+                scryptLogNFactor,
+                scryptIterationCount,
+                progressDialog);
+
+    int ret = crypto_aead_aes256gcm_decrypt_detached(
+                reinterpret_cast<unsigned char*>(decryptedIuk.data()),
+                nullptr,
+                reinterpret_cast<const unsigned char*>(encryptedIuk.constData()),
+                static_cast<unsigned long long>(encryptedIuk.length()),
+                reinterpret_cast<const unsigned char*>(verificationTag.constData()),
+                reinterpret_cast<const unsigned char*>(plainText.constData()),
+                static_cast<unsigned long long>(plainText.length()),
+                reinterpret_cast<const unsigned char*>(aesGcmIV.constData()),
+                reinterpret_cast<const unsigned char*>(key.constData()));
+
+    if (ret != 0) return false;
 
     return true;
 }

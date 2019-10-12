@@ -37,7 +37,8 @@ public:
     CryptUtil();
     static QByteArray enSCryptIterations(QString password, QByteArray randomSalt, int logNFactor, int iterationCount, QProgressDialog* progressDialog = nullptr);
     static QByteArray xorByteArrays(QByteArray a, QByteArray b);
-    static bool decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QString password, QProgressDialog* progressDialog = nullptr);
+    static bool decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QString password, QProgressDialog* progressDialog = nullptr);
+    static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
 };
 

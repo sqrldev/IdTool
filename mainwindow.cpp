@@ -267,7 +267,7 @@ void MainWindow::createSiteKeys()
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    if (!CryptUtil::decryptIdentityKeys(
+    if (!CryptUtil::decryptBlock1(
                 decryptedImk,
                 decryptedIlk,
                 pBlock,
@@ -338,7 +338,7 @@ void MainWindow::decryptIdentityKeys()
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    if (!CryptUtil::decryptIdentityKeys(
+    if (!CryptUtil::decryptBlock1(
                 decryptedImk,
                 decryptedIlk,
                 pBlock,
