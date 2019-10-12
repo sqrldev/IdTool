@@ -55,7 +55,8 @@ private slots:
     void createNewIdentity();
     void showBlockDesigner();
     void createSiteKeys();
-    void decryptIdentityKeys();
+    void decryptImkIlk();
+    void decryptIuk();
     void quit();
 
 private:

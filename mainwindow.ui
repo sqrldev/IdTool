@@ -167,7 +167,8 @@
     </property>
     <addaction name="actionBlockDesigner"/>
     <addaction name="separator"/>
-    <addaction name="actionDecryptIdentityKeys"/>
+    <addaction name="actionDecryptImkIlk"/>
+    <addaction name="actionDecryptIuk"/>
     <addaction name="actionCreateSiteKeys"/>
    </widget>
    <addaction name="menuFile"/>
@@ -277,13 +278,28 @@
     <string>Create site-specific keys</string>
    </property>
   </action>
-  <action name="actionDecryptIdentityKeys">
+  <action name="actionDecryptImkIlk">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt identity keys</string>
+    <string>Decrypt IMK and ILK (need password)</string>
+   </property>
+   <property name="toolTip">
+    <string>Decrypt IMK and ILK (need password)</string>
+   </property>
+  </action>
+  <action name="actionDecryptIuk">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Decrypt IUK (needs rescue code)</string>
+   </property>
+   <property name="toolTip">
+    <string>Decrypt IUK (needs rescue code)</string>
    </property>
   </action>
  </widget>

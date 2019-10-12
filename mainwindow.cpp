@@ -55,7 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
     connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
     connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::showBlockDesigner);
-    connect(ui->actionDecryptIdentityKeys, &QAction::triggered, this, &MainWindow::decryptIdentityKeys);
+    connect(ui->actionDecryptImkIlk, &QAction::triggered, this, &MainWindow::decryptImkIlk);
+    connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::decryptIuk);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
 }
 
@@ -308,7 +309,7 @@ void MainWindow::createSiteKeys()
     resultDialog.exec();
 }
 
-void MainWindow::decryptIdentityKeys()
+void MainWindow::decryptImkIlk()
 {
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
@@ -361,6 +362,62 @@ void MainWindow::decryptIdentityKeys()
     resultDialog.resize(700, 250);
     resultDialog.setWindowTitle("Success");
     resultDialog.setLabelText("Decryption of identitiy keys succeeded!");
+    resultDialog.setTextValue(result);
+    resultDialog.exec();
+}
+
+void MainWindow::decryptIuk()
+{
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        showNoIdentityLoadedError();
+        return;
+    }
+
+    IdentityBlock* pBlock = m_pIdentityModel->getBlock(2);
+    if (pBlock == nullptr) return;
+
+    bool ok = false;
+
+    QString rescueCode = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Identity rescue code:"),
+                QLineEdit::Normal,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    rescueCode = rescueCode.replace("-", "");
+    rescueCode = rescueCode.replace(" ", "");
+
+    QByteArray decryptedIuk(32, 0);
+
+    QProgressDialog progressDialog(tr("Decrypting identity unlock key..."), tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
+    if (!CryptUtil::decryptBlock2(
+                decryptedIuk,
+                pBlock,
+                rescueCode,
+                &progressDialog))
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("Decryption of identity unlock key failed! Wrong password?"));
+        return;
+    }
+
+    QByteArray result("Identity Unlock Key:\n");
+    result.append(decryptedIuk.toHex());
+
+    QInputDialog resultDialog(this);
+    resultDialog.setInputMode(QInputDialog::TextInput);
+    resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+    resultDialog.resize(700, 250);
+    resultDialog.setWindowTitle("Success");
+    resultDialog.setLabelText("Decryption of identitiy unlock key succeeded!");
     resultDialog.setTextValue(result);
     resultDialog.exec();
 }

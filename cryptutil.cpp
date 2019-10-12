@@ -123,6 +123,8 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
                 scryptIterationCount,
                 progressDialog);
 
+    if (!ok) return false;
+
     int ret = crypto_aead_aes256gcm_decrypt_detached(
                 reinterpret_cast<unsigned char*>(decryptedIdentityKeys.data()),
                 nullptr,
@@ -167,6 +169,8 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
                 scryptLogNFactor,
                 scryptIterationCount,
                 progressDialog);
+
+    if (!ok) return false;
 
     int ret = crypto_aead_aes256gcm_decrypt_detached(
                 reinterpret_cast<unsigned char*>(decryptedIuk.data()),
