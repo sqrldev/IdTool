@@ -27,9 +27,7 @@
 #ifndef CRYPTUTIL_H
 #define CRYPTUTIL_H
 
-#include <QString>
-#include <QByteArray>
-#include <QProgressDialog>
+#include "common.h"
 #include "identitymodel.h"
 #include "sodium.h"
 

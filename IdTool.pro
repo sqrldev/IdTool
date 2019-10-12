@@ -36,6 +36,7 @@ SOURCES += \
 
 HEADERS += \
         blockdesignerdialog.h \
+        common.h \
         cryptutil.h \
         identitymodel.h \
         identityparser.h \

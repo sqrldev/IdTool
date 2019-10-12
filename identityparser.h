@@ -27,12 +27,8 @@
 #ifndef S4PARSER_H
 #define S4PARSER_H
 
+#include "common.h"
 #include "identitymodel.h"
-#include <fstream>
-#include <QDir>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 
 class IdentityParser
 {

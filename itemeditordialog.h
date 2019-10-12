@@ -27,9 +27,7 @@
 #ifndef ITEMEDITORDIALOG_H
 #define ITEMEDITORDIALOG_H
 
-#include <QDialog>
-#include <QJsonObject>
-#include <QPushButton>
+#include "common.h"
 #include "identitymodel.h"
 
 namespace Ui {

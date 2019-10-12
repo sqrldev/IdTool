@@ -27,20 +27,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "common.h"
 #include "identitymodel.h"
 #include "identityparser.h"
 #include "uibuilder.h"
 #include "blockdesignerdialog.h"
 #include "cryptutil.h"
-#include <string>
-#include <fstream>
-#include <streambuf>
-#include <QMainWindow>
-#include <QScrollArea>
-#include <QtGui>
-#include <QDesktopWidget>
-#include <sodium.h>
-#include <QProgressDialog>
 
 namespace Ui {
 class MainWindow;

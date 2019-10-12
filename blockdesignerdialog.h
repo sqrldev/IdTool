@@ -27,12 +27,7 @@
 #ifndef BLOCKDESIGNERDIALOG_H
 #define BLOCKDESIGNERDIALOG_H
 
-#include <QDialog>
-#include <QStandardItemModel>
-#include <QSaveFile>
-#include <QMessageBox>
-#include <QJsonObject>
-#include <QInputDialog>
+#include "common.h"
 #include "identityparser.h"
 #include "itemeditordialog.h"
 

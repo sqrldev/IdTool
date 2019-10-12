@@ -27,15 +27,7 @@
 #ifndef IDENTITYMODEL_H
 #define IDENTITYMODEL_H
 
-#include <vector>
-#include <map>
-#include <string>
-#include <QObject>
-#include <QFile>
-#include <QDataStream>
-#include <QDebug>
-#include <QList>
-#include <QStandardItem>
+#include "common.h"
 
 struct ItemDataTypeInfo
 {

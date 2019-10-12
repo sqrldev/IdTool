@@ -27,26 +27,7 @@
 #ifndef UIBUILDER_H
 #define UIBUILDER_H
 
-#include <QMainWindow>
-#include <QScrollArea>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QSizePolicy>
-#include <QUuid>
-#include <QObjectUserData>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QApplication>
-#include <QClipboard>
-#include <QToolTip>
-#include <QPicture>
-#include <QMenu>
-#include <QMetaType>
-#include <QVariant>
-#include <QDir>
-#include <QMainWindow>
+#include "common.h"
 #include "identitymodel.h"
 #include "identityparser.h"
 
