@@ -168,7 +168,7 @@
     <addaction name="actionBlockDesigner"/>
     <addaction name="separator"/>
     <addaction name="actionDecryptIdentityKeys"/>
-    <addaction name="actionCreateSiteKey"/>
+    <addaction name="actionCreateSiteKeys"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -265,13 +265,16 @@
     <string>Block designer</string>
    </property>
   </action>
-  <action name="actionCreateSiteKey">
+  <action name="actionCreateSiteKeys">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/res/img/SiteKey_16x.png</normaloff>:/res/img/SiteKey_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Create site-specific key</string>
+    <string>Create site-specific keys</string>
+   </property>
+   <property name="toolTip">
+    <string>Create site-specific keys</string>
    </property>
   </action>
   <action name="actionDecryptIdentityKeys">

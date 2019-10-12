@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
     connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::showBlockDesigner);
     connect(ui->actionDecryptIdentityKeys, &QAction::triggered, this, &MainWindow::decryptIdentityKeys);
-    connect(ui->actionCreateSiteKey, &QAction::triggered, this, &MainWindow::createSiteKey);
+    connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
 }
 
 MainWindow::~MainWindow()
@@ -227,7 +227,7 @@ void MainWindow::showBlockDesigner()
     dialog.exec();
 }
 
-void MainWindow::createSiteKey()
+void MainWindow::createSiteKeys()
 {
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
@@ -293,14 +293,18 @@ void MainWindow::createSiteKey()
         return;
     }
 
+    QByteArray result("Site-specific private key:\n");
+    result.append(privateKey.toHex());
+    result.append("\n\nSite-specific public key:\n");
+    result.append(publicKey.toHex());
+
     QInputDialog resultDialog(this);
     resultDialog.setInputMode(QInputDialog::TextInput);
     resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
     resultDialog.resize(700, 250);
     resultDialog.setWindowTitle("Success");
     resultDialog.setLabelText("Creation of site keys succeeded!");
-    resultDialog.setTextValue(QByteArray("Site-specific key:\n")
-                              .append(publicKey.toHex()));
+    resultDialog.setTextValue(result);
     resultDialog.exec();
 }
 
