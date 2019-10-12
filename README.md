@@ -10,15 +10,20 @@ SQRL employs its own binary identity storage format called "S4". While being lig
 
 IdTool shows a nice visual representation of each of the identity's binary blocks and allows for a quick inspection of the values encoded within the identity.
 
-### Manipulating identity files
+### Manipulation of identity files
 IdTool lets the user 
  - change all values encoded within the S4 container
  - add and delete identity blocks
  - rearrange identity blocks
  - and finally save the modified data back to disk. 
+ (!!! All of this happens without re-encrypting or re-authenticating the identity data !!!)
 
 This makes it an ideal tool for creating "rogue" identity files, which can be useful for hardening the parsing code of any SQRL client application.
 
+### Testing of client-side cryptographic operations
+IdTool can perform the following identity-related cryptographic operations:
+- Decrypt identity keys (IMK, ILK)
+- Create site-specific identity public keys
 
 ### Parsing of custom identity blocks
 IdTool does not employ simple static parsing of the S4 format. 
@@ -67,8 +72,8 @@ IdTool is currently being developed and tested on Windows but should currently a
 
 ## Roadmap
 There are some more ideas for features that I would still like to implement if I find time, like for example
-- ~~building json templates using the GUI~~ done
-- ~~creating site-specific public keys to help in debugging identity-related problems~~ done
+- ~~building json templates using the GUI~~ -> DONE
+- ~~creating site-specific public keys to help in debugging identity-related problems~~ -> DONE
 - diffing of identities
 - changing identity settings
 
