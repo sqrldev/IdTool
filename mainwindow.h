@@ -40,6 +40,7 @@
 #include <QtGui>
 #include <QDesktopWidget>
 #include <sodium.h>
+#include <QProgressDialog>
 
 namespace Ui {
 class MainWindow;

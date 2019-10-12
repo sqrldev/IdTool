@@ -258,11 +258,15 @@ void MainWindow::createSiteKey()
     QByteArray decryptedImk(32, 0);
     QByteArray decryptedIlk(32, 0);
 
+    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
     if (!CryptUtil::decryptIdentityKeys(
                 decryptedImk,
                 decryptedIlk,
                 pBlock,
-                password))
+                password,
+                &progressDialog))
     {
         QMessageBox msgBox(this);
         msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
@@ -283,9 +287,11 @@ void MainWindow::createSiteKey()
         return;
     }
 
-    QMessageBox msgBox(this);
-    msgBox.information(this, tr("Success"), tr("Creation of site keys succeeded!\n\n Site-Specific-Key:\n") +
-                       publicKey.toHex());
+    QString result = QInputDialog::getMultiLineText(
+                nullptr,
+                tr("Success"),
+                tr("Creation of site keys succeeded!\n\nSite-specific key:\n"),
+                publicKey.toHex(), &ok);
 }
 
 void MainWindow::quit()

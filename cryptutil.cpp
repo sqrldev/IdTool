@@ -31,11 +31,14 @@ CryptUtil::CryptUtil()
 
 }
 
-QByteArray CryptUtil::enSCryptIterations(QString password, QByteArray randomSalt, int logNFactor, int iterationCount)
+QByteArray CryptUtil::enSCryptIterations(QString password, QByteArray randomSalt,
+                        int logNFactor, int iterationCount, QProgressDialog* progressDialog)
 {
     const int KEYLENGTH = 32;
     QByteArray pwdBytes = password.toLocal8Bit();
     QByteArray key(KEYLENGTH, 0);
+
+    if (progressDialog != nullptr) progressDialog->setMaximum(iterationCount);
 
     int ret = crypto_pwhash_scryptsalsa208sha256_ll(
                 reinterpret_cast<const unsigned char*>(pwdBytes.constData()),
@@ -47,6 +50,7 @@ QByteArray CryptUtil::enSCryptIterations(QString password, QByteArray randomSalt
                 1,
                 reinterpret_cast<uint8_t*>(key.data()),
                 static_cast<size_t>(key.length()));
+    progressDialog->setValue(1);
 
     QByteArray xorKey(key);
 
@@ -62,6 +66,9 @@ QByteArray CryptUtil::enSCryptIterations(QString password, QByteArray randomSalt
                     1,
                     reinterpret_cast<uint8_t*>(key.data()),
                     static_cast<size_t>(key.length()));
+
+        progressDialog->setValue(i);
+        if (progressDialog->wasCanceled()) break;
 
         xorKey = xorByteArrays(key, xorKey);
     }
@@ -80,7 +87,8 @@ QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
     return result;
 }
 
-bool CryptUtil::decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QString password)
+bool CryptUtil::decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryptedIlk,
+                IdentityBlock *block, QString password, QProgressDialog* progressDialog)
 {
     QByteArray decryptedIdentityKeys(64, 0);
 
@@ -107,7 +115,8 @@ bool CryptUtil::decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryp
                 password,
                 scryptSalt,
                 scryptLogNFactor,
-                scryptIterationCount);
+                scryptIterationCount,
+                progressDialog);
 
     int ret = crypto_aead_aes256gcm_decrypt_detached(
                 reinterpret_cast<unsigned char*>(decryptedIdentityKeys.data()),
