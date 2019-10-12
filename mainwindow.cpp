@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
     connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
     connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::showBlockDesigner);
+    connect(ui->actionDecryptIdentityKeys, &QAction::triggered, this, &MainWindow::decryptIdentityKeys);
     connect(ui->actionCreateSiteKey, &QAction::triggered, this, &MainWindow::createSiteKey);
 }
 
@@ -64,6 +65,12 @@ MainWindow::~MainWindow()
     delete m_pIdentityParser;
     delete m_pIdentityModel;
     delete m_pUiBuilder;
+}
+
+void MainWindow::showNoIdentityLoadedError()
+{
+    QMessageBox msgBox(this);
+    msgBox.critical(this, tr("Error"), tr("An identity needs to be loaded in order to complete this operation!"));
 }
 
 void MainWindow::openFile()
@@ -225,8 +232,7 @@ void MainWindow::createSiteKey()
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("An identity needs to be loaded in order to create a site-specific key!"));
+        showNoIdentityLoadedError();
         return;
     }
 
@@ -287,11 +293,72 @@ void MainWindow::createSiteKey()
         return;
     }
 
-    QString result = QInputDialog::getMultiLineText(
+    QInputDialog resultDialog(this);
+    resultDialog.setInputMode(QInputDialog::TextInput);
+    resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+    resultDialog.resize(700, 250);
+    resultDialog.setWindowTitle("Success");
+    resultDialog.setLabelText("Creation of site keys succeeded!");
+    resultDialog.setTextValue(QByteArray("Site-specific key:\n")
+                              .append(publicKey.toHex()));
+    resultDialog.exec();
+}
+
+void MainWindow::decryptIdentityKeys()
+{
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        showNoIdentityLoadedError();
+        return;
+    }
+
+    IdentityBlock* pBlock = m_pIdentityModel->getBlock(1);
+    if (pBlock == nullptr) return;
+
+    bool ok = false;
+
+    QString password = QInputDialog::getText(
                 nullptr,
-                tr("Success"),
-                tr("Creation of site keys succeeded!\n\nSite-specific key:\n"),
-                publicKey.toHex(), &ok);
+                tr(""),
+                tr("Identity password:"),
+                QLineEdit::Normal,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
+
+    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
+    if (!CryptUtil::decryptIdentityKeys(
+                decryptedImk,
+                decryptedIlk,
+                pBlock,
+                password,
+                &progressDialog))
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+        return;
+    }
+
+    QByteArray result("Identity Master Key:\n");
+    result.append(decryptedImk.toHex());
+    result.append("\n\nIdentity Lock Key:\n");
+    result.append(decryptedIlk.toHex());
+
+    QInputDialog resultDialog(this);
+    resultDialog.setInputMode(QInputDialog::TextInput);
+    resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+    resultDialog.resize(700, 250);
+    resultDialog.setWindowTitle("Success");
+    resultDialog.setLabelText("Decryption of identitiy keys succeeded!");
+    resultDialog.setTextValue(result);
+    resultDialog.exec();
 }
 
 void MainWindow::quit()

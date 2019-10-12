@@ -53,6 +53,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void showNoIdentityLoadedError();
 
 private slots:
     void openFile();
@@ -62,6 +63,7 @@ private slots:
     void createNewIdentity();
     void showBlockDesigner();
     void createSiteKey();
+    void decryptIdentityKeys();
     void quit();
 
 private:

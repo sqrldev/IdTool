@@ -166,6 +166,8 @@
      <string>Tools</string>
     </property>
     <addaction name="actionBlockDesigner"/>
+    <addaction name="separator"/>
+    <addaction name="actionDecryptIdentityKeys"/>
     <addaction name="actionCreateSiteKey"/>
    </widget>
    <addaction name="menuFile"/>
@@ -270,6 +272,15 @@
    </property>
    <property name="text">
     <string>Create site-specific key</string>
+   </property>
+  </action>
+  <action name="actionDecryptIdentityKeys">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Decrypt identity keys</string>
    </property>
   </action>
  </widget>
