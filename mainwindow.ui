@@ -284,10 +284,10 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt IMK and ILK (need password)</string>
+    <string>Decrypt IMK and ILK (needs password)</string>
    </property>
    <property name="toolTip">
-    <string>Decrypt IMK and ILK (need password)</string>
+    <string>Decrypt IMK and ILK (needs password)</string>
    </property>
   </action>
   <action name="actionDecryptIuk">
