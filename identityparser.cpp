@@ -159,7 +159,7 @@ IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDe
 {
     IdentityBlock newBlock;
     int index = 0;
-    auto bd = (*blockDef);
+    auto bd = (*blockDef).object();
 
     newBlock.blockType = bd["block_type"].toInt();
     newBlock.description = bd["description"].toString();

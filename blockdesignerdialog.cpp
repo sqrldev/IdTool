@@ -161,7 +161,8 @@ void BlockDesignerDialog::reload(bool reloadBlockDefinition)
     m_pItemModel->clear();
     createModelStub();
 
-    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    QJsonObject rootObj = (*m_pBlockDesign).object();
+    QJsonArray items = rootObj["items"].toArray();
     for (QJsonValue item: items)
     {
         QJsonObject itemObj = item.toObject();
@@ -182,8 +183,9 @@ void BlockDesignerDialog::onAddItemClicked()
     if (itemEditor.exec() != Accepted) return;
 
     QJsonObject* item = itemEditor.getItem();
+    QJsonObject rootObj = (*m_pBlockDesign).object();
 
-    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    QJsonArray items = rootObj["items"].toArray();
     items.append(*item);
     QJsonObject temp = (*m_pBlockDesign).object();
     temp.remove("items");
@@ -208,7 +210,8 @@ void BlockDesignerDialog::onDeleteItemClicked()
     QModelIndexList selectedRows = selection->selectedRows();
     int rowIndex = selectedRows[0].row();
 
-    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    QJsonObject rootObj = (*m_pBlockDesign).object();
+    QJsonArray items = rootObj["items"].toArray();
     items.removeAt(rowIndex);
 
     QJsonObject temp = (*m_pBlockDesign).object();
@@ -239,7 +242,8 @@ void BlockDesignerDialog::onMoveItemClicked()
     QModelIndexList selectedRows = selection->selectedRows();
     int rowIndex = selectedRows[0].row();
 
-    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    QJsonObject rootObj = (*m_pBlockDesign).object();
+    QJsonArray items = rootObj["items"].toArray();
     QJsonObject obj = items[rowIndex].toObject();
 
     if (sender() == ui->btnMoveItemUp)
@@ -280,7 +284,8 @@ void BlockDesignerDialog::onEditItemClicked()
     QModelIndexList selectedRows = selection->selectedRows();
     int rowIndex = selectedRows[0].row();
 
-    QJsonArray items = (*m_pBlockDesign)["items"].toArray();
+    QJsonObject rootObj = (*m_pBlockDesign).object();
+    QJsonArray items = rootObj["items"].toArray();
     QJsonObject item = items.at(rowIndex).toObject();
 
     ItemEditorDialog itemEditor(this, &item);

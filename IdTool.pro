@@ -72,7 +72,7 @@ DISTFILES += \
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/lib/sodium/lib/ -llibsodium
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/sodium/lib/ -llibsodiumd
-else:unix: LIBS += -L$$PWD/lib/sodium/lib/ -llibsodium
+else:unix: LIBS += -L$$PWD/lib/sodium/lib/ -lsodium
 
 INCLUDEPATH += $$PWD/lib/sodium/include
 DEPENDPATH += $$PWD/lib/sodium/include

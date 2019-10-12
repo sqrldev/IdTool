@@ -111,7 +111,7 @@ bool UiBuilder::showGetBlockTypeDialog(QString *result, bool allowEdit)
 
 QWidget* UiBuilder::createBlock(IdentityBlock *block)
 {
-    QString objectName = "obj_" + QUuid::createUuid().toString(QUuid::Id128);
+    QString objectName = "obj_" + QUuid::createUuid().toByteArray().toHex();
 
     QFrame* pFrame = new QFrame();
     pFrame->setObjectName(objectName);
