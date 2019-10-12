@@ -69,6 +69,7 @@ DISTFILES += \
     blockdef/2.json \
     blockdef/3.json \
     lib/sodium/lib/libsodium.lib \
+    lib/sodium/lib/libsodium.so \
     lib/sodium/lib/libsodiumd.lib
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/lib/sodium/lib/ -llibsodium
