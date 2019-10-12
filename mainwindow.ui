@@ -125,8 +125,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>630</width>
-         <height>543</height>
+         <width>626</width>
+         <height>511</height>
         </rect>
        </property>
       </widget>
@@ -140,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>650</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -264,6 +264,10 @@
    </property>
   </action>
   <action name="actionCreateSiteKey">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/SiteKey_16x.png</normaloff>:/res/img/SiteKey_16x.png</iconset>
+   </property>
    <property name="text">
     <string>Create site-specific key</string>
    </property>
