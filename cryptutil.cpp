@@ -31,14 +31,25 @@ CryptUtil::CryptUtil()
 
 }
 
-QByteArray CryptUtil::enSCryptIterations(QString password, QByteArray randomSalt,
+QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
+{
+    QByteArray result;
+
+    for (int i = 0; i < a.length(); i++)
+    {
+        result[i] = a[i] ^ b[i % b.length()];
+    }
+    return result;
+}
+
+bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt,
                         int logNFactor, int iterationCount, QProgressDialog* progressDialog)
 {
     const int KEYLENGTH = 32;
     QByteArray pwdBytes = password.toLocal8Bit();
     QByteArray key(KEYLENGTH, 0);
 
-    if (sodium_init() < 0) return NULL;
+    if (sodium_init() < 0) return false;
 
     if (progressDialog != nullptr) progressDialog->setMaximum(iterationCount);
 
@@ -70,23 +81,13 @@ QByteArray CryptUtil::enSCryptIterations(QString password, QByteArray randomSalt
                     static_cast<size_t>(key.length()));
 
         progressDialog->setValue(i);
-        if (progressDialog->wasCanceled()) break;
+        if (progressDialog->wasCanceled()) return false;
 
         xorKey = xorByteArrays(key, xorKey);
     }
 
-    return xorKey;
-}
-
-QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
-{
-    QByteArray result;
-
-    for (int i = 0; i < a.length(); i++)
-    {
-        result[i] = a[i] ^ b[i % b.length()];
-    }
-    return result;
+    result = xorKey;
+    return true;
 }
 
 bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk,
@@ -113,7 +114,9 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     QByteArray plainText;
     for (size_t i=0; i<11; i++) plainText.append(block->items[i].toByteArray());
 
-    QByteArray key = CryptUtil::enSCryptIterations(
+    QByteArray key;
+    bool ok = CryptUtil::enSCryptIterations(
+                key,
                 password,
                 scryptSalt,
                 scryptLogNFactor,
@@ -156,7 +159,9 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
     QByteArray plainText;
     for (size_t i=0; i<5; i++) plainText.append(block->items[i].toByteArray());
 
-    QByteArray key = CryptUtil::enSCryptIterations(
+    QByteArray key;
+    bool ok = CryptUtil::enSCryptIterations(
+                key,
                 rescueCode,
                 scryptSalt,
                 scryptLogNFactor,
