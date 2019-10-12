@@ -79,3 +79,74 @@ QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
     }
     return result;
 }
+
+bool CryptUtil::decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QString password)
+{
+    QByteArray decryptedIdentityKeys(64, 0);
+
+    if (decryptedImk == nullptr || decryptedIlk == nullptr || block == nullptr ||
+            sodium_init() < 0 || crypto_aead_aes256gcm_is_available() == 0)
+    {
+        return false;
+    }
+
+    QByteArray aesGcmIV = QByteArray::fromHex(block->items[3].value.toLocal8Bit());
+    QByteArray scryptSalt = QByteArray::fromHex(block->items[4].value.toLocal8Bit());
+    int scryptLogNFactor = block->items[5].value.toInt();
+    int scryptIterationCount = block->items[6].value.toInt();
+    QByteArray encryptedImk = QByteArray::fromHex(block->items[11].value.toLocal8Bit());
+    QByteArray encryptedIlk = QByteArray::fromHex(block->items[12].value.toLocal8Bit());
+    QByteArray verificationTag = QByteArray::fromHex(block->items[13].value.toLocal8Bit());
+    QByteArray encryptedIdentityKeys;
+    encryptedIdentityKeys.append(encryptedImk);
+    encryptedIdentityKeys.append(encryptedIlk);
+    QByteArray plainText;
+    for (size_t i=0; i<11; i++) plainText.append(block->items[i].toByteArray());
+
+    QByteArray key = CryptUtil::enSCryptIterations(
+                password,
+                scryptSalt,
+                scryptLogNFactor,
+                scryptIterationCount);
+
+    int ret = crypto_aead_aes256gcm_decrypt_detached(
+                reinterpret_cast<unsigned char*>(decryptedIdentityKeys.data()),
+                nullptr,
+                reinterpret_cast<const unsigned char*>(encryptedIdentityKeys.constData()),
+                static_cast<unsigned long long>(encryptedIdentityKeys.length()),
+                reinterpret_cast<const unsigned char*>(verificationTag.constData()),
+                reinterpret_cast<const unsigned char*>(plainText.constData()),
+                static_cast<unsigned long long>(plainText.length()),
+                reinterpret_cast<const unsigned char*>(aesGcmIV.constData()),
+                reinterpret_cast<const unsigned char*>(key.constData()));
+
+    if (ret != 0) return false;
+
+    decryptedImk = decryptedIdentityKeys.left(32);
+    decryptedIlk = decryptedIdentityKeys.mid(32);
+
+    return true;
+}
+
+bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk)
+{
+    QByteArray domainBytes = domain.toLocal8Bit();
+    unsigned char seed[crypto_sign_SEEDBYTES];
+
+    int ret = crypto_auth_hmacsha256(
+                seed,
+                reinterpret_cast<const unsigned char*>(domainBytes.constData()),
+                static_cast<unsigned long long>(domainBytes.length()),
+                reinterpret_cast<const unsigned char*>(imk.constData()));
+
+    if (ret != 0) return false;
+
+    ret = crypto_sign_seed_keypair(
+                reinterpret_cast<unsigned char*>(publicKey.data()),
+                reinterpret_cast<unsigned char*>(privateKey.data()),
+                seed);
+
+    if (ret != 0) return false;
+
+    return true;
+}

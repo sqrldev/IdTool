@@ -29,6 +29,7 @@
 
 #include <QString>
 #include <QByteArray>
+#include "identitymodel.h"
 #include "sodium.h"
 
 class CryptUtil
@@ -37,6 +38,8 @@ public:
     CryptUtil();
     static QByteArray enSCryptIterations(QString password, QByteArray randomSalt, int logNFactor, int iterationCount);
     static QByteArray xorByteArrays(QByteArray a, QByteArray b);
+    static bool decryptIdentityKeys(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QString password);
+    static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
 };
 
 #endif // CRYPTUTIL_H

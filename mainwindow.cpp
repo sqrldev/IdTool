@@ -222,112 +222,70 @@ void MainWindow::showBlockDesigner()
 
 void MainWindow::createSiteKey()
 {
-    const int KEYLENGTH = 32;
-
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
     {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("An identity needs to be loaded in order to create a site-specific key!"));
         return;
     }
 
     IdentityBlock* pBlock = m_pIdentityModel->getBlock(1);
     if (pBlock == nullptr) return;
 
-    QString pass = "test12345678";
+    bool ok = false;
 
-    int logNFactor = pBlock->items[5].value.toInt();
-    int iterationCount = pBlock->items[6].value.toInt();
-    QByteArray iv = QByteArray::fromHex(pBlock->items[3].value.toLocal8Bit());
-    QByteArray scryptSalt = QByteArray::fromHex(pBlock->items[4].value.toLocal8Bit());
-    QByteArray imk = QByteArray::fromHex(pBlock->items[11].value.toLocal8Bit());
-    QByteArray verificationTag = QByteArray::fromHex(pBlock->items[13].value.toLocal8Bit());
-    QByteArray plainText;
+    QString domain = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Domain:"),
+                QLineEdit::Normal,
+                "",
+                &ok);
 
-    for (size_t i=0; i<11; i++)
-    {
-        plainText.append(pBlock->items[i].toByteArray());
-    }
+    if (!ok) return;
 
-    if (sodium_init() < 0)
+    QString password = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Identity password:"),
+                QLineEdit::Normal,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
+
+    if (!CryptUtil::decryptIdentityKeys(
+                decryptedImk,
+                decryptedIlk,
+                pBlock,
+                password))
     {
         QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Could not initialize sodium library. Aborting!"));
-        msgBox.exec();
+        msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
         return;
     }
 
-    QByteArray derivedPwd = CryptUtil::enSCryptIterations(
-                pass,
-                scryptSalt,
-                logNFactor,
-                iterationCount);
+    QByteArray publicKey(crypto_sign_PUBLICKEYBYTES, 0);
+    QByteArray privateKey(crypto_sign_SECRETKEYBYTES, 0);
 
-    if (crypto_aead_aes256gcm_is_available() == 0) {
-        return; /* Not available on this CPU */
+    if ( !CryptUtil::createSiteKeys(
+                publicKey,
+                privateKey,
+                domain,
+                decryptedImk))
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("Creation of site keys failed, probably due to an error in the crypto routines!"));
+        return;
     }
 
-    unsigned char decrypted[KEYLENGTH];
-
-    // Test
-    const char* MSG = "TEST";
-    unsigned char c[4];
-    unsigned char mac[16];
-    unsigned long long maclen;
-
-    crypto_aead_aes256gcm_encrypt_detached(
-                c,
-                mac,
-                &maclen,
-                (const unsigned char *)MSG,
-                4,
-                reinterpret_cast<const unsigned char*>(plainText.constData()),
-                static_cast<unsigned long long>(plainText.length()),
-                nullptr,
-                reinterpret_cast<const unsigned char*>(iv.constData()),
-                reinterpret_cast<const unsigned char*>(derivedPwd.constData()));
-
-    int ret = crypto_aead_aes256gcm_decrypt_detached(
-                decrypted,
-                nullptr,
-                c,
-                4,
-                mac,
-                reinterpret_cast<const unsigned char*>(plainText.constData()),
-                static_cast<unsigned long long>(plainText.length()),
-                reinterpret_cast<const unsigned char*>(iv.constData()),
-                reinterpret_cast<const unsigned char*>(derivedPwd.constData()));
-
-
-    // End test
-
-    ret = crypto_aead_aes256gcm_decrypt_detached(
-                decrypted,
-                nullptr,
-                reinterpret_cast<const unsigned char*>(imk.constData()),
-                static_cast<unsigned long long>(imk.length()),
-                reinterpret_cast<const unsigned char*>(verificationTag.constData()),
-                reinterpret_cast<const unsigned char*>(plainText.constData()),
-                static_cast<unsigned long long>(plainText.length()),
-                reinterpret_cast<const unsigned char*>(iv.constData()),
-                reinterpret_cast<const unsigned char*>(derivedPwd.constData()));
-
-    QString domain = "www.example.com";
-    QByteArray domainBytes = domain.toLocal8Bit();
-    unsigned char seed[crypto_sign_SEEDBYTES];
-
-    ret = crypto_auth_hmacsha256(
-                seed,
-                reinterpret_cast<const unsigned char*>(domainBytes.constData()),
-                static_cast<unsigned long long>(domainBytes.length()),
-                reinterpret_cast<const unsigned char*>(imk.constData()));
-
-    unsigned char publicKey[crypto_sign_PUBLICKEYBYTES];
-    unsigned char secretKey[crypto_sign_SECRETKEYBYTES];
-
-    ret = crypto_sign_seed_keypair(
-                publicKey,
-                secretKey,
-                seed);
+    QMessageBox msgBox(this);
+    msgBox.information(this, tr("Success"), tr("Creation of site keys succeeded!\n\n Site-Specific-Key:\n") +
+                       publicKey.toHex());
 }
 
 void MainWindow::quit()
