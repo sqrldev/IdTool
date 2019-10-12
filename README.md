@@ -23,7 +23,7 @@ This makes it an ideal tool for creating "rogue" identity files, which can be us
 ### Testing of client-side cryptographic operations
 IdTool can perform the following identity-related cryptographic operations:
 - Decrypt identity keys (IMK, ILK)
-- Create site-specific identity public keys
+- Create site-specific identity keys
 
 ### Parsing of custom identity blocks
 IdTool does not employ simple static parsing of the S4 format. 
