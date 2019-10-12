@@ -191,6 +191,7 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
 bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, IdentityBlock *block, QString rescueCode, QProgressDialog *progressDialog)
 {
 
+    return true;
 }
 
 bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk)
