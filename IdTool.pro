@@ -64,6 +64,7 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\" \
 
 DISTFILES += \
     CHANGELOG \
+    README.md \
     blockdef/1.json \
     blockdef/2.json \
     blockdef/3.json \

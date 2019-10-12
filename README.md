@@ -63,10 +63,14 @@ If you are interested in creating your own block templates, I recommend to look 
 ## Platforms
 IdTool was written in platform neutral C++ using the [Qt Framework](https://www.qt.io) and it should therefore be possible to compile it for all platforms supported by the Qt framework. Among those are the Windows, Linux and MacOS.
 
-IdTool is currently being developed and tested on Windows only, any help with testing it on other platforms is highly appreciated.
+IdTool is currently being developed and tested on Windows but should currently also build and run on Linux (tested on Ubuntu 18.04 LTS). Any help with testing it on other platforms is highly appreciated.
 
 ## Roadmap
-There are some more ideas for features that I would still like to implement if I find time, like for example building json templates using the GUI, diffing of identities and creating site-specific public keys to help in debugging identity-related problems.
+There are some more ideas for features that I would still like to implement if I find time, like for example
+- ~~building json templates using the GUI~~ done
+- ~~creating site-specific public keys to help in debugging identity-related problems~~ done
+- diffing of identities
+- changing identity settings
 
 ## Collaboration
 I invite everyone willing to contribute to do so by either helping with further development/posting PRs, or simply finding and reporting bugs using the issue tracker.
