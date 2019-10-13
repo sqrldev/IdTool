@@ -57,6 +57,7 @@ private slots:
     void createSiteKeys();
     void decryptImkIlk();
     void decryptIuk();
+    void decryptPreviousIuks();
     void quit();
 
 private:

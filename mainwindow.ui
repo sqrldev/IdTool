@@ -125,8 +125,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>626</width>
-         <height>511</height>
+         <width>630</width>
+         <height>543</height>
         </rect>
        </property>
       </widget>
@@ -140,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>650</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -169,6 +169,8 @@
     <addaction name="separator"/>
     <addaction name="actionDecryptImkIlk"/>
     <addaction name="actionDecryptIuk"/>
+    <addaction name="actionDecryptPreviousIuks"/>
+    <addaction name="separator"/>
     <addaction name="actionCreateSiteKeys"/>
    </widget>
    <addaction name="menuFile"/>
@@ -300,6 +302,15 @@
    </property>
    <property name="toolTip">
     <string>Decrypt IUK (needs rescue code)</string>
+   </property>
+  </action>
+  <action name="actionDecryptPreviousIuks">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Decrypt previous IUKs (needs password)</string>
    </property>
   </action>
  </widget>

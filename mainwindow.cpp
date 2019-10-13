@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::showBlockDesigner);
     connect(ui->actionDecryptImkIlk, &QAction::triggered, this, &MainWindow::decryptImkIlk);
     connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::decryptIuk);
+    connect(ui->actionDecryptPreviousIuks, &QAction::triggered, this, &MainWindow::decryptPreviousIuks);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
 }
 
@@ -256,7 +257,7 @@ void MainWindow::createSiteKeys()
                 nullptr,
                 tr(""),
                 tr("Identity password:"),
-                QLineEdit::Normal,
+                QLineEdit::Password,
                 "",
                 &ok);
 
@@ -420,6 +421,86 @@ void MainWindow::decryptIuk()
     resultDialog.setLabelText("Decryption of identitiy unlock key succeeded!");
     resultDialog.setTextValue(result);
     resultDialog.exec();
+}
+
+void MainWindow::decryptPreviousIuks()
+{
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        showNoIdentityLoadedError();
+        return;
+    }
+
+    IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+    IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
+    if (pBlock1 == nullptr) return;
+    if (pBlock3 == nullptr)
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have any previous IUKs!"));
+        return;
+    }
+
+    bool ok = false;
+
+    QString password = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Identity password:"),
+                QLineEdit::Password,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
+
+    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
+    if (!CryptUtil::decryptBlock1(
+                decryptedImk,
+                decryptedIlk,
+                pBlock1,
+                password,
+                &progressDialog))
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+        return;
+    }
+
+    QList<QByteArray> previousIuks;
+
+    if (!CryptUtil::decryptBlock3(
+                previousIuks,
+                pBlock3,
+                decryptedImk))
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("Decryption of previous identity keys failed! Wrong password?"));
+        return;
+    }
+
+    QByteArray result;
+    for (int i=0; i<previousIuks.length(); i++)
+    {
+        result.append(QString("Identity Unlock Key %1:\n").arg(i+1));
+        result.append(previousIuks[i].toHex());
+        result.append("\n\n");
+    }
+
+    QInputDialog resultDialog(this);
+    resultDialog.setInputMode(QInputDialog::TextInput);
+    resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+    resultDialog.resize(700, 250);
+    resultDialog.setWindowTitle("Success");
+    resultDialog.setLabelText("Decryption of previous identitiy unlock keys succeeded!");
+    resultDialog.setTextValue(result);
+    resultDialog.exec();
+
 }
 
 void MainWindow::quit()
