@@ -188,8 +188,57 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
     return true;
 }
 
-bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, IdentityBlock *block, QString rescueCode, QProgressDialog *progressDialog)
+bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, IdentityBlock *block, QByteArray imk)
 {
+    bool ok = false;
+
+    if (block == nullptr || sodium_init() < 0 ||
+            crypto_aead_aes256gcm_is_available() == 0)
+    {
+        return false;
+    }
+
+    QByteArray aesGcmIV(12, 0);
+    int nrOfPreviousIuks = block->items[2].value.toInt(&ok);
+    if (!ok) return false;
+
+    QByteArray verificationTag = QByteArray::fromHex(
+                block->items[3 + static_cast<size_t>(nrOfPreviousIuks)].value.toLocal8Bit()
+            );
+
+    QByteArray plainText;
+    for (size_t i=0; i<3; i++) plainText.append(block->items[i].toByteArray());
+
+    QByteArray encryptedData;
+
+    for (size_t i=0; i<static_cast<size_t>(nrOfPreviousIuks); i++)
+    {
+        encryptedData.append(
+                    QByteArray::fromHex(block->items[3+i].value.toLocal8Bit())
+                );
+    }
+
+    QByteArray decryptedData(encryptedData.size(), 0);
+
+    int ret = crypto_aead_aes256gcm_decrypt_detached(
+                reinterpret_cast<unsigned char*>(decryptedData.data()),
+                nullptr,
+                reinterpret_cast<const unsigned char*>(encryptedData.constData()),
+                static_cast<unsigned long long>(encryptedData.length()),
+                reinterpret_cast<const unsigned char*>(verificationTag.constData()),
+                reinterpret_cast<const unsigned char*>(plainText.constData()),
+                static_cast<unsigned long long>(plainText.length()),
+                reinterpret_cast<const unsigned char*>(aesGcmIV.constData()),
+                reinterpret_cast<const unsigned char*>(imk.constData()));
+
+    if (ret != 0) return false;
+
+    for (int i=0; i<nrOfPreviousIuks; i++)
+    {
+        decryptedPreviousIuks.append(
+                    decryptedData.mid(i*32, 32)
+                );
+    }
 
     return true;
 }

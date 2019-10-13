@@ -39,7 +39,7 @@ public:
     static bool enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt, int logNFactor, int iterationCount, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QString password, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
-    static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
+    static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
 };
 
