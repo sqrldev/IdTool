@@ -319,8 +319,13 @@ void MainWindow::decryptImkIlk()
         return;
     }
 
-    IdentityBlock* pBlock = m_pIdentityModel->getBlock(1);
-    if (pBlock == nullptr) return;
+    IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+    if (pBlock1 == nullptr)
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
+        return;
+    }
 
     bool ok = false;
 
@@ -343,7 +348,7 @@ void MainWindow::decryptImkIlk()
     if (!CryptUtil::decryptBlock1(
                 decryptedImk,
                 decryptedIlk,
-                pBlock,
+                pBlock1,
                 password,
                 &progressDialog))
     {
@@ -376,8 +381,13 @@ void MainWindow::decryptIuk()
         return;
     }
 
-    IdentityBlock* pBlock = m_pIdentityModel->getBlock(2);
-    if (pBlock == nullptr) return;
+    IdentityBlock* pBlock2 = m_pIdentityModel->getBlock(2);
+    if (pBlock2 == nullptr)
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
+        return;
+    }
 
     bool ok = false;
 
@@ -401,7 +411,7 @@ void MainWindow::decryptIuk()
 
     if (!CryptUtil::decryptBlock2(
                 decryptedIuk,
-                pBlock,
+                pBlock2,
                 rescueCode,
                 &progressDialog))
     {
@@ -437,13 +447,13 @@ void MainWindow::decryptPreviousIuks()
     if (pBlock1 == nullptr)
     {
         QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type1 block!"));
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
         return;
     }
     if (pBlock3 == nullptr)
     {
         QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have any previous IUKs!"));
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
         return;
     }
 
