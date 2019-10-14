@@ -434,7 +434,12 @@ void MainWindow::decryptPreviousIuks()
 
     IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
     IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
-    if (pBlock1 == nullptr) return;
+    if (pBlock1 == nullptr)
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type1 block!"));
+        return;
+    }
     if (pBlock3 == nullptr)
     {
         QMessageBox msgBox(this);
