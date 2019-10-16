@@ -41,6 +41,7 @@ public:
     static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
+    static bool createImkFromIuk(QByteArray& imk, QByteArray decryptedIuk);
 };
 
 #endif // CRYPTUTIL_H

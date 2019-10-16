@@ -265,3 +265,9 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QS
 
     return true;
 }
+
+bool CryptUtil::createImkFromIuk(QByteArray &imk, QByteArray decryptedIuk)
+{
+    //TODO: Implement
+    return true;
+}

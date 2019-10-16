@@ -435,6 +435,11 @@ void MainWindow::decryptIuk()
 
 void MainWindow::decryptPreviousIuks()
 {
+    const QString DECRYPTION_METHOD_PASSWORD = tr("Password");
+    const QString DECRYPTION_METHOD_RESCUE_CODE = tr("Rescue Code");
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
+
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
     {
@@ -442,48 +447,110 @@ void MainWindow::decryptPreviousIuks()
         return;
     }
 
-    IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
-    IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
-    if (pBlock1 == nullptr)
-    {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
-        return;
-    }
-    if (pBlock3 == nullptr)
-    {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
-        return;
-    }
-
     bool ok = false;
 
-    QString password = QInputDialog::getText(
-                nullptr,
+    QString decryptionMethod = QInputDialog::getItem(
+                this,
                 tr(""),
-                tr("Identity password:"),
-                QLineEdit::Password,
-                "",
+                tr("Choose decrytion method:"),
+                QStringList( { QString(DECRYPTION_METHOD_PASSWORD), QString(DECRYPTION_METHOD_RESCUE_CODE) } ),
+                0,
+                false,
                 &ok);
 
     if (!ok) return;
 
-    QByteArray decryptedImk(32, 0);
-    QByteArray decryptedIlk(32, 0);
+    if (decryptionMethod == DECRYPTION_METHOD_PASSWORD)
+    {
+        IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+        if (pBlock1 == nullptr)
+        {
+            QMessageBox msgBox(this);
+            msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
+            return;
+        }
 
-    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
-    progressDialog.setWindowModality(Qt::WindowModal);
+        QString password = QInputDialog::getText(
+                    nullptr,
+                    tr(""),
+                    tr("Identity password:"),
+                    QLineEdit::Password,
+                    "",
+                    &ok);
 
-    if (!CryptUtil::decryptBlock1(
-                decryptedImk,
-                decryptedIlk,
-                pBlock1,
-                password,
-                &progressDialog))
+        if (!ok) return;
+
+        QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+        progressDialog.setWindowModality(Qt::WindowModal);
+
+        if (!CryptUtil::decryptBlock1(
+                    decryptedImk,
+                    decryptedIlk,
+                    pBlock1,
+                    password,
+                    &progressDialog))
+        {
+            QMessageBox msgBox(this);
+            msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+            return;
+        }
+    }
+    else if (decryptionMethod == DECRYPTION_METHOD_RESCUE_CODE)
+    {
+        IdentityBlock* pBlock2 = m_pIdentityModel->getBlock(2);
+        if (pBlock2 == nullptr)
+        {
+            QMessageBox msgBox(this);
+            msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
+            return;
+        }
+
+        QString rescueCode = QInputDialog::getText(
+                    nullptr,
+                    tr(""),
+                    tr("Identity rescue code:"),
+                    QLineEdit::Normal,
+                    "",
+                    &ok);
+
+        if (!ok) return;
+
+        rescueCode = rescueCode.replace("-", "");
+        rescueCode = rescueCode.replace(" ", "");
+
+        QProgressDialog progressDialog(tr("Decrypting identity unlock key..."), tr("Abort"), 0, 0, this);
+        progressDialog.setWindowModality(Qt::WindowModal);
+
+        QByteArray decryptedIuk(32, 0);
+
+        if (!CryptUtil::decryptBlock2(
+                    decryptedIuk,
+                    pBlock2,
+                    rescueCode,
+                    &progressDialog))
+        {
+            QMessageBox msgBox(this);
+            msgBox.critical(this, tr("Error"), tr("Decryption of identity unlock key failed! Wrong password?"));
+            return;
+        }
+
+        QByteArray decryptedImk;
+
+        if (!CryptUtil::createImkFromIuk(
+                    decryptedImk,
+                    decryptedIuk))
+        {
+            QMessageBox msgBox(this);
+            msgBox.critical(this, tr("Error"), tr("Creating IMK from IUK failed!"));
+            return;
+        }
+    }
+
+    IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
+    if (pBlock3 == nullptr)
     {
         QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
         return;
     }
 
