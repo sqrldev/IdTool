@@ -447,6 +447,14 @@ void MainWindow::decryptPreviousIuks()
         return;
     }
 
+    IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
+    if (pBlock3 == nullptr)
+    {
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
+        return;
+    }
+
     bool ok = false;
 
     QString decryptionMethod = QInputDialog::getItem(
@@ -534,24 +542,7 @@ void MainWindow::decryptPreviousIuks()
             return;
         }
 
-        QByteArray decryptedImk;
-
-        if (!CryptUtil::createImkFromIuk(
-                    decryptedImk,
-                    decryptedIuk))
-        {
-            QMessageBox msgBox(this);
-            msgBox.critical(this, tr("Error"), tr("Creating IMK from IUK failed!"));
-            return;
-        }
-    }
-
-    IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
-    if (pBlock3 == nullptr)
-    {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
-        return;
+        decryptedImk = CryptUtil::createImkFromIuk(decryptedIuk);
     }
 
     QList<QByteArray> previousIuks;

@@ -266,8 +266,22 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QS
     return true;
 }
 
-bool CryptUtil::createImkFromIuk(QByteArray &imk, QByteArray decryptedIuk)
+QByteArray CryptUtil::createImkFromIuk(QByteArray decryptedIuk)
 {
-    //TODO: Implement
-    return true;
+    QByteArray output(decryptedIuk);
+    QByteArray result(32, 0);
+
+    for (int i=0; i<16; i++)
+    {
+        crypto_hash_sha256(
+                    reinterpret_cast<unsigned char*>(output.data()),
+                    reinterpret_cast<const unsigned char*>(output.constData()),
+                    static_cast<unsigned long long>(output.length())
+                    );
+
+        if (i == 0) result.replace(0, result.length(), output);
+        else result = xorByteArrays(result, output);
+    }
+
+    return result;
 }
