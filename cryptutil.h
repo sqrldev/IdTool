@@ -42,6 +42,7 @@ public:
     static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
+    static QByteArray enHash(QByteArray data);
 };
 
 #endif // CRYPTUTIL_H

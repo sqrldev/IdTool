@@ -268,7 +268,12 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QS
 
 QByteArray CryptUtil::createImkFromIuk(QByteArray decryptedIuk)
 {
-    QByteArray output(decryptedIuk);
+    return enHash(decryptedIuk);
+}
+
+QByteArray CryptUtil::enHash(QByteArray data)
+{
+    QByteArray output(data);
     QByteArray result(32, 0);
 
     for (int i=0; i<16; i++)
