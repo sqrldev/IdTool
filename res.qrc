@@ -20,5 +20,7 @@
         <file>res/img/NewBlock_16x.png</file>
         <file>res/img/Key_16x.png</file>
         <file>res/img/SiteKey_16x.png</file>
+        <file>res/img/Settings_16x.png</file>
+        <file>res/img/IdentitySettings_16x.png</file>
     </qresource>
 </RCC>
