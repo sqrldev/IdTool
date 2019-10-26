@@ -32,6 +32,7 @@
 #include "identityparser.h"
 #include "uibuilder.h"
 #include "blockdesignerdialog.h"
+#include "idsetdialog.h"
 #include "cryptutil.h"
 
 namespace Ui {
@@ -51,6 +52,7 @@ private slots:
     void openFile();
     void saveFile();
     void showAboutDialog();
+    void showIdentitySettingsDialog();
     void pasteIdentityText();
     void createNewIdentity();
     void showBlockDesigner();

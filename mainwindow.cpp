@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::decryptIuk);
     connect(ui->actionDecryptPreviousIuks, &QAction::triggered, this, &MainWindow::decryptPreviousIuks);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
+    connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
 }
 
 MainWindow::~MainWindow()
@@ -148,6 +149,12 @@ void MainWindow::showAboutDialog()
     message.append("<a href=\"https://github.com/alexhauser/IdTool\">https://github.com/alexhauser/IdTool</a>");
 
     QMessageBox::about(this, "About", message);
+}
+
+void MainWindow::showIdentitySettingsDialog()
+{
+    IdentitySettingsDialog dialog;
+    dialog.exec();
 }
 
 void MainWindow::pasteIdentityText()
