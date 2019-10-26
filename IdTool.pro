@@ -29,6 +29,7 @@ SOURCES += \
         cryptutil.cpp \
         identitymodel.cpp \
         identityparser.cpp \
+        idsetdialog.cpp \
         itemeditordialog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -40,12 +41,14 @@ HEADERS += \
         cryptutil.h \
         identitymodel.h \
         identityparser.h \
+        idsetdialog.h \
         itemeditordialog.h \
         mainwindow.h \
         uibuilder.h
 
 FORMS += \
         blockdesignerdialog.ui \
+        idsetdialog.ui \
         itemeditordialog.ui \
         mainwindow.ui
 
