@@ -153,7 +153,12 @@ void MainWindow::showAboutDialog()
 
 void MainWindow::showIdentitySettingsDialog()
 {
-    IdentitySettingsDialog dialog;
+    if (m_pIdentityModel == nullptr) return;
+
+    IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+    if (pBlock1 == nullptr) return;
+
+    IdentitySettingsDialog dialog(this, pBlock1);
     dialog.exec();
 }
 

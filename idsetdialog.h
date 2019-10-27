@@ -39,13 +39,13 @@ class IdentitySettingsDialog : public QDialog
     Q_OBJECT
 
 private:
-    QJsonObject* m_pItem = nullptr;
+    IdentityBlock* m_pBlock1 = nullptr;
 
 public:
     explicit IdentitySettingsDialog(QWidget *parent = nullptr);
-    IdentitySettingsDialog(QWidget *parent, QJsonObject* item);
+    IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1);
     ~IdentitySettingsDialog();
-    QJsonObject* getItem();
+    IdentityBlock* getItem();
 
 public slots:
     void onSaveButtonClicked();
@@ -53,7 +53,7 @@ public slots:
 
 private:
     void loadDefaults();
-    void loadItemData();
+    void loadBlockData();
 
 private:
     Ui::IdentitySettingsDialog *ui;
