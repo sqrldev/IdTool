@@ -48,7 +48,6 @@ public:
     QJsonObject* getItem();
 
 public slots:
-    void onDataTypeChanged(int currentIndex);
     void onSaveButtonClicked();
     void onResetButtonClicked();
 
