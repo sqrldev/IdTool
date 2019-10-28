@@ -32,7 +32,6 @@ IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent) :
     ui(new Ui::IdentitySettingsDialog)
 {
     ui->setupUi(this);
-    loadDefaults();
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
     connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), SLOT(onResetButtonClicked()));
@@ -42,8 +41,6 @@ IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent, IdentityBlock* b
     IdentitySettingsDialog(parent)
 {
     m_pBlock1 = block1;
-
-    loadDefaults();
     if (m_pBlock1 != nullptr) loadBlockData();
 }
 
@@ -52,51 +49,68 @@ IdentitySettingsDialog::~IdentitySettingsDialog()
     delete ui;
 }
 
-IdentityBlock* IdentitySettingsDialog::getItem()
+bool IdentitySettingsDialog::hasChanges()
 {
-    return m_pBlock1;
+    int optionFlags = m_pBlock1->items[7].value.toInt();
+    if (ui->chkCheckForUpdates->isChecked() != (optionFlags & 0x0001)) return true;
+    if (ui->chkUpdateAutonomously->isChecked() != ((optionFlags & 0x0002) >> 1)) return true;
+    if (ui->chkRequestSqrlOnlyLogin->isChecked() != ((optionFlags & 0x0004) >> 2)) return true;
+    if (ui->chkRequstNoSqrlBypass->isChecked() != ((optionFlags & 0x0008) >> 3)) return true;
+    if (ui->chkMitmWarning->isChecked() != ((optionFlags & 0x0010) >> 4)) return true;
+    if (ui->chkClearQuickPassOnSleep->isChecked() != ((optionFlags & 0x0020) >> 5)) return true;
+    if (ui->chkClearQuickPassOnUserSwitch->isChecked() != ((optionFlags & 0x0040) >> 6)) return true;
+    if (ui->chkEnableQuickPassTimeout->isChecked() != ((optionFlags & 0x0080) >> 7)) return true;
+    if (ui->chkWarnOnNonCps->isChecked() != ((optionFlags & 0x0100) >> 8)) return true;
+
+    int quickPassLength = m_pBlock1->items[8].value.toInt();
+    if (ui->spnQuickPassLength->value() != quickPassLength) return true;
+
+    int passwordVerifySecs = m_pBlock1->items[9].value.toInt();
+    if (ui->spnPasswordVerifySeconds->value() != passwordVerifySecs) return true;
+
+    int quickPassTimeout = m_pBlock1->items[10].value.toInt();
+    if (ui->spnQuickPassTimeout->value() != quickPassTimeout) return true;
+
+    return false;
 }
 
 void IdentitySettingsDialog::onSaveButtonClicked()
 {
+    QMessageBox msg(this);
+    if (hasChanges())
+    {
+        msg.critical(this, "Yes!!", "Yes!!");
+        return;
+    }
 
+    msg.critical(this, "No!!", "No!!");
 }
 
 void IdentitySettingsDialog::onResetButtonClicked()
 {
-
-}
-
-void IdentitySettingsDialog::loadDefaults()
-{
-
+    loadBlockData();
 }
 
 void IdentitySettingsDialog::loadBlockData()
 {
-    bool ok = false;
-    int optiosnFlags = m_pBlock1->items[7].value.toInt(&ok);
-    if (!ok) return;
+    int optionFlags = m_pBlock1->items[7].value.toInt();
 
-    ui->chkCheckForUpdates->setChecked(optiosnFlags & 0x0001);
-    ui->chkUpdateAutonomously->setChecked((optiosnFlags & 0x0002) >> 1);
-    ui->chkRequestSqrlOnlyLogin->setChecked((optiosnFlags & 0x0004) >> 2);
-    ui->chkRequstNoSqrlBypass->setChecked((optiosnFlags & 0x0008) >> 3);
-    ui->chkMitmWarning->setChecked((optiosnFlags & 0x0010) >> 4);
-    ui->chkClearQuickPassOnSleep->setChecked((optiosnFlags & 0x0020) >> 5);
-    ui->chkClearQuickPassOnUserSwitch->setChecked((optiosnFlags & 0x0040) >> 6);
-    ui->chkEnableQuickPassTimeout->setChecked((optiosnFlags & 0x0080) >> 7);
-    ui->chkWarnOnNonCps->setChecked((optiosnFlags & 0x0100) >> 8);
+    ui->chkCheckForUpdates->setChecked(optionFlags & 0x0001);
+    ui->chkUpdateAutonomously->setChecked((optionFlags & 0x0002) >> 1);
+    ui->chkRequestSqrlOnlyLogin->setChecked((optionFlags & 0x0004) >> 2);
+    ui->chkRequstNoSqrlBypass->setChecked((optionFlags & 0x0008) >> 3);
+    ui->chkMitmWarning->setChecked((optionFlags & 0x0010) >> 4);
+    ui->chkClearQuickPassOnSleep->setChecked((optionFlags & 0x0020) >> 5);
+    ui->chkClearQuickPassOnUserSwitch->setChecked((optionFlags & 0x0040) >> 6);
+    ui->chkEnableQuickPassTimeout->setChecked((optionFlags & 0x0080) >> 7);
+    ui->chkWarnOnNonCps->setChecked((optionFlags & 0x0100) >> 8);
 
-    int quickPassLength = m_pBlock1->items[8].value.toInt(&ok);
-    if (!ok) return;
+    int quickPassLength = m_pBlock1->items[8].value.toInt();
     ui->spnQuickPassLength->setValue(quickPassLength);
 
-    int passwordVerifySecs = m_pBlock1->items[9].value.toInt(&ok);
-    if (!ok) return;
+    int passwordVerifySecs = m_pBlock1->items[9].value.toInt();
     ui->spnPasswordVerifySeconds->setValue(passwordVerifySecs);
 
-    int quickPassTimeout = m_pBlock1->items[10].value.toInt(&ok);
-    if (!ok) return;
+    int quickPassTimeout = m_pBlock1->items[10].value.toInt();
     ui->spnQuickPassTimeout->setValue(quickPassTimeout);
 }

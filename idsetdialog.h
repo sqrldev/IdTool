@@ -45,14 +45,13 @@ public:
     explicit IdentitySettingsDialog(QWidget *parent = nullptr);
     IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1);
     ~IdentitySettingsDialog();
-    IdentityBlock* getItem();
+    bool hasChanges();
 
 public slots:
     void onSaveButtonClicked();
     void onResetButtonClicked();
 
 private:
-    void loadDefaults();
     void loadBlockData();
 
 private:

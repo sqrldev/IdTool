@@ -43,6 +43,7 @@ public:
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
+    static bool updateBlock1(IdentityBlock *currentBlock, IdentityBlock *newBlock, QString password, QProgressDialog* progressDialog = nullptr);
 };
 
 #endif // CRYPTUTIL_H

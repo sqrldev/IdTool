@@ -290,3 +290,9 @@ QByteArray CryptUtil::enHash(QByteArray data)
 
     return result;
 }
+
+bool CryptUtil::updateBlock1(IdentityBlock *currentBlock, IdentityBlock *newBlock, QString password, QProgressDialog *progressDialog)
+{
+
+    return true;
+}
