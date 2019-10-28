@@ -91,7 +91,7 @@ bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteAr
 }
 
 bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk,
-                IdentityBlock *block, QString password, QProgressDialog* progressDialog)
+                IdentityBlock *block, QByteArray key)
 {
     QByteArray decryptedIdentityKeys(64, 0);
 
@@ -102,9 +102,6 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     }
 
     QByteArray aesGcmIV = QByteArray::fromHex(block->items[3].value.toLocal8Bit());
-    QByteArray scryptSalt = QByteArray::fromHex(block->items[4].value.toLocal8Bit());
-    int scryptLogNFactor = block->items[5].value.toInt();
-    int scryptIterationCount = block->items[6].value.toInt();
     QByteArray encryptedImk = QByteArray::fromHex(block->items[11].value.toLocal8Bit());
     QByteArray encryptedIlk = QByteArray::fromHex(block->items[12].value.toLocal8Bit());
     QByteArray verificationTag = QByteArray::fromHex(block->items[13].value.toLocal8Bit());
@@ -113,17 +110,6 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     encryptedIdentityKeys.append(encryptedIlk);
     QByteArray plainText;
     for (size_t i=0; i<11; i++) plainText.append(block->items[i].toByteArray());
-
-    QByteArray key;
-    bool ok = CryptUtil::enSCryptIterations(
-                key,
-                password,
-                scryptSalt,
-                scryptLogNFactor,
-                scryptIterationCount,
-                progressDialog);
-
-    if (!ok) return false;
 
     int ret = crypto_aead_aes256gcm_decrypt_detached(
                 reinterpret_cast<unsigned char*>(decryptedIdentityKeys.data()),
@@ -264,6 +250,25 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QS
     if (ret != 0) return false;
 
     return true;
+}
+
+QByteArray CryptUtil::createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog)
+{
+    QByteArray scryptSalt = QByteArray::fromHex(block->items[4].value.toLocal8Bit());
+    int scryptLogNFactor = block->items[5].value.toInt();
+    int scryptIterationCount = block->items[6].value.toInt();
+
+    QByteArray key;
+    bool ok = CryptUtil::enSCryptIterations(
+                key,
+                password,
+                scryptSalt,
+                scryptLogNFactor,
+                scryptIterationCount,
+                progressDialog);
+
+    if (ok) return key;
+    else return NULL;
 }
 
 QByteArray CryptUtil::createImkFromIuk(QByteArray decryptedIuk)

@@ -275,18 +275,22 @@ void MainWindow::createSiteKeys()
 
     if (!ok) return;
 
-    QByteArray decryptedImk(32, 0);
-    QByteArray decryptedIlk(32, 0);
-
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
+
+    QByteArray key = CryptUtil::createKeyFromPassword(
+                pBlock,
+                password,
+                &progressDialog);
+
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
 
     if (!CryptUtil::decryptBlock1(
                 decryptedImk,
                 decryptedIlk,
                 pBlock,
-                password,
-                &progressDialog))
+                key))
     {
         QMessageBox msgBox(this);
         msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
@@ -351,18 +355,22 @@ void MainWindow::decryptImkIlk()
 
     if (!ok) return;
 
-    QByteArray decryptedImk(32, 0);
-    QByteArray decryptedIlk(32, 0);
-
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
+
+    QByteArray key = CryptUtil::createKeyFromPassword(
+                pBlock1,
+                password,
+                &progressDialog);
+
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
 
     if (!CryptUtil::decryptBlock1(
                 decryptedImk,
                 decryptedIlk,
                 pBlock1,
-                password,
-                &progressDialog))
+                key))
     {
         QMessageBox msgBox(this);
         msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
@@ -503,12 +511,16 @@ void MainWindow::decryptPreviousIuks()
         QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
         progressDialog.setWindowModality(Qt::WindowModal);
 
+        QByteArray key = CryptUtil::createKeyFromPassword(
+                    pBlock1,
+                    password,
+                    &progressDialog);
+
         if (!CryptUtil::decryptBlock1(
                     decryptedImk,
                     decryptedIlk,
                     pBlock1,
-                    password,
-                    &progressDialog))
+                    key))
         {
             QMessageBox msgBox(this);
             msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
