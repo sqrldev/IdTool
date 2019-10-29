@@ -45,6 +45,7 @@ public:
     void clearLayout();
     bool hasBlocks();
     IdentityModel* getModel();
+    void setEnableUnauthenticatedChanges(bool enable, bool rebuild = false);
 
 public:
     static bool showGetBlockTypeDialog(QString* result, bool allowEdit = false);
@@ -57,6 +58,7 @@ private:
     QLayout* m_pLastLayout = nullptr;
     IdentityModel* m_pModel = nullptr;
     bool m_bNeedsRebuild = false;
+    bool m_bEnableUnauthenticatedChanges = false;
 
     QWidget* createBlock(IdentityBlock* block);
     QWidget* createBlockHeader(IdentityBlock *block);

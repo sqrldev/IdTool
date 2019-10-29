@@ -53,6 +53,7 @@ private slots:
     void saveFile();
     void showAboutDialog();
     void showIdentitySettingsDialog();
+    void controlUnauthenticatedChanges();
     void pasteIdentityText();
     void createNewIdentity();
     void showBlockDesigner();
