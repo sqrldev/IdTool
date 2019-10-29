@@ -80,6 +80,12 @@ IdentityModel *UiBuilder::getModel()
     return m_pModel;
 }
 
+void UiBuilder::setEnableUnauthenticatedChanges(bool enable, bool rebuild)
+{
+    m_bEnableUnauthenticatedChanges = enable;
+    if (rebuild) this->rebuild();
+}
+
 bool UiBuilder::showGetBlockTypeDialog(QString *result, bool allowEdit)
 {
     QDir currentPath = QDir::currentPath();
@@ -153,15 +159,18 @@ QWidget* UiBuilder::createBlockHeader(IdentityBlock *block)
     pBlockDescLabel->setWordWrap(true);
     pLayout->addWidget(pBlockDescLabel);
 
-    QPushButton* pBlockOptionsButton = new QPushButton();
-    pBlockOptionsButton->setToolTip(tr("Block options"));
-    pBlockOptionsButton->setMaximumWidth(30);
-    pBlockOptionsButton->setMinimumWidth(30);
-    pBlockOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
-    QVariant blockConnectorContainer = QVariant::fromValue(BlockConnector(block));
-    pBlockOptionsButton->setProperty("0", blockConnectorContainer );
-    connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(blockOptionsButtonClicked()));
-    pLayout->addWidget(pBlockOptionsButton);
+    if (m_bEnableUnauthenticatedChanges)
+    {
+        QPushButton* pBlockOptionsButton = new QPushButton();
+        pBlockOptionsButton->setToolTip(tr("Block options"));
+        pBlockOptionsButton->setMaximumWidth(30);
+        pBlockOptionsButton->setMinimumWidth(30);
+        pBlockOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
+        QVariant blockConnectorContainer = QVariant::fromValue(BlockConnector(block));
+        pBlockOptionsButton->setProperty("0", blockConnectorContainer );
+        connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(blockOptionsButtonClicked()));
+        pLayout->addWidget(pBlockOptionsButton);
+    }
 
     pWidget->setLayout(pLayout);
 
@@ -208,16 +217,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     pLayout->addWidget(pValueLineEdit);
 
     ItemConnector ic(block, item, pValueLineEdit);
-
-    QPushButton* pEditButton = new QPushButton();
-    pEditButton->setToolTip(tr("Edit value"));
-    pEditButton->setMaximumWidth(30);
-    pNameLable->setMinimumWidth(30);
-    pEditButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
     QVariant itemConnectorContainer = QVariant::fromValue(ic);
-    pEditButton->setProperty("0", itemConnectorContainer);
-    connect(pEditButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
-    pLayout->addWidget(pEditButton);
 
     QPushButton* pCopyButton = new QPushButton();
     pCopyButton->setToolTip(tr("Copy to clipboard"));
@@ -228,14 +228,26 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     connect(pCopyButton, SIGNAL(clicked()), this, SLOT(copyButtonClicked()));
     pLayout->addWidget(pCopyButton);
 
-    QPushButton* pOptionsButton = new QPushButton();
-    pOptionsButton->setToolTip(tr("Item options"));
-    pOptionsButton->setMaximumWidth(30);
-    pOptionsButton->setMinimumWidth(30);
-    pOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
-    pOptionsButton->setProperty("0", itemConnectorContainer);
-    connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(itemOptionsButtonClicked()));
-    pLayout->addWidget(pOptionsButton);
+    if (m_bEnableUnauthenticatedChanges)
+    {
+        QPushButton* pEditButton = new QPushButton();
+        pEditButton->setToolTip(tr("Edit value"));
+        pEditButton->setMaximumWidth(30);
+        pNameLable->setMinimumWidth(30);
+        pEditButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
+        pEditButton->setProperty("0", itemConnectorContainer);
+        connect(pEditButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
+        pLayout->addWidget(pEditButton);
+
+        QPushButton* pOptionsButton = new QPushButton();
+        pOptionsButton->setToolTip(tr("Item options"));
+        pOptionsButton->setMaximumWidth(30);
+        pOptionsButton->setMinimumWidth(30);
+        pOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
+        pOptionsButton->setProperty("0", itemConnectorContainer);
+        connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(itemOptionsButtonClicked()));
+        pLayout->addWidget(pOptionsButton);
+    }
 
     pWidget->setLayout(pLayout);
 

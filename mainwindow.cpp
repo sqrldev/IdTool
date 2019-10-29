@@ -47,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pHeaderFrame->setVisible(false);
 
     m_pScrollArea->setWidgetResizable(true);
+    controlUnauthenticatedChanges();
 
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
     connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::saveFile);
@@ -60,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDecryptPreviousIuks, &QAction::triggered, this, &MainWindow::decryptPreviousIuks);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
+    connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
 }
 
 MainWindow::~MainWindow()
@@ -167,6 +169,16 @@ void MainWindow::showIdentitySettingsDialog()
     dialog.exec();
 
     m_pUiBuilder->rebuild();
+}
+
+void MainWindow::controlUnauthenticatedChanges()
+{
+    bool enable = ui->actionEnableUnauthenticatedChanges->isChecked();
+
+    m_pUiBuilder->setEnableUnauthenticatedChanges(
+                enable, true);
+
+    ui->actionCreateNewIdentity->setVisible(enable);
 }
 
 void MainWindow::pasteIdentityText()
