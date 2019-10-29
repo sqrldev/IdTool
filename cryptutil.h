@@ -44,7 +44,7 @@ public:
     static QByteArray createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog = nullptr);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
-    static bool updateBlock1(IdentityBlock *currentBlock, IdentityBlock *newBlock, QString password, QProgressDialog* progressDialog = nullptr);
+    static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
 };
 
 #endif // CRYPTUTIL_H

@@ -52,15 +52,8 @@ IdentitySettingsDialog::~IdentitySettingsDialog()
 bool IdentitySettingsDialog::hasChanges()
 {
     int optionFlags = m_pBlock1->items[7].value.toInt();
-    if (ui->chkCheckForUpdates->isChecked() != (optionFlags & 0x0001)) return true;
-    if (ui->chkUpdateAutonomously->isChecked() != ((optionFlags & 0x0002) >> 1)) return true;
-    if (ui->chkRequestSqrlOnlyLogin->isChecked() != ((optionFlags & 0x0004) >> 2)) return true;
-    if (ui->chkRequstNoSqrlBypass->isChecked() != ((optionFlags & 0x0008) >> 3)) return true;
-    if (ui->chkMitmWarning->isChecked() != ((optionFlags & 0x0010) >> 4)) return true;
-    if (ui->chkClearQuickPassOnSleep->isChecked() != ((optionFlags & 0x0020) >> 5)) return true;
-    if (ui->chkClearQuickPassOnUserSwitch->isChecked() != ((optionFlags & 0x0040) >> 6)) return true;
-    if (ui->chkEnableQuickPassTimeout->isChecked() != ((optionFlags & 0x0080) >> 7)) return true;
-    if (ui->chkWarnOnNonCps->isChecked() != ((optionFlags & 0x0100) >> 8)) return true;
+    int newOptionFlags = createOptionFlagsInt();
+    if (optionFlags != newOptionFlags) return true;
 
     int quickPassLength = m_pBlock1->items[8].value.toInt();
     if (ui->spnQuickPassLength->value() != quickPassLength) return true;
@@ -74,16 +67,58 @@ bool IdentitySettingsDialog::hasChanges()
     return false;
 }
 
+int IdentitySettingsDialog::createOptionFlagsInt()
+{
+    int optionFlags = 0;
+    if (ui->chkCheckForUpdates->isChecked()) optionFlags |= 1;
+    if (ui->chkUpdateAutonomously->isChecked()) optionFlags |= 0x0002;
+    if (ui->chkRequestSqrlOnlyLogin->isChecked()) optionFlags |= 0x0004;
+    if (ui->chkRequstNoSqrlBypass->isChecked()) optionFlags |= 0x0008;
+    if (ui->chkMitmWarning->isChecked()) optionFlags |= 0x0010;
+    if (ui->chkClearQuickPassOnSleep->isChecked()) optionFlags |= 0x0020;
+    if (ui->chkClearQuickPassOnUserSwitch->isChecked()) optionFlags |= 0x0040;
+    if (ui->chkEnableQuickPassTimeout->isChecked()) optionFlags |= 0x0080;
+    if (ui->chkWarnOnNonCps->isChecked()) optionFlags |= 0x0100;
+
+    return optionFlags;
+}
+
 void IdentitySettingsDialog::onSaveButtonClicked()
 {
+    IdentityBlock newBlock1(*m_pBlock1);
     QMessageBox msg(this);
-    if (hasChanges())
+
+    if (!hasChanges()) return;
+
+    newBlock1.items[7].value = QString::number(createOptionFlagsInt());
+    newBlock1.items[8].value = QString::number(ui->spnQuickPassLength->value());
+    newBlock1.items[9].value = QString::number(ui->spnPasswordVerifySeconds->value());
+    newBlock1.items[10].value = QString::number(ui->spnQuickPassTimeout->value());
+
+    bool ok = false;
+    QString password = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Identity password:"),
+                QLineEdit::Password,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
+    QByteArray key = CryptUtil::createKeyFromPassword(m_pBlock1, password, &progressDialog);
+    ok = CryptUtil::updateBlock1(m_pBlock1, &newBlock1, key);
+
+    if (!ok)
     {
-        msg.critical(this, "Yes!!", "Yes!!");
-        return;
+        QMessageBox msgBox(this);
+        msgBox.critical(this, tr("Error"), tr("Reencryption failed! Wrong password?"));
     }
 
-    msg.critical(this, "No!!", "No!!");
+    *m_pBlock1 = newBlock1;
 }
 
 void IdentitySettingsDialog::onResetButtonClicked()

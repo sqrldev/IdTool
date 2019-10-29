@@ -160,6 +160,8 @@ void MainWindow::showIdentitySettingsDialog()
 
     IdentitySettingsDialog dialog(this, pBlock1);
     dialog.exec();
+
+    m_pUiBuilder->rebuild();
 }
 
 void MainWindow::pasteIdentityText()

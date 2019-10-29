@@ -29,6 +29,8 @@
 
 #include "common.h"
 #include "identitymodel.h"
+#include "identityparser.h"
+#include "cryptutil.h"
 
 namespace Ui {
 class IdentitySettingsDialog;
@@ -45,7 +47,6 @@ public:
     explicit IdentitySettingsDialog(QWidget *parent = nullptr);
     IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1);
     ~IdentitySettingsDialog();
-    bool hasChanges();
 
 public slots:
     void onSaveButtonClicked();
@@ -53,6 +54,8 @@ public slots:
 
 private:
     void loadBlockData();
+    bool hasChanges();
+    int createOptionFlagsInt();
 
 private:
     Ui::IdentitySettingsDialog *ui;
