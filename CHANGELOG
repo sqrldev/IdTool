@@ -1,15 +1,25 @@
-Version 0.2.0
+Version 0.3.0
+  Features
+    * Change identity settings (authenticated changes)
+    * New block designer to create json for custom blocks
+    * Decrypt IMK/ILK (block type 1)
+    * Decrypt IUK (block type 2)
+    * Decrypt previous IUKs (block type 3)
+    * Create site-specifik keys (IDK)
+  Changes:
+    * Unauthenticated changes are now disabled by default and   
+      need to be enabled in the menu.
 
-Features
-* Create new identity from scratch
-* Add, remove and reorder block items
+Version 0.2.0
+  Features
+    * Create new identity from scratch (unauthenticated)
+    * Add, remove and reorder block items (unauthenticated)
 
 Version 0.1.0 (initial release)
-
-Features
-* Load SQRL identities from file or paste plain text
-* Dynamically parse identitiy blocks using JSON templates
-* Graphically visualize identitiy
-* Add, remove and reorder identity blocks
-* Show, copy and edit block item values
-* Save changed identity back to file
+  Features
+    * Load SQRL identities from file or paste plain text
+    * Dynamically parse identitiy blocks using JSON templates
+    * Graphically visualize identitiy
+    * Add, remove and reorder identity blocks (unauthenticated)
+    * Show, copy and edit block item values (unauthenticated)
+    * Save changed identity back to file
