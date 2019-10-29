@@ -125,8 +125,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>630</width>
-         <height>543</height>
+         <width>626</width>
+         <height>511</height>
         </rect>
        </property>
       </widget>
@@ -140,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>650</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -173,7 +173,14 @@
     <addaction name="separator"/>
     <addaction name="actionCreateSiteKeys"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionIdentitySettings"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
    <addaction name="menuInfo"/>
   </widget>
@@ -310,7 +317,16 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt previous IUKs (needs password)</string>
+    <string>Decrypt previous IUKs (needs password or rescue code)</string>
+   </property>
+  </action>
+  <action name="actionIdentitySettings">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/IdentitySettings_16x.png</normaloff>:/res/img/IdentitySettings_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Identity settings</string>
    </property>
   </action>
  </widget>

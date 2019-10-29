@@ -91,7 +91,7 @@ bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteAr
 }
 
 bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk,
-                IdentityBlock *block, QString password, QProgressDialog* progressDialog)
+                IdentityBlock *block, QByteArray key)
 {
     QByteArray decryptedIdentityKeys(64, 0);
 
@@ -102,9 +102,6 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     }
 
     QByteArray aesGcmIV = QByteArray::fromHex(block->items[3].value.toLocal8Bit());
-    QByteArray scryptSalt = QByteArray::fromHex(block->items[4].value.toLocal8Bit());
-    int scryptLogNFactor = block->items[5].value.toInt();
-    int scryptIterationCount = block->items[6].value.toInt();
     QByteArray encryptedImk = QByteArray::fromHex(block->items[11].value.toLocal8Bit());
     QByteArray encryptedIlk = QByteArray::fromHex(block->items[12].value.toLocal8Bit());
     QByteArray verificationTag = QByteArray::fromHex(block->items[13].value.toLocal8Bit());
@@ -113,17 +110,6 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     encryptedIdentityKeys.append(encryptedIlk);
     QByteArray plainText;
     for (size_t i=0; i<11; i++) plainText.append(block->items[i].toByteArray());
-
-    QByteArray key;
-    bool ok = CryptUtil::enSCryptIterations(
-                key,
-                password,
-                scryptSalt,
-                scryptLogNFactor,
-                scryptIterationCount,
-                progressDialog);
-
-    if (!ok) return false;
 
     int ret = crypto_aead_aes256gcm_decrypt_detached(
                 reinterpret_cast<unsigned char*>(decryptedIdentityKeys.data()),
@@ -266,6 +252,27 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QS
     return true;
 }
 
+QByteArray CryptUtil::createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog)
+{
+    QByteArray scryptSalt = QByteArray::fromHex(block->items[4].value.toLocal8Bit());
+    int scryptLogNFactor = block->items[5].value.toInt();
+    int scryptIterationCount = block->items[6].value.toInt();
+
+    QByteArray key;
+    bool ok = CryptUtil::enSCryptIterations(
+                key,
+                password,
+                scryptSalt,
+                scryptLogNFactor,
+                scryptIterationCount,
+                progressDialog);
+
+    if (!ok) throw std::runtime_error(QObject::tr("enScrypt failed!")
+                                .toStdString());
+
+    return key;
+}
+
 QByteArray CryptUtil::createImkFromIuk(QByteArray decryptedIuk)
 {
     return enHash(decryptedIuk);
@@ -289,4 +296,49 @@ QByteArray CryptUtil::enHash(QByteArray data)
     }
 
     return result;
+}
+
+bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key)
+{
+    QByteArray oldImk(32, 0);
+    QByteArray oldIlk(32, 0);
+    QByteArray newImk(32, 0);
+    QByteArray newIlk(32, 0);
+    QByteArray newIv(12, 0);
+    QByteArray newPlainText;
+
+    if (sodium_init() < 0) return false;
+
+    bool ok = decryptBlock1(oldImk, oldIlk, oldBlock, key);
+    if (!ok) return false;
+
+    randombytes_buf(newIv.data(), static_cast<size_t>(newIv.length()));
+    updatedBlock->items[3].value = newIv.toHex();
+
+    QByteArray unencryptedKeys = oldImk + oldIlk;
+    QByteArray encryptedKeys(unencryptedKeys.length(), 0);
+    QByteArray authTag(16, 0);
+    for (size_t i=0; i<11; i++) newPlainText.append(updatedBlock->items[i].toByteArray());
+    unsigned long long authTagLen;
+
+    crypto_aead_aes256gcm_encrypt_detached(
+                reinterpret_cast<unsigned char*>(encryptedKeys.data()),
+                reinterpret_cast<unsigned char*>(authTag.data()),
+                &authTagLen,
+                reinterpret_cast<const unsigned char*>(unencryptedKeys.constData()),
+                static_cast<size_t>(unencryptedKeys.length()),
+                reinterpret_cast<const unsigned char*>(newPlainText.constData()),
+                static_cast<size_t>(newPlainText.length()),
+                nullptr,
+                reinterpret_cast<const unsigned char*>(newIv.constData()),
+                reinterpret_cast<const unsigned char*>(key.constData()));
+
+    newImk = encryptedKeys.left(32);
+    newIlk = encryptedKeys.right(32);
+
+    updatedBlock->items[11].value = newImk.toHex();
+    updatedBlock->items[12].value = newIlk.toHex();
+    updatedBlock->items[13].value = authTag.toHex();
+
+    return true;
 }

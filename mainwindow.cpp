@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::decryptIuk);
     connect(ui->actionDecryptPreviousIuks, &QAction::triggered, this, &MainWindow::decryptPreviousIuks);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
+    connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
 }
 
 MainWindow::~MainWindow()
@@ -148,6 +149,24 @@ void MainWindow::showAboutDialog()
     message.append("<a href=\"https://github.com/alexhauser/IdTool\">https://github.com/alexhauser/IdTool</a>");
 
     QMessageBox::about(this, "About", message);
+}
+
+void MainWindow::showIdentitySettingsDialog()
+{
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        showNoIdentityLoadedError();
+        return;
+    }
+
+    IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+    if (pBlock1 == nullptr) return;
+
+    IdentitySettingsDialog dialog(this, pBlock1);
+    dialog.exec();
+
+    m_pUiBuilder->rebuild();
 }
 
 void MainWindow::pasteIdentityText()
@@ -263,18 +282,22 @@ void MainWindow::createSiteKeys()
 
     if (!ok) return;
 
-    QByteArray decryptedImk(32, 0);
-    QByteArray decryptedIlk(32, 0);
-
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
+
+    QByteArray key = CryptUtil::createKeyFromPassword(
+                pBlock,
+                password,
+                &progressDialog);
+
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
 
     if (!CryptUtil::decryptBlock1(
                 decryptedImk,
                 decryptedIlk,
                 pBlock,
-                password,
-                &progressDialog))
+                key))
     {
         QMessageBox msgBox(this);
         msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
@@ -333,24 +356,28 @@ void MainWindow::decryptImkIlk()
                 nullptr,
                 tr(""),
                 tr("Identity password:"),
-                QLineEdit::Normal,
+                QLineEdit::Password,
                 "",
                 &ok);
 
     if (!ok) return;
 
-    QByteArray decryptedImk(32, 0);
-    QByteArray decryptedIlk(32, 0);
-
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
+
+    QByteArray key = CryptUtil::createKeyFromPassword(
+                pBlock1,
+                password,
+                &progressDialog);
+
+    QByteArray decryptedImk(32, 0);
+    QByteArray decryptedIlk(32, 0);
 
     if (!CryptUtil::decryptBlock1(
                 decryptedImk,
                 decryptedIlk,
                 pBlock1,
-                password,
-                &progressDialog))
+                key))
     {
         QMessageBox msgBox(this);
         msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
@@ -491,12 +518,16 @@ void MainWindow::decryptPreviousIuks()
         QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
         progressDialog.setWindowModality(Qt::WindowModal);
 
+        QByteArray key = CryptUtil::createKeyFromPassword(
+                    pBlock1,
+                    password,
+                    &progressDialog);
+
         if (!CryptUtil::decryptBlock1(
                     decryptedImk,
                     decryptedIlk,
                     pBlock1,
-                    password,
-                    &progressDialog))
+                    key))
         {
             QMessageBox msgBox(this);
             msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));

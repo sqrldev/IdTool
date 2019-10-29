@@ -24,27 +24,41 @@
  * SOFTWARE.
  */
 
-#ifndef CRYPTUTIL_H
-#define CRYPTUTIL_H
+#ifndef IDSETDIALOG_H
+#define IDSETDIALOG_H
 
 #include "common.h"
 #include "identitymodel.h"
-#include "sodium.h"
+#include "identityparser.h"
+#include "cryptutil.h"
 
-class CryptUtil
+namespace Ui {
+class IdentitySettingsDialog;
+}
+
+class IdentitySettingsDialog : public QDialog
 {
+    Q_OBJECT
+
+private:
+    IdentityBlock* m_pBlock1 = nullptr;
+
 public:
-    CryptUtil();
-    static QByteArray xorByteArrays(QByteArray a, QByteArray b);
-    static bool enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt, int logNFactor, int iterationCount, QProgressDialog* progressDialog = nullptr);
-    static bool decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QByteArray key);
-    static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
-    static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);
-    static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
-    static QByteArray createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog = nullptr);
-    static QByteArray createImkFromIuk(QByteArray decryptedIuk);
-    static QByteArray enHash(QByteArray data);
-    static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
+    explicit IdentitySettingsDialog(QWidget *parent = nullptr);
+    IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1);
+    ~IdentitySettingsDialog();
+
+public slots:
+    void onSaveButtonClicked();
+    void onResetButtonClicked();
+
+private:
+    void loadBlockData();
+    bool hasChanges();
+    int createOptionFlagsInt();
+
+private:
+    Ui::IdentitySettingsDialog *ui;
 };
 
-#endif // CRYPTUTIL_H
+#endif // IDSETDIALOG_H
