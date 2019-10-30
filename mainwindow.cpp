@@ -175,6 +175,27 @@ void MainWindow::controlUnauthenticatedChanges()
 {
     bool enable = ui->actionEnableUnauthenticatedChanges->isChecked();
 
+    if (enable)
+    {
+        QMessageBox::StandardButton reply;
+
+        reply = QMessageBox::question(
+                    this,
+                    tr("Enabling unauthenticated changes"),
+                    tr("CAUTION!\n\nEnabling unauthenticated changes will break the validity "
+                       "of the identity! While this feature may be useful for developers, "
+                       "making unauthenticated changes WILL break the identity's cryptographic "
+                       "authentication and therefore make it usesless for all standard "
+                       "operations!\n\nAre you sure you want to continue?"),
+                    QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::No)
+        {
+            ui->actionEnableUnauthenticatedChanges->setChecked(false);
+            return;
+        }
+    }
+
     m_pUiBuilder->setEnableUnauthenticatedChanges(
                 enable, true);
 
