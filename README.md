@@ -16,7 +16,8 @@ IdTool lets the user
 * change all values encoded within the S4 container (unauthenticated)
 * add and delete identity blocks (unauthenticated)
 * rearrange identity blocks (unauthenticated)
-and finally save the modified data back to disk.
+
+... and finally save the modified data back to disk.
  (!!! All of the changes marked with "unauthenticated" need to be enabled in the "Edit" menu and are carried out without re-encrypting or re-authenticating the identity data !!!) This makes it possible to create "rogue" identity files, which can be useful for hardening the parsing code of any SQRL client application.
 
 ### Testing of client-side cryptographic operations
