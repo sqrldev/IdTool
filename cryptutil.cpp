@@ -63,7 +63,8 @@ bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteAr
                 1,
                 reinterpret_cast<uint8_t*>(key.data()),
                 static_cast<size_t>(key.length()));
-    progressDialog->setValue(1);
+
+    if (progressDialog != nullptr) progressDialog->setValue(1);
 
     QByteArray xorKey(key);
 
@@ -80,8 +81,11 @@ bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteAr
                     reinterpret_cast<uint8_t*>(key.data()),
                     static_cast<size_t>(key.length()));
 
-        progressDialog->setValue(i);
-        if (progressDialog->wasCanceled()) return false;
+        if (progressDialog != nullptr)
+        {
+            progressDialog->setValue(i);
+            if (progressDialog->wasCanceled()) return false;
+        }
 
         xorKey = xorByteArrays(key, xorKey);
     }
