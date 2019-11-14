@@ -71,7 +71,26 @@ If you are interested in creating your own block templates, I recommend to look 
 ## Platforms
 IdTool was written in platform neutral C++ using the [Qt Framework](https://www.qt.io) and it should therefore be possible to compile it for all platforms supported by the Qt framework. Among those are the Windows, Linux and MacOS.
 
-IdTool is currently being developed and tested on Windows but should currently also build and run on Linux (tested on Ubuntu 18.04 LTS). Any help with testing it on other platforms is highly appreciated.
+IdTool is currently being developed and tested on Windows but should currently also build and run on Linux.
+
+Build instructions for Linux (tested with Ubuntu 18.04 and 19.10 - requires minimal desktop version):
+
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt autoremove
+sudo apt-get install git
+sudo apt-get install qtcreator qt5-default build_essential
+
+mkdir ~/src
+cd ~/src
+git clone https://github.com/alexhauser/IdTool IdTool
+cd IdTool
+qmake IdTool.pro
+make
+./IdTool
+```
+
+Any help with testing it on other platforms is highly appreciated.
 
 ## Roadmap
 There are some more ideas for features that I would still like to implement if I find time, like for example
