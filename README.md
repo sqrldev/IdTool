@@ -79,7 +79,7 @@ Build instructions for Linux (tested with Ubuntu 18.04 and 19.10 - requires mini
 sudo apt update && sudo apt upgrade -y
 sudo apt autoremove
 sudo apt-get install git
-sudo apt-get install qtcreator qt5-default build_essential
+sudo apt-get install qtcreator qt5-default build-essential
 
 mkdir ~/src
 cd ~/src
