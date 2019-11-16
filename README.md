@@ -73,7 +73,8 @@ IdTool was written in platform neutral C++ using the [Qt Framework](https://www.
 
 IdTool is currently being developed and tested on Windows but should currently also build and run on Linux.
 
-Build instructions for Linux (tested with Ubuntu 18.04 and 19.10 - requires minimal desktop version):
+Build instructions for Linux (tested on Ubuntu 18.04 and 19.10 minimal desktop version):
+(IMPORTANT  :  Ubuntu  versions  prior  to  18.04  are  **not**  supported,  becuase  IdTool  requires QT  Version  5.9.5,  and  GLIBC  above  version  2.25).
 
 ```
 sudo apt update && sudo apt upgrade -y
