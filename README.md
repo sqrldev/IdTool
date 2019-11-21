@@ -84,7 +84,7 @@ sudo apt-get install qtcreator qt5-default build-essential
 
 mkdir ~/src
 cd ~/src
-git clone https://github.com/alexhauser/IdTool IdTool
+git clone https://github.com/sqrldev/IdTool IdTool
 cd IdTool
 qmake IdTool.pro
 make
