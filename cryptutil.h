@@ -45,6 +45,9 @@ public:
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
     static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
+    static QByteArray CreateIuk();
+    static QString CreateNewRescueCode();
+    static QString FormatRescueCode(QString rescueCode);
 };
 
 #endif // CRYPTUTIL_H

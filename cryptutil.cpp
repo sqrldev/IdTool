@@ -346,3 +346,35 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
 
     return true;
 }
+
+QByteArray CryptUtil::CreateIuk()
+{
+    QByteArray iuk(32, 0);
+
+    if (sodium_init() < 0) return nullptr;
+
+    randombytes((unsigned char*)iuk.data(),
+                (size_t)iuk.size());
+
+    return iuk;
+}
+
+QString CryptUtil::CreateNewRescueCode()
+{
+    QByteArray tempBytes(24, 0);
+    unsigned char temp;
+
+    if (sodium_init() < 0) return nullptr;
+
+    for (int i=0; i<tempBytes.count(); i+=2)
+    {
+        temp = 255;
+        while (temp > 199) randombytes(&temp, 1);
+
+        int n = temp % 100;
+        tempBytes[i+0] = '0'+(n/10);
+        tempBytes[i+1] = '0'+(n%10);
+    }
+
+    return QString(tempBytes);
+}
