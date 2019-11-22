@@ -382,14 +382,34 @@ QByteArray CryptUtil::createKeyFromPassword(IdentityBlock* block, QString passwo
 
 
 /*!
+ * Derives and returns an identity master key (IMK) from the given
+ * decrypted identity unlock key \a decryptedIuk (IUK).
+ *
  * This is a purpose-bound alias to the \c enHash function.
  *
- * \sa enHash
+ * \sa enHash, createIlkFromIuk
  */
 
 QByteArray CryptUtil::createImkFromIuk(QByteArray decryptedIuk)
 {
     return enHash(decryptedIuk);
+}
+
+/*!
+ * Derives and returns an identity lock key (ILK) from the given
+ * identity unlock key \a decryptedIuk (IUK).
+ *
+ * * \sa createImkFromIuk
+ */
+
+QByteArray CryptUtil::createIlkFromIuk(QByteArray decryptedIuk)
+{
+    QByteArray ilk(32, 0);
+
+    crypto_scalarmult_base(reinterpret_cast<unsigned char*>(ilk.data()),
+                           reinterpret_cast<const unsigned char*>(decryptedIuk.constData()));
+
+    return ilk;
 }
 
 /*!

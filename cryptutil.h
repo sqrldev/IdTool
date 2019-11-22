@@ -45,6 +45,7 @@ public:
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
     static QByteArray createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog = nullptr);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
+    static QByteArray createIlkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
     static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
     static QByteArray CreateIuk();
