@@ -378,3 +378,12 @@ QString CryptUtil::CreateNewRescueCode()
 
     return QString(tempBytes);
 }
+
+QString CryptUtil::FormatRescueCode(QString rescueCode)
+{
+    if (rescueCode.length() != 24)
+        throw std::runtime_error("RescueCode must be a string of 24 characters!");
+
+    for (int i=20; i>0; i-=4) rescueCode.insert(i, '-');
+    return rescueCode;
+}
