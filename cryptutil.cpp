@@ -26,21 +26,37 @@
 
 #include "cryptutil.h"
 
-CryptUtil::CryptUtil()
-{
+CryptUtil::CryptUtil() {}
 
-}
+/*!
+ * Performs a byte-by-byte XOR-operation on the given byte arrays \a a and \a b
+ * and returns the result. In order to maintain the cryptographic strengh of the
+ * XOR operation, both byte arrays must be of the same length (number of bytes)
+ * in order to avoid reuse of source material.
+ *
+ * \throws std::runtime_error is thrown if the byte arrays are not of equal size.
+ */
 
 QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
 {
-    QByteArray result;
+    QByteArray result(a.length(), 0);
+
+    if (a.length() != b.length())
+        throw std::runtime_error("Both byte arrays must be of the same size!");
 
     for (int i = 0; i < a.length(); i++)
     {
-        result[i] = a[i] ^ b[i % b.length()];
+        result[i] = a[i] ^ b[i];
     }
     return result;
 }
+
+/*!
+ * Fills \a buffer with \c buffer.length() number of random bytes.
+ *
+ * \return Retrurns true on success, false otherwise (e.g. if initializing
+ * the crypto library failed)
+ */
 
 bool CryptUtil::getRandomBytes(QByteArray &buffer)
 {
@@ -50,6 +66,13 @@ bool CryptUtil::getRandomBytes(QByteArray &buffer)
                 static_cast<size_t>(buffer.size()));
     return true;
 }
+
+/*!
+ * Assigns a single random byte to \a byte.
+ *
+ * \return Retrurns true on success, false otherwise (e.g. if initializing
+ * the crypto library failed).
+ */
 
 bool CryptUtil::getRandomByte(unsigned char &byte)
 {
@@ -61,6 +84,19 @@ bool CryptUtil::getRandomByte(unsigned char &byte)
     byte = static_cast<unsigned char>(ba[0]);
     return true;
 }
+
+/*!
+ * Runs \a iterationCount number of scrypt iterations on \a password,
+ * using the scrypt parameters \a randomSalt and \a logNFactor.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ *
+ * When successful, the result of the operation will be stored in \a result.
+ *
+ * \return True on success, false otherwise (e.g. if initializing
+ * the crypto library failed).
+ */
 
 bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt,
                         int logNFactor, int iterationCount, QProgressDialog* progressDialog)
@@ -114,6 +150,14 @@ bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteAr
     return true;
 }
 
+/*!
+ * Decrypts the IMK and ILK contained within \a block using \a key, and
+ * upon success places them into \a decryptedImk and \a decryptedIlk.
+ *
+ * \return True on success, false otherwise (e.g. if initializing
+ * the crypto library failed).
+ */
+
 bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk,
                 IdentityBlock *block, QByteArray key)
 {
@@ -154,7 +198,19 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     return true;
 }
 
-bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog *progressDialog)
+/*!
+ * Decrypts the IUK contained within \a block using \a rescueCode, and
+ * upon success places it into \a decryptedIuk.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ *
+ * \return True on success, false otherwise (e.g. if initializing
+ * the crypto library failed).
+ */
+
+bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QString rescueCode,
+                              QProgressDialog *progressDialog)
 {
     if (decryptedIuk == nullptr || block == nullptr ||
             sodium_init() < 0 || crypto_aead_aes256gcm_is_available() == 0)
@@ -197,6 +253,14 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
 
     return true;
 }
+
+/*!
+ * Decrypts a list of previous IUKs contained within \a block using \a imk as the key,
+ * and upon success places them into \a decryptedPreviousIuks.
+ *
+ * \return True on success, false otherwise (e.g. if initializing
+ * the crypto library failed).
+ */
 
 bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, IdentityBlock *block, QByteArray imk)
 {
@@ -253,6 +317,14 @@ bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, Identity
     return true;
 }
 
+/*!
+ * Creates a public- and private-key pair for \a domain using the identity master key \a imk.
+ * Upon success, the public and private keys are stored within \a publicKey and \a privateKey.
+ *
+ * \return True on success, false otherwise (e.g. if initializing
+ * the crypto library failed).
+ */
+
 bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk)
 {
     QByteArray domainBytes = domain.toLocal8Bit();
@@ -276,6 +348,17 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QS
     return true;
 }
 
+/*!
+ * Derives a key from the given \a password using the scrypt parameters
+ * stored within \a block and returns it.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ *
+ * \throws std::runtime_error is thrown in case of an error (e.g. if
+ * initializing the crypto library failed).
+ */
+
 QByteArray CryptUtil::createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog)
 {
     QByteArray scryptSalt = QByteArray::fromHex(block->items[4].value.toLocal8Bit());
@@ -297,10 +380,25 @@ QByteArray CryptUtil::createKeyFromPassword(IdentityBlock* block, QString passwo
     return key;
 }
 
+
+/*!
+ * This is a purpose-bound alias to the \c enHash function.
+ *
+ * \sa enHash
+ */
+
 QByteArray CryptUtil::createImkFromIuk(QByteArray decryptedIuk)
 {
     return enHash(decryptedIuk);
 }
+
+/*!
+ * Performs 16 iterations of the SHA256 hash on \a data, with each successive
+ * output XORed to form a 1’s complement sum to produce the final result,
+ * which is then returned.
+ *
+ * \sa createImkFromIuk
+ */
 
 QByteArray CryptUtil::enHash(QByteArray data)
 {
@@ -322,6 +420,21 @@ QByteArray CryptUtil::enHash(QByteArray data)
     return result;
 }
 
+/*!
+ * \brief Re-encrypts and re-authenticates a type 1 block after a change to
+ * the plain-text settings.
+ *
+ * This function will decrypt the IMK and ILK of the (unmodified) \a oldBlock
+ * and subsequently re-encrypt and re-authenticate them within \a updatedBlock,
+ * using the updated plain-text data already stored in \a updatedBlock as
+ * "additional data" for the AES GCM authenticated encryption.
+ *
+ * If successful, \a updatedBlock will contain the re-encrypted and
+ * re-authenticated data.
+ *
+ * \return Returns true if the operation succeeds, false otherwise.
+ */
+
 bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key)
 {
     QByteArray oldImk(32, 0);
@@ -336,7 +449,7 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
     bool ok = decryptBlock1(oldImk, oldIlk, oldBlock, key);
     if (!ok) return false;
 
-    randombytes_buf(newIv.data(), static_cast<size_t>(newIv.length()));
+    if (!getRandomBytes(newIv)) return false;
     updatedBlock->items[3].value = newIv.toHex();
 
     QByteArray unencryptedKeys = oldImk + oldIlk;
@@ -367,6 +480,11 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
     return true;
 }
 
+/*!
+ * Generates and returns a random 256 bit identity unlock key (IUK).
+ * Returns \c nullptr if the operation fails.
+ */
+
 QByteArray CryptUtil::CreateIuk()
 {
     QByteArray iuk(32, 0);
@@ -376,7 +494,8 @@ QByteArray CryptUtil::CreateIuk()
 
 
 /*!
- * Generates and returns a random, 24 digit rescue code.
+ * Generates and returns a random, 24 digit rescue code string.
+ * Returns \c nullptr if the operation fails.
  */
 
 QString CryptUtil::CreateNewRescueCode()
@@ -405,7 +524,7 @@ QString CryptUtil::CreateNewRescueCode()
 
 /*!
  * Returns a formatted version of the given \a rescueCode
- * string by inserting dashes after each 4th charcacter.
+ * string by inserting a dash after each 4th charcacter.
  * If the given \a rescueCode does not have exactly 24 characters,
  * it is being returned unaltered. Otherwise, the returned
  * string will have the format ("1111-1111-1111-1111-1111-1111").
