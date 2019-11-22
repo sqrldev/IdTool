@@ -48,9 +48,10 @@ public:
     static QByteArray createIlkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
     static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
-    static QByteArray CreateIuk();
-    static QString CreateNewRescueCode();
-    static QString FormatRescueCode(QString rescueCode);
+    static QByteArray createIuk();
+    static QString createNewRescueCode();
+    static QString formatRescueCode(QString rescueCode);
+    static bool createIdentity(IdentityModel& identity, QString &rescueCode, QString password, QProgressDialog *progressDialog = nullptr);
 };
 
 #endif // CRYPTUTIL_H

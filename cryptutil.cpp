@@ -505,7 +505,7 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
  * Returns \c nullptr if the operation fails.
  */
 
-QByteArray CryptUtil::CreateIuk()
+QByteArray CryptUtil::createIuk()
 {
     QByteArray iuk(32, 0);
     if (!getRandomBytes(iuk)) return nullptr;
@@ -518,7 +518,7 @@ QByteArray CryptUtil::CreateIuk()
  * Returns \c nullptr if the operation fails.
  */
 
-QString CryptUtil::CreateNewRescueCode()
+QString CryptUtil::createNewRescueCode()
 {
     QByteArray tempBytes(24, 0);
     unsigned char temp;
@@ -550,11 +550,51 @@ QString CryptUtil::CreateNewRescueCode()
  * string will have the format ("1111-1111-1111-1111-1111-1111").
  */
 
-QString CryptUtil::FormatRescueCode(QString rescueCode)
+QString CryptUtil::formatRescueCode(QString rescueCode)
 {
     if (rescueCode.length() != 24)
         return rescueCode;
 
     for (int i=20; i>0; i-=4) rescueCode.insert(i, '-');
     return rescueCode;
+}
+
+/*!
+ * Creates a new SQRL identity, which is encrypted using \a password.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ *
+ * If successful, a valid \c IdentityModel is placed in \a identity and the
+ * rescue code is placed in \a rescueCode.
+ *
+ * \return Returns \c true on success, \c false otherwise (e.g. if any of
+ * the crypotgraphic operations failed or the operation was cancelled by the
+ * user using the \c QProgressDialog 's "Cancel" button).
+ */
+
+bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
+                               QString password, QProgressDialog *progressDialog)
+{
+    bool ok = false;
+    QByteArray iv(12, 0);
+
+    ok = getRandomBytes(iv);
+
+    // Generate IUK
+    QByteArray iuk = createIuk();
+    if (iuk == nullptr) return false;
+
+    // Create IMK and ILK
+    QByteArray imk = createImkFromIuk(iuk);
+    QByteArray ilk = createIlkFromIuk(iuk);
+    if (imk == nullptr || ilk == nullptr) return false;
+
+    // Generate rescue code
+    rescueCode = createNewRescueCode();
+    if (rescueCode == nullptr) return false;
+
+    // TODO: implement!
+
+    return true;
 }

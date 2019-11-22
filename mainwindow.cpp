@@ -65,8 +65,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
 
     // Test
-    QString rc = CryptUtil::CreateNewRescueCode();
-    QString rcf = CryptUtil::FormatRescueCode(rc);
+    QString rc = CryptUtil::createNewRescueCode();
+    QString rcf = CryptUtil::formatRescueCode(rc);
 
     // Test resccue code character distribution
     /*
