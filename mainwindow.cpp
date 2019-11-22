@@ -27,6 +27,7 @@
 #include "mainwindow.h"
 #include "identityparser.h"
 #include "ui_mainwindow.h"
+#include "cryptutil.h"
 #include <QFileDialog>
 #include <QStandardPaths>
 
@@ -62,6 +63,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
+
+    // Test
+    QString rc = CryptUtil::CreateNewRescueCode();
+    QString rcf = CryptUtil::FormatRescueCode(rc);
 }
 
 MainWindow::~MainWindow()

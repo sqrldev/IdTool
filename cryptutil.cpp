@@ -42,6 +42,22 @@ QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
     return result;
 }
 
+bool CryptUtil::getRandomBytes(QByteArray &buffer)
+{
+    if (sodium_init() < 0) return false;
+
+    randombytes((unsigned char*)buffer.data(), (size_t)buffer.size());
+    return true;
+}
+
+bool CryptUtil::getRandomByte(unsigned char &byte)
+{
+    if (sodium_init() < 0) return false;
+
+    byte = (unsigned char)randombytes_uniform(256);
+    return true;
+}
+
 bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt,
                         int logNFactor, int iterationCount, QProgressDialog* progressDialog)
 {
@@ -350,12 +366,7 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
 QByteArray CryptUtil::CreateIuk()
 {
     QByteArray iuk(32, 0);
-
-    if (sodium_init() < 0) return nullptr;
-
-    randombytes((unsigned char*)iuk.data(),
-                (size_t)iuk.size());
-
+    if (!getRandomBytes(iuk)) return nullptr;
     return iuk;
 }
 
@@ -369,7 +380,10 @@ QString CryptUtil::CreateNewRescueCode()
     for (int i=0; i<tempBytes.count(); i+=2)
     {
         temp = 255;
-        while (temp > 199) randombytes(&temp, 1);
+        while (temp > 199)
+        {
+            if (!getRandomByte(temp)) return nullptr;
+        }
 
         int n = temp % 100;
         tempBytes[i+0] = '0'+(n/10);
@@ -382,7 +396,7 @@ QString CryptUtil::CreateNewRescueCode()
 QString CryptUtil::FormatRescueCode(QString rescueCode)
 {
     if (rescueCode.length() != 24)
-        throw std::runtime_error("RescueCode must be a string of 24 characters!");
+        return rescueCode;
 
     for (int i=20; i>0; i-=4) rescueCode.insert(i, '-');
     return rescueCode;
