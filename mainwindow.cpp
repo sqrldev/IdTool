@@ -67,6 +67,22 @@ MainWindow::MainWindow(QWidget *parent) :
     // Test
     QString rc = CryptUtil::CreateNewRescueCode();
     QString rcf = CryptUtil::FormatRescueCode(rc);
+
+    // Test resccue code character distribution
+    /*
+    QMap<QChar, long> dist;
+    for (int i=0; i<500000; i++)
+    {
+        QString rc = CryptUtil::CreateNewRescueCode();
+
+        for (QChar c : rc)
+        {
+            if (!dist.contains(c)) dist.insert(c, 0);
+            dist[c]++;
+        }
+    }
+    int x = dist.count();
+    */
 }
 
 MainWindow::~MainWindow()

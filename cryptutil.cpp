@@ -46,7 +46,8 @@ bool CryptUtil::getRandomBytes(QByteArray &buffer)
 {
     if (sodium_init() < 0) return false;
 
-    randombytes((unsigned char*)buffer.data(), (size_t)buffer.size());
+    randombytes(reinterpret_cast<unsigned char*>(buffer.data()),
+                static_cast<size_t>(buffer.size()));
     return true;
 }
 
@@ -54,7 +55,10 @@ bool CryptUtil::getRandomByte(unsigned char &byte)
 {
     if (sodium_init() < 0) return false;
 
-    byte = (unsigned char)randombytes_uniform(256);
+    QByteArray ba(1, 0);
+    if (!getRandomBytes(ba)) return false;
+
+    byte = static_cast<unsigned char>(ba[0]);
     return true;
 }
 
@@ -370,6 +374,11 @@ QByteArray CryptUtil::CreateIuk()
     return iuk;
 }
 
+
+/*!
+ * Generates and returns a random, 24 digit rescue code.
+ */
+
 QString CryptUtil::CreateNewRescueCode()
 {
     QByteArray tempBytes(24, 0);
@@ -386,12 +395,21 @@ QString CryptUtil::CreateNewRescueCode()
         }
 
         int n = temp % 100;
-        tempBytes[i+0] = '0'+(n/10);
-        tempBytes[i+1] = '0'+(n%10);
+        tempBytes[i+0] = '0' + static_cast<char>(n/10);
+        tempBytes[i+1] = '0' + (n%10);
     }
 
     return QString(tempBytes);
 }
+
+
+/*!
+ * Returns a formatted version of the given \a rescueCode
+ * string by inserting dashes after each 4th charcacter.
+ * If the given \a rescueCode does not have exactly 24 characters,
+ * it is being returned unaltered. Otherwise, the returned
+ * string will have the format ("1111-1111-1111-1111-1111-1111").
+ */
 
 QString CryptUtil::FormatRescueCode(QString rescueCode)
 {
