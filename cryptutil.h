@@ -40,6 +40,7 @@ public:
     static bool getRandomBytes(QByteArray& buffer);
     static bool getRandomByte(unsigned char& byte);
     static bool enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt, int logNFactor, int iterationCount, QProgressDialog* progressDialog = nullptr);
+    static bool enSCryptTime(QByteArray& result, QString password, QByteArray randomSalt, int logNFactor, int& iterationCount, int secondsToRun, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QByteArray key);
     static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);

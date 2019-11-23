@@ -68,5 +68,6 @@
 #include <QJsonArray>
 #include <QtGui>
 #include <QDesktopWidget>
+#include <QElapsedTimer>
 
 #endif // COMMON_H

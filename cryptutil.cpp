@@ -151,6 +151,80 @@ bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteAr
 }
 
 /*!
+ * Runs multiple scrypt iterations on \a password for a duration of
+ * \a secondsToRun seconds, using the the scrypt parameters \a randomSalt
+ * and \a logNFactor.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ *
+ * When successful, the result of the operation will be stored in \a result
+ * and the number of iterations that were run is placed in \a iterationCount.
+ *
+ * \return True on success, false otherwise (e.g. if initializing
+ * the crypto library failed).
+ */
+
+bool CryptUtil::enSCryptTime(QByteArray &result, QString password, QByteArray randomSalt,
+                             int logNFactor, int &iterationCount, int secondsToRun, QProgressDialog *progressDialog)
+{
+    const int KEYLENGTH = 32;
+    QByteArray pwdBytes = password.toLocal8Bit();
+    QByteArray key(KEYLENGTH, 0);
+
+    if (sodium_init() < 0) return false;
+
+    if (progressDialog != nullptr) progressDialog->setMaximum(iterationCount);
+
+    QElapsedTimer timer;
+    timer.start();
+
+    int ret = crypto_pwhash_scryptsalsa208sha256_ll(
+                reinterpret_cast<const unsigned char*>(pwdBytes.constData()),
+                static_cast<size_t>(pwdBytes.length()),
+                reinterpret_cast<const unsigned char*>(randomSalt.constData()),
+                static_cast<size_t>(randomSalt.length()),
+                1 << logNFactor,
+                256,
+                1,
+                reinterpret_cast<uint8_t*>(key.data()),
+                static_cast<size_t>(key.length()));
+
+    if (progressDialog != nullptr) progressDialog->setValue(1);
+    iterationCount = 1;
+
+    QByteArray xorKey(key);
+
+    for(int i = 1; ; i++)
+    {
+        ret = crypto_pwhash_scryptsalsa208sha256_ll(
+                    reinterpret_cast<const unsigned char*>(pwdBytes.constData()),
+                    static_cast<size_t>(pwdBytes.length()),
+                    reinterpret_cast<const unsigned char*>(key.constData()),
+                    static_cast<size_t>(key.length()),
+                    1 << logNFactor,
+                    256,
+                    1,
+                    reinterpret_cast<uint8_t*>(key.data()),
+                    static_cast<size_t>(key.length()));
+
+        if (progressDialog != nullptr)
+        {
+            progressDialog->setValue(i);
+            if (progressDialog->wasCanceled()) return false;
+        }
+
+        xorKey = xorByteArrays(key, xorKey);
+
+        iterationCount++;
+        if (timer.elapsed() >= secondsToRun*1000) break;
+    }
+
+    result = xorKey;
+    return true;
+}
+
+/*!
  * Decrypts the IMK and ILK contained within \a block using \a key, and
  * upon success places them into \a decryptedImk and \a decryptedIlk.
  *
