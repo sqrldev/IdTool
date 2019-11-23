@@ -29,6 +29,7 @@
 
 #include "common.h"
 #include "identitymodel.h"
+#include "identityparser.h"
 #include "sodium.h"
 
 class CryptUtil
@@ -48,6 +49,7 @@ public:
     static QByteArray createIlkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
     static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
+    static QByteArray aesGcmEncrypt(QByteArray message, QByteArray additionalData, QByteArray iv, QByteArray key);
     static QByteArray createIuk();
     static QString createNewRescueCode();
     static QString formatRescueCode(QString rescueCode);

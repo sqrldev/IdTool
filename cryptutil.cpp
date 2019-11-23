@@ -173,9 +173,7 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     QByteArray encryptedImk = QByteArray::fromHex(block->items[11].value.toLocal8Bit());
     QByteArray encryptedIlk = QByteArray::fromHex(block->items[12].value.toLocal8Bit());
     QByteArray verificationTag = QByteArray::fromHex(block->items[13].value.toLocal8Bit());
-    QByteArray encryptedIdentityKeys;
-    encryptedIdentityKeys.append(encryptedImk);
-    encryptedIdentityKeys.append(encryptedIlk);
+    QByteArray encryptedIdentityKeys = encryptedImk + encryptedIlk;
     QByteArray plainText;
     for (size_t i=0; i<11; i++) plainText.append(block->items[i].toByteArray());
 
@@ -501,6 +499,36 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
 }
 
 /*!
+ * Encrypts \a message under the secret key \a key and
+ * the initialization vector \a iv, adding in \a additionalData
+ * as additional data for the authenticated encryption.
+ *
+ * The returned data contains the encrypted ciphertext as well
+ * as the generated authentication tag, which is being appended
+ * right after the ciphertext.
+ */
+
+QByteArray CryptUtil::aesGcmEncrypt(QByteArray message, QByteArray additionalData,
+                                    QByteArray iv, QByteArray key)
+{
+    int len = message.length() + 16;
+    QByteArray cipherText(len, 0);
+
+    crypto_aead_aes256gcm_encrypt(
+                reinterpret_cast<unsigned char*>(cipherText.data()),
+                reinterpret_cast<unsigned long long*>(&len),
+                reinterpret_cast<const unsigned char*>(message.constData()),
+                static_cast<unsigned long long>(message.length()),
+                reinterpret_cast<const unsigned char*>(additionalData.constData()),
+                static_cast<unsigned long long>(additionalData.length()),
+                nullptr,
+                reinterpret_cast<const unsigned char*>(iv.constData()),
+                reinterpret_cast<const unsigned char*>(key.constData()));
+
+    return cipherText;
+}
+
+/*!
  * Generates and returns a random 256 bit identity unlock key (IUK).
  * Returns \c nullptr if the operation fails.
  */
@@ -577,24 +605,92 @@ bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
                                QString password, QProgressDialog *progressDialog)
 {
     bool ok = false;
-    QByteArray iv(12, 0);
+    QByteArray initVec(12, 0);
+    QByteArray randomSalt(16, 0);
 
-    ok = getRandomBytes(iv);
+    /****** Block 1 *******/
 
-    // Generate IUK
+    // Generate the random values we'll need
+    ok = getRandomBytes(initVec);
+    if (!ok) return false;
+    ok = getRandomBytes(randomSalt);
+    if (!ok) return false;
+
+    // Generate IUK, IMK, ILK and rescue code
     QByteArray iuk = createIuk();
-    if (iuk == nullptr) return false;
-
-    // Create IMK and ILK
     QByteArray imk = createImkFromIuk(iuk);
     QByteArray ilk = createIlkFromIuk(iuk);
-    if (imk == nullptr || ilk == nullptr) return false;
-
-    // Generate rescue code
     rescueCode = createNewRescueCode();
-    if (rescueCode == nullptr) return false;
 
-    // TODO: implement!
+    if (iuk == nullptr || imk == nullptr ||
+        ilk == nullptr || rescueCode == nullptr) return false;
+
+    qDebug("IUK: " + iuk.toHex());
+    qDebug("IMK: " + imk.toHex());
+    qDebug("ILK: " + ilk.toHex());
+    qDebug("RC: " + rescueCode.toLocal8Bit());
+
+    IdentityBlock block1 = IdentityParser::createEmptyBlock(1);
+    block1.items[0].value = "125"; // Length
+    block1.items[1].value = "1";   // Type
+    block1.items[2].value = "45";  // Plain text length
+    block1.items[3].value = initVec.toHex();  // AES GCM initialization vector
+    block1.items[4].value = randomSalt.toHex();  // Scrypt random salt
+    block1.items[5].value = "9";  // Scrypt log-n-factor
+    block1.items[6].value = "100";  // Scrypt iterations //TODO: calculate!!!
+    block1.items[7].value = "499";  // Option flags
+    block1.items[8].value = "4";  // QuickPass length
+    block1.items[9].value = "5";  // Password verify seconds
+    block1.items[10].value = "15";  // QuickPass timeout
+
+    // Derive key from password
+    QByteArray key = createKeyFromPassword(&block1, password, progressDialog);
+
+    // Encrypt identity keys
+    QByteArray unencryptedKeys = imk + ilk;
+    QByteArray additionalData;
+    for (size_t i=0; i<11; i++) additionalData.append(block1.items[i].toByteArray());
+    QByteArray encryptedData = aesGcmEncrypt(unencryptedKeys, additionalData, initVec, key);
+    QByteArray encryptedImk = encryptedData.left(32);
+    QByteArray encryptedIlk = encryptedData.mid(32, 32);
+    QByteArray authTag = encryptedData.right(16);
+
+    block1.items[11].value = encryptedImk.toHex();  // IMK
+    block1.items[12].value = encryptedIlk.toHex();  // ILK
+    block1.items[13].value = authTag.toHex();  // Authentication tag
+
+    // Add the block to the identity
+    identity.blocks.push_back(block1);
+
+    /****** Block 2 *******/
+
+    initVec.fill(0);  // Initialization vector for IUK encryption is all zeros
+    ok = getRandomBytes(randomSalt); // New random salt for the scrypt operation
+    if (!ok) return false;
+
+    IdentityBlock block2 = IdentityParser::createEmptyBlock(2);
+    block2.items[0].value = "73"; // Length
+    block2.items[1].value = "2";   // Type
+    block2.items[2].value = randomSalt.toHex();  // Scrypt random salt
+    block2.items[3].value = "9";  // Scrypt log-n-factor
+    block2.items[4].value = "100";  // Scrypt iterations //TODO: calculate!!!
+
+    // Derive key from rescue code
+    ok = enSCryptIterations(key, rescueCode, randomSalt, 9, 100, progressDialog);
+    if (!ok) return false;
+
+    // Encrypt IUK
+    additionalData.clear();
+    for (size_t i=0; i<5; i++) additionalData.append(block2.items[i].toByteArray());
+    encryptedData = aesGcmEncrypt(iuk, additionalData, initVec, key);
+    QByteArray encryptedIuk = encryptedData.left(32);
+    authTag = encryptedData.right(16);
+
+    block2.items[5].value = encryptedIuk.toHex();  // Encrypted IUK
+    block2.items[6].value = authTag.toHex();  // Verification tag
+
+    // Add the block to the identity
+    identity.blocks.push_back(block2);
 
     return true;
 }
