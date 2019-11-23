@@ -50,12 +50,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pScrollArea->setWidgetResizable(true);
     controlUnauthenticatedChanges();
 
+    connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
     connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::saveFile);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
     connect(ui->actionPasteIdentityData, &QAction::triggered, this, &MainWindow::pasteIdentityText);
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
-    connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
+    connect(ui->actionBuildNewIdentity, &QAction::triggered, this, &MainWindow::buildNewIdentity);
     connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::showBlockDesigner);
     connect(ui->actionDecryptImkIlk, &QAction::triggered, this, &MainWindow::decryptImkIlk);
     connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::decryptIuk);
@@ -63,26 +64,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
-
-    // Test
-    QString rc = CryptUtil::createNewRescueCode();
-    QString rcf = CryptUtil::formatRescueCode(rc);
-
-    // Test resccue code character distribution
-    /*
-    QMap<QChar, long> dist;
-    for (int i=0; i<500000; i++)
-    {
-        QString rc = CryptUtil::CreateNewRescueCode();
-
-        for (QChar c : rc)
-        {
-            if (!dist.contains(c)) dist.insert(c, 0);
-            dist[c]++;
-        }
-    }
-    int x = dist.count();
-    */
 }
 
 MainWindow::~MainWindow()
@@ -97,6 +78,85 @@ void MainWindow::showNoIdentityLoadedError()
 {
     QMessageBox msgBox(this);
     msgBox.critical(this, tr("Error"), tr("An identity needs to be loaded in order to complete this operation!"));
+}
+
+bool MainWindow::canDiscardCurrentIdentity()
+{
+    if (m_pUiBuilder->hasBlocks())
+    {
+        QMessageBox msgBox;
+        msgBox.setText(tr("This operation will discard any existing identity information!"));
+        msgBox.setInformativeText(tr("Do you really want to create a new identity and discard all changes?"));
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+
+        if (msgBox.exec() != QMessageBox::Ok) return false;
+    }
+
+    return true;
+}
+
+void MainWindow::createNewIdentity()
+{
+    IdentityModel identity;
+    QString rescueCode;
+    bool ok = false;
+
+    if (!canDiscardCurrentIdentity()) return;
+
+    QString password = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Identity password:"),
+                QLineEdit::Password,
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    QString password2;
+    do
+    {
+        password2 = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Confirm password:"),
+                QLineEdit::Password,
+                "",
+                &ok);
+
+        if (!ok) return;
+    }
+    while (password != password2);
+
+    QProgressDialog progressDialog(tr("Generating and encrypting identity..."), tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
+    ok = CryptUtil::createIdentity(identity, rescueCode, password, &progressDialog);
+
+    progressDialog.close();
+
+    if (!ok)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error"));
+        msgBox.setText(tr("An error occured while creating the identity or the operation was aborted by the user."));
+        msgBox.exec();
+    }
+
+    m_pIdentityModel->clear();
+    m_pIdentityModel->blocks = identity.blocks;
+    m_pUiBuilder->rebuild();
+
+    QInputDialog resultDialog(this);
+    resultDialog.setInputMode(QInputDialog::TextInput);
+    resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+    resultDialog.resize(700, 250);
+    resultDialog.setWindowTitle(tr("Success"));
+    resultDialog.setLabelText(tr("The identity was successfully created!"));
+    resultDialog.setTextValue("Rescue code: " + CryptUtil::formatRescueCode(rescueCode));
+    resultDialog.exec();
 }
 
 void MainWindow::openFile()
@@ -220,7 +280,7 @@ void MainWindow::controlUnauthenticatedChanges()
     m_pUiBuilder->setEnableUnauthenticatedChanges(
                 enable, true);
 
-    ui->actionCreateNewIdentity->setVisible(enable);
+    ui->actionBuildNewIdentity->setVisible(enable);
 }
 
 void MainWindow::pasteIdentityText()
@@ -256,21 +316,11 @@ void MainWindow::pasteIdentityText()
     }
 }
 
-void MainWindow::createNewIdentity()
+void MainWindow::buildNewIdentity()
 {
     QString sBlockType;
 
-    if (m_pUiBuilder->hasBlocks())
-    {
-        QMessageBox msgBox;
-        msgBox.setText(tr("This operation will discard any existing identity information!"));
-        msgBox.setInformativeText(tr("Do you really want to create a new identity and discard all changes?"));
-        msgBox.setIcon(QMessageBox::Question);
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-
-        if (msgBox.exec() != QMessageBox::Ok) return;
-    }
+    if (!canDiscardCurrentIdentity()) return;
 
     bool ok = UiBuilder::showGetBlockTypeDialog(&sBlockType);
     if (!ok) return;
@@ -343,6 +393,8 @@ void MainWindow::createSiteKeys()
                 pBlock,
                 password,
                 &progressDialog);
+
+    progressDialog.close();
 
     QByteArray decryptedImk(32, 0);
     QByteArray decryptedIlk(32, 0);
@@ -424,6 +476,8 @@ void MainWindow::decryptImkIlk()
                 password,
                 &progressDialog);
 
+    progressDialog.close();
+
     QByteArray decryptedImk(32, 0);
     QByteArray decryptedIlk(32, 0);
 
@@ -490,14 +544,17 @@ void MainWindow::decryptIuk()
     QProgressDialog progressDialog(tr("Decrypting identity unlock key..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    if (!CryptUtil::decryptBlock2(
+    ok = CryptUtil::decryptBlock2(
                 decryptedIuk,
                 pBlock2,
                 rescueCode,
-                &progressDialog))
+                &progressDialog);
+
+    progressDialog.close();
+
+    if (!ok)
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Decryption of identity unlock key failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"), tr("Decryption of identity unlock key failed! Wrong password?"));
         return;
     }
 
@@ -577,6 +634,8 @@ void MainWindow::decryptPreviousIuks()
                     password,
                     &progressDialog);
 
+        progressDialog.close();
+
         if (!CryptUtil::decryptBlock1(
                     decryptedImk,
                     decryptedIlk,
@@ -616,11 +675,15 @@ void MainWindow::decryptPreviousIuks()
 
         QByteArray decryptedIuk(32, 0);
 
-        if (!CryptUtil::decryptBlock2(
+        ok = CryptUtil::decryptBlock2(
                     decryptedIuk,
                     pBlock2,
                     rescueCode,
-                    &progressDialog))
+                    &progressDialog);
+
+        progressDialog.close();
+
+        if (!ok)
         {
             QMessageBox msgBox(this);
             msgBox.critical(this, tr("Error"), tr("Decryption of identity unlock key failed! Wrong password?"));

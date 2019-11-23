@@ -637,13 +637,15 @@ bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
     block1.items[3].value = initVec.toHex();  // AES GCM initialization vector
     block1.items[4].value = randomSalt.toHex();  // Scrypt random salt
     block1.items[5].value = "9";  // Scrypt log-n-factor
-    block1.items[6].value = "100";  // Scrypt iterations //TODO: calculate!!!
+    block1.items[6].value = "50";  // Scrypt iterations //TODO: calculate!!!
     block1.items[7].value = "499";  // Option flags
     block1.items[8].value = "4";  // QuickPass length
     block1.items[9].value = "5";  // Password verify seconds
     block1.items[10].value = "15";  // QuickPass timeout
 
     // Derive key from password
+    if (progressDialog != nullptr) progressDialog->setLabelText(
+                QObject::tr("Encrypting block 1..."));
     QByteArray key = createKeyFromPassword(&block1, password, progressDialog);
 
     // Encrypt identity keys
@@ -673,10 +675,12 @@ bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
     block2.items[1].value = "2";   // Type
     block2.items[2].value = randomSalt.toHex();  // Scrypt random salt
     block2.items[3].value = "9";  // Scrypt log-n-factor
-    block2.items[4].value = "100";  // Scrypt iterations //TODO: calculate!!!
+    block2.items[4].value = "50";  // Scrypt iterations //TODO: calculate!!!
 
     // Derive key from rescue code
-    ok = enSCryptIterations(key, rescueCode, randomSalt, 9, 100, progressDialog);
+    if (progressDialog != nullptr) progressDialog->setLabelText(
+                QObject::tr("Encrypting block 2..."));
+    ok = enSCryptIterations(key, rescueCode, randomSalt, 9, 50, progressDialog);
     if (!ok) return false;
 
     // Encrypt IUK

@@ -48,14 +48,18 @@ public:
     ~MainWindow();
     void showNoIdentityLoadedError();
 
+private:
+    bool canDiscardCurrentIdentity();
+
 private slots:
+    void createNewIdentity();
     void openFile();
     void saveFile();
     void showAboutDialog();
     void showIdentitySettingsDialog();
     void controlUnauthenticatedChanges();
     void pasteIdentityText();
-    void createNewIdentity();
+    void buildNewIdentity();
     void showBlockDesigner();
     void createSiteKeys();
     void decryptImkIlk();
