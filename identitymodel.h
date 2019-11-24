@@ -61,6 +61,7 @@ public:
     bool moveBlock(IdentityBlock* block, bool up);
     bool insertBlock(IdentityBlock block, IdentityBlock* after);
     void clear();
+    void import(IdentityModel& model);
 };
 
 class IdentityBlock

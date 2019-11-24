@@ -138,6 +138,12 @@ void IdentityModel::clear()
     blocks.clear();
 }
 
+void IdentityModel::import(IdentityModel &model)
+{
+    clear();
+    blocks = model.blocks;
+}
+
 IdentityBlockItem *IdentityBlock::getItem(QString name)
 {
     for (auto iter=items.begin(); iter!=items.end(); iter++)

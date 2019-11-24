@@ -86,7 +86,7 @@ bool MainWindow::canDiscardCurrentIdentity()
     {
         QMessageBox msgBox;
         msgBox.setText(tr("This operation will discard any existing identity information!"));
-        msgBox.setInformativeText(tr("Do you really want to create a new identity and discard all changes?"));
+        msgBox.setInformativeText(tr("Do you really want to continue and discard all unsaved changes?"));
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Ok);
@@ -108,7 +108,7 @@ void MainWindow::createNewIdentity()
     QString password = QInputDialog::getText(
                 nullptr,
                 tr(""),
-                tr("Identity password:"),
+                tr("Set identity master password:"),
                 QLineEdit::Password,
                 "",
                 &ok);
@@ -139,14 +139,12 @@ void MainWindow::createNewIdentity()
 
     if (!ok)
     {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error"));
-        msgBox.setText(tr("An error occured while creating the identity or the operation was aborted by the user."));
-        msgBox.exec();
+        QMessageBox::critical(this, tr("Error"), tr("An error occured while creating the identity "
+                                                    "or the operation was aborted by the user."));
+        return;
     }
 
-    m_pIdentityModel->clear();
-    m_pIdentityModel->blocks = identity.blocks;
+    m_pIdentityModel->import(identity);
     m_pUiBuilder->rebuild();
 
     QInputDialog resultDialog(this);
@@ -157,13 +155,16 @@ void MainWindow::createNewIdentity()
     resultDialog.setLabelText(tr("The identity was successfully created!"));
     resultDialog.setTextValue("Rescue code: " + CryptUtil::formatRescueCode(rescueCode));
     resultDialog.exec();
+
+    saveFile();
 }
 
 void MainWindow::openFile()
 {
     QString dir = nullptr;
 
-    const QStringList dirs = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+    const QStringList dirs = QStandardPaths::standardLocations(
+                QStandardPaths::DocumentsLocation);
     if (dirs.count() > 0)
     {
         dir = QDir(dirs[0]).filePath("SQRL/");
