@@ -64,15 +64,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
-
-    QFile file("C:\\Users\\Alex\\Documents\\SQRL\\AlexDev#1.sqrl");
-    if (!file.open(QIODevice::ReadOnly)) return;
-    QByteArray identityData = file.readAll();
-    identityData = identityData.right(identityData.count()-8-125);
-    //identityData = QByteArray::fromHex("3aff99e800440f01");
-
-    QString textualId = CryptUtil::base56EncodeIdentity(identityData);
-    qDebug() << textualId;
 }
 
 MainWindow::~MainWindow()

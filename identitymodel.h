@@ -28,6 +28,7 @@
 #define IDENTITYMODEL_H
 
 #include "common.h"
+#include "cryptutil.h"
 
 struct ItemDataTypeInfo
 {
@@ -62,6 +63,7 @@ public:
     bool insertBlock(IdentityBlock block, IdentityBlock* after);
     void clear();
     void import(IdentityModel& model);
+    QString getTextualVersion();
 };
 
 class IdentityBlock

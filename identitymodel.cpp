@@ -144,6 +144,16 @@ void IdentityModel::import(IdentityModel &model)
     blocks = model.blocks;
 }
 
+QString IdentityModel::getTextualVersion()
+{
+    IdentityBlock* block2 = getBlock(2);
+    if (block2 == nullptr) return "";
+
+    QByteArray identityData = block2->toByteArray();
+
+    return CryptUtil::base56EncodeIdentity(identityData);
+}
+
 IdentityBlockItem *IdentityBlock::getItem(QString name)
 {
     for (auto iter=items.begin(); iter!=items.end(); iter++)
