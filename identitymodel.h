@@ -67,6 +67,7 @@ public:
     void clear();
     void import(IdentityModel& model);
     QString getTextualVersion();
+    QString getTextualVersionFormatted();
 };
 
 class IdentityBlock

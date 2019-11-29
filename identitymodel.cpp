@@ -155,6 +155,12 @@ QString IdentityModel::getTextualVersion()
     return CryptUtil::base56EncodeIdentity(identityData);
 }
 
+QString IdentityModel::getTextualVersionFormatted()
+{
+    return CryptUtil::formatTextualIdentity(
+                getTextualVersion());
+}
+
 IdentityBlockItem *IdentityBlock::getItem(QString name)
 {
     for (auto iter=items.begin(); iter!=items.end(); iter++)

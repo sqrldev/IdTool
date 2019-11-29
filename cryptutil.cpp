@@ -887,3 +887,35 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
 
     return textualId;
 }
+
+/*!
+ * Formats the given \a textualIdentity string to groups of 5x4 characters
+ * per line, separated by a space.
+ *
+ * The output looks something like this:
+ *
+ * jWJX JmD3 hUKQ qcRQ YRis
+ * Gnmx uQHs LaE5 vR2f V7At
+ * vW5g UQ5m B5kK gBjH 9uJr
+ * JQEF T7sm yYm7 USzH tmfu
+ * 6ktj U86K Dqdz p8Gh TfZS
+ * UA8a G3F
+ */
+
+QString CryptUtil::formatTextualIdentity(QString textualIdentity)
+{
+    QByteArray result;
+
+    for (int i=0; i<textualIdentity.length(); i++)
+    {
+        result.append(textualIdentity.at(i));
+        if ((i+1) % 20 == 0)
+        {
+            result.append("\r\n");
+            continue;
+        }
+        if ((i+1) % 4 == 0) result.append(" ");
+    }
+
+    return result;
+}

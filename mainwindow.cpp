@@ -147,11 +147,12 @@ void MainWindow::createNewIdentity()
     m_pIdentityModel->import(identity);
     m_pUiBuilder->rebuild();
 
-    QString messageText = "Rescue code: " + CryptUtil::formatRescueCode(rescueCode);
+    QString messageText = "!!!!" + tr("RECORD THIS INFORMATION AND STORE IT SAFELY") + "!!!!\r\n\r\n" ;
+    messageText += tr("Rescue code:") + " " + CryptUtil::formatRescueCode(rescueCode);
     messageText += "\r\n\r\n";
-    messageText += "Textual version of the identity:";
+    messageText += tr("Textual version of the identity:");
     messageText += "\r\n\r\n";
-    messageText += identity.getTextualVersion();
+    messageText += identity.getTextualVersionFormatted();
 
     QInputDialog resultDialog(this);
     resultDialog.setInputMode(QInputDialog::TextInput);
@@ -205,7 +206,8 @@ void MainWindow::saveFile()
 {
     QString dir = nullptr;
 
-    const QStringList dirs = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+    const QStringList dirs = QStandardPaths::standardLocations(
+                QStandardPaths::DocumentsLocation);
     if (dirs.count() > 0)
     {
         dir = QDir(dirs[0]).filePath("SQRL/");
@@ -236,7 +238,8 @@ void MainWindow::showAboutDialog()
     message.append(tr("Author") + ": ");
     message.append("Alex Hauser<br><br>");
     message.append(tr("IdTool is open source software") + ":<br>");
-    message.append("<a href=\"https://github.com/alexhauser/IdTool\">https://github.com/alexhauser/IdTool</a>");
+    message.append("<a href=\"https://github.com/sqrldev/IdTool\">"
+                   "https://github.com/sqrldev/IdTool</a>");
 
     QMessageBox::about(this, "About", message);
 }

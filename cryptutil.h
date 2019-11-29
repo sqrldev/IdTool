@@ -63,6 +63,7 @@ public:
     static QByteArray reverseByteArray(QByteArray source);
     static BigUnsigned convertRawDataToBigUnsigned(QByteArray data);
     static QString base56EncodeIdentity(QByteArray identityData);
+    static QString formatTextualIdentity(QString textualIdentity);
 };
 
 #endif // CRYPTUTIL_H
