@@ -777,3 +777,147 @@ bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
 
     return true;
 }
+
+/*!
+ * Performs a long division (unsined integer division) on a byte array
+ * \a bigNumber, using \a divisor as divisor.
+ *
+ * If successful, it places the result of the division in \a result and
+ * the remainder of the division in \a remainder.
+ *
+ * \return Returns \c true on success, and \c false otherwise.
+ */
+
+bool CryptUtil::longDivideBigNumber(QByteArray& result, int& remainder, QByteArray bigNumber, int divisor)
+{
+    if (divisor == 0)
+        throw std::runtime_error("Division by zero!");
+
+    bigNumber = reverseByteArray(bigNumber);
+
+    // Create bit arrays of the appropriate size
+    int nrOfBits = bigNumber.count()*8;
+    QBitArray bigNumberBits(nrOfBits);
+    QBitArray quotientBits(nrOfBits, false);
+
+    // Convert from QByteArray to QBitArray
+    for(int i=0; i<bigNumber.count(); ++i) {
+        for(int b=0; b<8;b++) {
+            bigNumberBits.setBit( i*8+b, bigNumber.at(i)&(1<<b) );
+        }
+    }
+
+    // Reset result and remainder
+    result = QByteArray(bigNumber.count(), 0);
+    remainder = 0;
+
+    // Do the actual division
+    for (int i=nrOfBits-1; i >=0; i--)
+    {
+      remainder <<= 1;
+
+      remainder |= 0x00000001 & (bigNumberBits[i] ? 1 : 0);
+      if (remainder >= divisor)
+      {
+        remainder = remainder-divisor;
+        quotientBits[i] = true;
+      }
+    }
+
+    // Convert back from QBitArray to QByteArray
+    for(int b=0; b<quotientBits.count();++b) {
+        result[b/8] = (result.at(b/8) | ((quotientBits[b]?1:0)<<(b%8)));
+    }
+
+    result = reverseByteArray(result);
+
+    // Remove leading zeroes from result
+    while (result.count() > 0 && result.at(0) == 0x00) result.remove(0,1);
+
+    return true;
+}
+
+/*!
+ * Reverts the given byte array and returns the result.
+ * e.g \c "\0x00\0xFF" becomes \c "\0xFF\0x00"
+ */
+
+QByteArray CryptUtil::reverseByteArray(QByteArray source)
+{
+    QByteArray result;
+    result.reserve(source.size());
+
+    for (int i=source.size()-1; i>=0; i--)
+        result.append(source.at(i));
+
+    return result;
+}
+
+/*!
+ * Creates a base-56-encoded textual representation of the provided
+ * binary \a identityData.
+ *
+ * See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf for
+ * more information.
+ */
+
+QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
+{
+    QByteArray BASE56_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+    QByteArray textualId;
+    QByteArray divResult;
+    int divRemainder;
+    crypto_hash_sha256_state state;
+    crypto_hash_sha256_init(&state);
+    unsigned char hash[crypto_hash_sha256_BYTES];
+
+    int charsOnLine = 0;
+    unsigned char line = 0;
+
+    QByteArray bigNumber = identityData;
+    int expectedLength = static_cast<int>(ceil((bigNumber.count()*8)/(log(56)/log(2))));
+
+    for (int i=0; i<expectedLength; i++)
+    {
+        if(charsOnLine == 19)
+        {
+            crypto_hash_sha256_update(&state, &line, 1);
+            crypto_hash_sha256_final(&state, hash);
+            QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash), crypto_hash_sha256_BYTES);
+            checksum = CryptUtil::reverseByteArray(checksum);
+            QByteArray res(checksum.count(), 0);
+            int r = 0;
+            CryptUtil::longDivideBigNumber(res, r, checksum, 56);
+            textualId.append(BASE56_ALPHABET[r]);
+            crypto_hash_sha256_init(&state);
+            line++;
+            charsOnLine = 0;
+        }
+
+        if (bigNumber.count() == 0)
+        {
+            // pad with "zero"
+            textualId.append(BASE56_ALPHABET[0]);
+            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(&BASE56_ALPHABET.constData()[0]), 1);
+        }
+        else
+        {
+            CryptUtil::longDivideBigNumber(divResult, divRemainder, bigNumber, 56);
+            textualId.append(BASE56_ALPHABET[divRemainder]);
+            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(&BASE56_ALPHABET.constData()[divRemainder]), 1);
+            bigNumber = divResult;
+        }
+        charsOnLine++;
+    }
+
+    crypto_hash_sha256_update(&state, &line, 1);
+    crypto_hash_sha256_final(&state, hash);
+    QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash), crypto_hash_sha256_BYTES);
+    checksum = CryptUtil::reverseByteArray(checksum);
+    QByteArray res(checksum.count(), 0);
+    int r = 0;
+    CryptUtil::longDivideBigNumber(res, r, checksum, 56);
+    textualId.append(BASE56_ALPHABET[r]);
+
+    return textualId;
+}
