@@ -887,8 +887,6 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
 {
     QByteArray BASE56_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
     QByteArray textualId;
-    QByteArray divResult;
-    int divRemainder;
     crypto_hash_sha256_state state;
     crypto_hash_sha256_init(&state);
     unsigned char hash[crypto_hash_sha256_BYTES];
@@ -896,8 +894,8 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
     int charsOnLine = 0;
     unsigned char line = 0;
 
-    QByteArray bigNumber = identityData;
-    int expectedLength = static_cast<int>(ceil((bigNumber.count()*8)/(log(56)/log(2))));
+    int expectedLength = static_cast<int>(ceil((identityData.count()*8)/(log(56)/log(2))));
+    BigUnsigned bigNumber = convertRawDataToBigUnsigned(reverseByteArray(identityData));
 
     for (int i=0; i<expectedLength; i++)
     {
@@ -907,16 +905,16 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
             crypto_hash_sha256_final(&state, hash);
             QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash), crypto_hash_sha256_BYTES);
             checksum = CryptUtil::reverseByteArray(checksum);
-            QByteArray res(checksum.count(), 0);
-            int r = 0;
-            CryptUtil::longDivideBigNumber(res, r, checksum, 56);
-            textualId.append(BASE56_ALPHABET[r]);
+            BigUnsigned checksumNum = convertRawDataToBigUnsigned(checksum);
+            BigUnsigned q;
+            checksumNum.divideWithRemainder(56, q); // checksum holds the remainder after this op
+            textualId.append(BASE56_ALPHABET[checksum.toInt()]);
             crypto_hash_sha256_init(&state);
             line++;
             charsOnLine = 0;
         }
 
-        if (bigNumber.count() == 0)
+        if (bigNumber.isZero())
         {
             // pad with "zero"
             textualId.append(BASE56_ALPHABET[0]);
@@ -924,10 +922,11 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
         }
         else
         {
-            CryptUtil::longDivideBigNumber(divResult, divRemainder, bigNumber, 56);
-            textualId.append(BASE56_ALPHABET[divRemainder]);
-            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(&BASE56_ALPHABET.constData()[divRemainder]), 1);
-            bigNumber = divResult;
+            BigUnsigned result(0);
+            bigNumber.divideWithRemainder(56, result); // bigNumber holds the remainder after this op
+            textualId.append(BASE56_ALPHABET[bigNumber.toInt()]);
+            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(&BASE56_ALPHABET.constData()[bigNumber.toInt()]), 1);
+            bigNumber = result;
         }
         charsOnLine++;
     }
@@ -936,10 +935,10 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
     crypto_hash_sha256_final(&state, hash);
     QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash), crypto_hash_sha256_BYTES);
     checksum = CryptUtil::reverseByteArray(checksum);
-    QByteArray res(checksum.count(), 0);
-    int r = 0;
-    CryptUtil::longDivideBigNumber(res, r, checksum, 56);
-    textualId.append(BASE56_ALPHABET[r]);
+    BigUnsigned checksumNum = convertRawDataToBigUnsigned(checksum);
+    BigUnsigned q;
+    checksumNum.divideWithRemainder(56, q); // checksum holds the remainder after this op
+    textualId.append(BASE56_ALPHABET[checksum.toInt()]);
 
     return textualId;
 }

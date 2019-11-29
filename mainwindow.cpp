@@ -69,12 +69,10 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!file.open(QIODevice::ReadOnly)) return;
     QByteArray identityData = file.readAll();
     identityData = identityData.right(identityData.count()-8-125);
-    identityData = QByteArray::fromHex("3aff99e800440f01");
+    //identityData = QByteArray::fromHex("3aff99e800440f01");
 
     QString textualId = CryptUtil::base56EncodeIdentity(identityData);
     qDebug() << textualId;
-
-
 }
 
 MainWindow::~MainWindow()
