@@ -26,6 +26,10 @@
 
 #include "cryptutil.h"
 
+const QByteArray CryptUtil::BASE56_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+const int CryptUtil::BASE56_LINE_MAX_CHARS = 19;
+const int CryptUtil::BASE56_BASE_NUM = 56;
+
 CryptUtil::CryptUtil() {}
 
 /*!
@@ -826,7 +830,6 @@ BigUnsigned CryptUtil::convertRawDataToBigUnsigned(QByteArray data)
 
 QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
 {
-    QByteArray BASE56_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
     QByteArray textualId;
     crypto_hash_sha256_state state;
     crypto_hash_sha256_init(&state);
@@ -835,35 +838,40 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
     unsigned char line = 0;
     BigUnsigned result(0);
 
-    int expectedLength = static_cast<int>(ceil((identityData.count()*8)/(log(56)/log(2))));
+    int maxLength = static_cast<int>(
+                ceil((identityData.count()*8)/(log(BASE56_BASE_NUM)/log(2)))
+                );
+
     BigUnsigned bigNumber = convertRawDataToBigUnsigned(identityData);
 
-    for (int i=0; i<expectedLength; i++)
+    for (int i=0; i<maxLength; i++)
     {
-        if(charsOnLine == 19)
+        if(charsOnLine == BASE56_LINE_MAX_CHARS) // add check character
         {
             crypto_hash_sha256_update(&state, &line, 1);
             crypto_hash_sha256_final(&state, hash);
-            QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash), crypto_hash_sha256_BYTES);
+            QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
+                                             crypto_hash_sha256_BYTES);
             BigUnsigned checksumNum = convertRawDataToBigUnsigned(checksum);
-            BigUnsigned remainder = checksumNum % 56;
+            BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
             textualId.append(BASE56_ALPHABET[remainder.toInt()]);
             crypto_hash_sha256_init(&state);
             line++;
             charsOnLine = 0;
         }
 
-        if (bigNumber.isZero())
+        if (bigNumber.isZero()) // zero padding
         {
-            // pad with "zero"
             textualId.append(BASE56_ALPHABET[0]);
-            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(&BASE56_ALPHABET.constData()[0]), 1);
+            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(
+                                          &BASE56_ALPHABET.constData()[0]), 1);
         }
         else
         {
-            bigNumber.divideWithRemainder(56, result); // bigNumber holds the remainder after this op
+            bigNumber.divideWithRemainder(BASE56_BASE_NUM, result); // bigNumber now holds remainder
             textualId.append(BASE56_ALPHABET[bigNumber.toInt()]);
-            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(&BASE56_ALPHABET.constData()[bigNumber.toInt()]), 1);
+            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(
+                                          &BASE56_ALPHABET.constData()[bigNumber.toInt()]), 1);
             bigNumber = result;
         }
         charsOnLine++;
@@ -871,9 +879,10 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
 
     crypto_hash_sha256_update(&state, &line, 1);
     crypto_hash_sha256_final(&state, hash);
-    QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash), crypto_hash_sha256_BYTES);
+    QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
+                                     crypto_hash_sha256_BYTES);
     BigUnsigned checksumNum = convertRawDataToBigUnsigned(checksum);
-    BigUnsigned remainder = checksumNum % 56;
+    BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
     textualId.append(BASE56_ALPHABET[remainder.toInt()]);
 
     return textualId;

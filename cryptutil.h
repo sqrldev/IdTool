@@ -35,6 +35,11 @@
 class CryptUtil
 {
 public:
+    static const QByteArray BASE56_ALPHABET;
+    static const int BASE56_LINE_MAX_CHARS;
+    static const int BASE56_BASE_NUM;
+
+public:
     CryptUtil();
     static QByteArray xorByteArrays(QByteArray a, QByteArray b);
     static bool getRandomBytes(QByteArray& buffer);
