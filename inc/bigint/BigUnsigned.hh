@@ -20,11 +20,11 @@ public:
 	typedef unsigned long Blk;
 
 	typedef NumberlikeArray<Blk>::Index Index;
-	NumberlikeArray<Blk>::N;
+    using NumberlikeArray<Blk>::N;
 
 protected:
 	// Creates a BigUnsigned with a capacity; for internal use.
-	BigUnsigned(int, Index c) : NumberlikeArray<Blk>(0, c) {}
+    BigUnsigned(int, Index c) : NumberlikeArray<Blk>(nullptr, c) {}
 
 	// Decreases len to eliminate any leading zero blocks.
 	void zapLeadingZeros() { 
@@ -84,8 +84,8 @@ public:
 	// BIT/BLOCK ACCESSORS
 
 	// Expose these from NumberlikeArray directly.
-	NumberlikeArray<Blk>::getCapacity;
-	NumberlikeArray<Blk>::getLength;
+    using NumberlikeArray<Blk>::getCapacity;
+    using NumberlikeArray<Blk>::getLength;
 
 	/* Returns the requested block, or 0 if it is beyond the length (as if
 	 * the number had 0s infinitely to the left). */
