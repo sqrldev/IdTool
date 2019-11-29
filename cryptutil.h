@@ -29,22 +29,41 @@
 
 #include "common.h"
 #include "identitymodel.h"
+#include "identityparser.h"
 #include "sodium.h"
 
 class CryptUtil
 {
 public:
+    static const QByteArray BASE56_ALPHABET;
+    static const int BASE56_LINE_MAX_CHARS;
+    static const int BASE56_BASE_NUM;
+
+public:
     CryptUtil();
     static QByteArray xorByteArrays(QByteArray a, QByteArray b);
+    static bool getRandomBytes(QByteArray& buffer);
+    static bool getRandomByte(unsigned char& byte);
     static bool enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt, int logNFactor, int iterationCount, QProgressDialog* progressDialog = nullptr);
+    static bool enSCryptTime(QByteArray& result, int& iterationCount, QString password, QByteArray randomSalt, int logNFactor, int secondsToRun, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QByteArray key);
     static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
     static QByteArray createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog = nullptr);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
+    static QByteArray createIlkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
     static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
+    static QByteArray aesGcmEncrypt(QByteArray message, QByteArray additionalData, QByteArray iv, QByteArray key);
+    static QByteArray createIuk();
+    static QString createNewRescueCode();
+    static QString formatRescueCode(QString rescueCode);
+    static bool createIdentity(IdentityModel& identity, QString &rescueCode, QString password, QProgressDialog *progressDialog = nullptr);
+    static QByteArray reverseByteArray(QByteArray source);
+    static BigUnsigned convertRawDataToBigUnsigned(QByteArray data);
+    static QString base56EncodeIdentity(QByteArray identityData);
+    static QString formatTextualIdentity(QString textualIdentity);
 };
 
 #endif // CRYPTUTIL_H

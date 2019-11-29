@@ -26,6 +26,7 @@
 
 #include "identitymodel.h"
 #include "identityparser.h"
+#include "cryptutil.h"
 
 void IdentityModel::writeToFile(QString fileName)
 {
@@ -136,6 +137,28 @@ bool IdentityModel::insertBlock(IdentityBlock block, IdentityBlock* after)
 void IdentityModel::clear()
 {
     blocks.clear();
+}
+
+void IdentityModel::import(IdentityModel &model)
+{
+    clear();
+    blocks = model.blocks;
+}
+
+QString IdentityModel::getTextualVersion()
+{
+    IdentityBlock* block2 = getBlock(2);
+    if (block2 == nullptr) return "";
+
+    QByteArray identityData = block2->toByteArray();
+
+    return CryptUtil::base56EncodeIdentity(identityData);
+}
+
+QString IdentityModel::getTextualVersionFormatted()
+{
+    return CryptUtil::formatTextualIdentity(
+                getTextualVersion());
 }
 
 IdentityBlockItem *IdentityBlock::getItem(QString name)

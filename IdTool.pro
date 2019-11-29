@@ -30,6 +30,11 @@ SOURCES += \
         identitymodel.cpp \
         identityparser.cpp \
         idsetdialog.cpp \
+        inc/bigint/BigInteger.cc \
+        inc/bigint/BigIntegerAlgorithms.cc \
+        inc/bigint/BigIntegerUtils.cc \
+        inc/bigint/BigUnsigned.cc \
+        inc/bigint/BigUnsignedInABase.cc \
         itemeditordialog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -42,6 +47,13 @@ HEADERS += \
         identitymodel.h \
         identityparser.h \
         idsetdialog.h \
+        inc/bigint/BigInteger.hh \
+        inc/bigint/BigIntegerAlgorithms.hh \
+        inc/bigint/BigIntegerLibrary.hh \
+        inc/bigint/BigIntegerUtils.hh \
+        inc/bigint/BigUnsigned.hh \
+        inc/bigint/BigUnsignedInABase.hh \
+        inc/bigint/NumberlikeArray.hh \
         itemeditordialog.h \
         mainwindow.h \
         uibuilder.h
