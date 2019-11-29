@@ -779,65 +779,6 @@ bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
 }
 
 /*!
- * Performs a long division (unsined integer division) on a byte array
- * \a bigNumber, using \a divisor as divisor.
- *
- * If successful, it places the result of the division in \a result and
- * the remainder of the division in \a remainder.
- *
- * \return Returns \c true on success, and \c false otherwise.
- */
-
-bool CryptUtil::longDivideBigNumber(QByteArray& result, int& remainder, QByteArray bigNumber, int divisor)
-{
-    if (divisor == 0)
-        throw std::runtime_error("Division by zero!");
-
-    bigNumber = reverseByteArray(bigNumber);
-
-    // Create bit arrays of the appropriate size
-    int nrOfBits = bigNumber.count()*8;
-    QBitArray bigNumberBits(nrOfBits);
-    QBitArray quotientBits(nrOfBits, false);
-
-    // Convert from QByteArray to QBitArray
-    for(int i=0; i<bigNumber.count(); ++i) {
-        for(int b=0; b<8;b++) {
-            bigNumberBits.setBit( i*8+b, bigNumber.at(i)&(1<<b) );
-        }
-    }
-
-    // Reset result and remainder
-    result = QByteArray(bigNumber.count(), 0);
-    remainder = 0;
-
-    // Do the actual division
-    for (int i=nrOfBits-1; i >=0; i--)
-    {
-      remainder <<= 1;
-
-      remainder |= 0x00000001 & (bigNumberBits[i] ? 1 : 0);
-      if (remainder >= divisor)
-      {
-        remainder = remainder-divisor;
-        quotientBits[i] = true;
-      }
-    }
-
-    // Convert back from QBitArray to QByteArray
-    for(int b=0; b<quotientBits.count();++b) {
-        result[b/8] = (result.at(b/8) | ((quotientBits[b]?1:0)<<(b%8)));
-    }
-
-    result = reverseByteArray(result);
-
-    // Remove leading zeroes from result
-    while (result.count() > 0 && result.at(0) == 0x00) result.remove(0,1);
-
-    return true;
-}
-
-/*!
  * Reversers the given byte array and returns the result.
  * e.g \c "\0x00\0xFF" becomes \c "\0xFF\0x00"
  */

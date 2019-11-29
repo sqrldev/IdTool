@@ -55,7 +55,6 @@ public:
     static QString createNewRescueCode();
     static QString formatRescueCode(QString rescueCode);
     static bool createIdentity(IdentityModel& identity, QString &rescueCode, QString password, QProgressDialog *progressDialog = nullptr);
-    static bool longDivideBigNumber(QByteArray& result, int& remainder, QByteArray bigNumber, int divisor);
     static QByteArray reverseByteArray(QByteArray source);
     static BigUnsigned convertRawDataToBigUnsigned(QByteArray data);
     static QString base56EncodeIdentity(QByteArray identityData);
