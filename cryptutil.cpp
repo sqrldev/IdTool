@@ -838,7 +838,7 @@ bool CryptUtil::longDivideBigNumber(QByteArray& result, int& remainder, QByteArr
 }
 
 /*!
- * Reverts the given byte array and returns the result.
+ * Reversers the given byte array and returns the result.
  * e.g \c "\0x00\0xFF" becomes \c "\0xFF\0x00"
  */
 
@@ -851,6 +851,28 @@ QByteArray CryptUtil::reverseByteArray(QByteArray source)
         result.append(source.at(i));
 
     return result;
+}
+
+/*!
+ * Converts a raw byte array into a \c BigUnsigned unsigned integer
+ * representation using Matt McCutchen's C++ Big Integer Library at
+ * https://mattmccutchen.net/bigint/ .
+ */
+
+BigUnsigned CryptUtil::convertRawDataToBigUnsigned(QByteArray data)
+{
+    BigUnsigned num(0), exp(1);
+
+    for (int i=0; i<data.count(); i++)
+    {
+        for (int j=0; j<8; j++)
+        {
+            if ((data.at(i) >> j) & 1) num += exp;
+            exp *= 2;
+        }
+    }
+
+    return num;
 }
 
 /*!

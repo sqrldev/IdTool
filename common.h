@@ -70,4 +70,6 @@
 #include <QDesktopWidget>
 #include <QElapsedTimer>
 
+#include "inc/bigint/BigIntegerLibrary.hh"
+
 #endif // COMMON_H
