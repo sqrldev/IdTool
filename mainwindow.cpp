@@ -147,13 +147,19 @@ void MainWindow::createNewIdentity()
     m_pIdentityModel->import(identity);
     m_pUiBuilder->rebuild();
 
+    QString messageText = "Rescue code: " + CryptUtil::formatRescueCode(rescueCode);
+    messageText += "\r\n\r\n";
+    messageText += "Textual version of the identity:";
+    messageText += "\r\n\r\n";
+    messageText += identity.getTextualVersion();
+
     QInputDialog resultDialog(this);
     resultDialog.setInputMode(QInputDialog::TextInput);
     resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
     resultDialog.resize(700, 250);
     resultDialog.setWindowTitle(tr("Success"));
     resultDialog.setLabelText(tr("The identity was successfully created!"));
-    resultDialog.setTextValue("Rescue code: " + CryptUtil::formatRescueCode(rescueCode));
+    resultDialog.setTextValue(messageText);
     resultDialog.exec();
 
     saveFile();

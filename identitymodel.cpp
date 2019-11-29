@@ -26,6 +26,7 @@
 
 #include "identitymodel.h"
 #include "identityparser.h"
+#include "cryptutil.h"
 
 void IdentityModel::writeToFile(QString fileName)
 {

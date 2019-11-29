@@ -28,7 +28,10 @@
 #define IDENTITYMODEL_H
 
 #include "common.h"
-#include "cryptutil.h"
+
+// Forward declarations
+class CryptUtil;
+// End of forward declarations
 
 struct ItemDataTypeInfo
 {
