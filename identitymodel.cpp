@@ -30,13 +30,6 @@
 
 void IdentityModel::writeToFile(QString fileName)
 {
-    QByteArray ba(IdentityParser::HEADER.toUtf8());
-
-    for (size_t i=0; i<blocks.size(); i++)
-    {
-        ba.append(blocks[i].toByteArray());
-    }
-
     QFile file(fileName);
 
     if (!file.open(QFile::WriteOnly))
@@ -46,6 +39,7 @@ void IdentityModel::writeToFile(QString fileName)
                     .toStdString());
     }
 
+    QByteArray ba = getRawBytes();
     file.write(ba);
     file.close();
 }
@@ -143,6 +137,18 @@ void IdentityModel::import(IdentityModel &model)
 {
     clear();
     blocks = model.blocks;
+}
+
+QByteArray IdentityModel::getRawBytes()
+{
+    QByteArray ba(IdentityParser::HEADER.toUtf8());
+
+    for (size_t i=0; i<blocks.size(); i++)
+    {
+        ba.append(blocks[i].toByteArray());
+    }
+
+    return ba;
 }
 
 QString IdentityModel::getTextualVersion()

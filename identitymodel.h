@@ -66,6 +66,7 @@ public:
     bool insertBlock(IdentityBlock block, IdentityBlock* after);
     void clear();
     void import(IdentityModel& model);
+    QByteArray getRawBytes();
     QString getTextualVersion();
     QString getTextualVersionFormatted();
 };
