@@ -96,7 +96,7 @@ void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
     QInputDialog resultDialog(this);
     resultDialog.setInputMode(QInputDialog::TextInput);
     resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
-    resultDialog.resize(700, 250);
+    resultDialog.resize(700, 400);
     resultDialog.setWindowTitle(tr("Success"));
     resultDialog.setLabelText(tr("The identity was successfully created!"));
     resultDialog.setTextValue(messageText);
