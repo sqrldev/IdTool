@@ -173,6 +173,7 @@
     <addaction name="actionDecryptPreviousIuks"/>
     <addaction name="separator"/>
     <addaction name="actionCreateSiteKeys"/>
+    <addaction name="actionDisplayTextualIdentity"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -360,6 +361,24 @@
    </property>
    <property name="toolTip">
     <string>Generate a new SQRL identity</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionDisplayTextualIdentity">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/TextualId.png</normaloff>:/res/img/TextualId.png</iconset>
+   </property>
+   <property name="text">
+    <string>Display textual identity version</string>
+   </property>
+   <property name="toolTip">
+    <string>Creates and displays a textual version of the currently loaded identity</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
  </widget>

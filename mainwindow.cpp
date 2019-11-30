@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
+    connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::displayTextualIdentity);
 }
 
 MainWindow::~MainWindow()
@@ -78,6 +79,28 @@ void MainWindow::showNoIdentityLoadedError()
 {
     QMessageBox msgBox(this);
     msgBox.critical(this, tr("Error"), tr("An identity needs to be loaded in order to complete this operation!"));
+}
+
+void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
+{
+    QString messageText = "!!!!" + tr("RECORD THIS INFORMATION AND STORE IT SAFELY") + "!!!!\r\n\r\n" ;
+    if (rescueCode != nullptr && rescueCode != "")
+    {
+        messageText += tr("Rescue code:") + " " + CryptUtil::formatRescueCode(rescueCode);
+        messageText += "\r\n\r\n";
+    }
+    messageText += tr("Textual version of the identity:");
+    messageText += "\r\n\r\n";
+    messageText += m_pIdentityModel->getTextualVersionFormatted();
+
+    QInputDialog resultDialog(this);
+    resultDialog.setInputMode(QInputDialog::TextInput);
+    resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+    resultDialog.resize(700, 250);
+    resultDialog.setWindowTitle(tr("Success"));
+    resultDialog.setLabelText(tr("The identity was successfully created!"));
+    resultDialog.setTextValue(messageText);
+    resultDialog.exec();
 }
 
 bool MainWindow::canDiscardCurrentIdentity()
@@ -147,23 +170,21 @@ void MainWindow::createNewIdentity()
     m_pIdentityModel->import(identity);
     m_pUiBuilder->rebuild();
 
-    QString messageText = "!!!!" + tr("RECORD THIS INFORMATION AND STORE IT SAFELY") + "!!!!\r\n\r\n" ;
-    messageText += tr("Rescue code:") + " " + CryptUtil::formatRescueCode(rescueCode);
-    messageText += "\r\n\r\n";
-    messageText += tr("Textual version of the identity:");
-    messageText += "\r\n\r\n";
-    messageText += identity.getTextualVersionFormatted();
-
-    QInputDialog resultDialog(this);
-    resultDialog.setInputMode(QInputDialog::TextInput);
-    resultDialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
-    resultDialog.resize(700, 250);
-    resultDialog.setWindowTitle(tr("Success"));
-    resultDialog.setLabelText(tr("The identity was successfully created!"));
-    resultDialog.setTextValue(messageText);
-    resultDialog.exec();
+    showTextualIdentityInfoDialog(rescueCode);
 
     saveFile();
+}
+
+void MainWindow::displayTextualIdentity()
+{
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        showNoIdentityLoadedError();
+        return;
+    }
+
+    showTextualIdentityInfoDialog();
 }
 
 void MainWindow::openFile()
