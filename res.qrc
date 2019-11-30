@@ -22,5 +22,7 @@
         <file>res/img/SiteKey_16x.png</file>
         <file>res/img/Settings_16x.png</file>
         <file>res/img/IdentitySettings_16x.png</file>
+        <file>res/img/Build_Identity_16x.png</file>
+        <file>res/img/TextualId.png</file>
     </qresource>
 </RCC>

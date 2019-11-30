@@ -125,8 +125,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>626</width>
-         <height>511</height>
+         <width>630</width>
+         <height>537</height>
         </rect>
        </property>
       </widget>
@@ -140,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>650</width>
-     <height>26</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -148,6 +148,7 @@
      <string>File</string>
     </property>
     <addaction name="actionCreateNewIdentity"/>
+    <addaction name="actionBuildNewIdentity"/>
     <addaction name="actionOpenFile"/>
     <addaction name="actionPasteIdentityData"/>
     <addaction name="separator"/>
@@ -172,6 +173,7 @@
     <addaction name="actionDecryptPreviousIuks"/>
     <addaction name="separator"/>
     <addaction name="actionCreateSiteKeys"/>
+    <addaction name="actionDisplayTextualIdentity"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -194,6 +196,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionCreateNewIdentity"/>
+   <addaction name="actionBuildNewIdentity"/>
    <addaction name="actionOpenFile"/>
    <addaction name="actionPasteIdentityData"/>
    <addaction name="actionSaveIdentityFileAs"/>
@@ -256,16 +259,19 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionCreateNewIdentity">
+  <action name="actionBuildNewIdentity">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/res/img/NewFile_16x.png</normaloff>:/res/img/NewFile_16x.png</iconset>
+     <normaloff>:/res/img/Build_Identity_16x.png</normaloff>:/res/img/Build_Identity_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Create new identity</string>
+    <string>Build an identity (unauthenticated)</string>
+   </property>
+   <property name="toolTip">
+    <string>Build a new identity from scratch (unauthenticated)</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+N</string>
+    <string>Ctrl+B</string>
    </property>
    <property name="visible">
     <bool>true</bool>
@@ -343,6 +349,36 @@
    </property>
    <property name="toolTip">
     <string>Enable unauthenticated changes to the identity</string>
+   </property>
+  </action>
+  <action name="actionCreateNewIdentity">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/NewFile_16x.png</normaloff>:/res/img/NewFile_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create new identity</string>
+   </property>
+   <property name="toolTip">
+    <string>Generate a new SQRL identity</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionDisplayTextualIdentity">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/TextualId.png</normaloff>:/res/img/TextualId.png</iconset>
+   </property>
+   <property name="text">
+    <string>Display textual identity version</string>
+   </property>
+   <property name="toolTip">
+    <string>Creates and displays a textual version of the currently loaded identity</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
  </widget>

@@ -29,6 +29,10 @@
 
 #include "common.h"
 
+// Forward declarations
+class CryptUtil;
+// End of forward declarations
+
 struct ItemDataTypeInfo
 {
     QString name;
@@ -61,6 +65,9 @@ public:
     bool moveBlock(IdentityBlock* block, bool up);
     bool insertBlock(IdentityBlock block, IdentityBlock* after);
     void clear();
+    void import(IdentityModel& model);
+    QString getTextualVersion();
+    QString getTextualVersionFormatted();
 };
 
 class IdentityBlock

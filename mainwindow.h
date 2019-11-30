@@ -46,16 +46,22 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+private:
     void showNoIdentityLoadedError();
+    void showTextualIdentityInfoDialog(QString rescueCode = nullptr);
+    bool canDiscardCurrentIdentity();
 
 private slots:
+    void createNewIdentity();
+    void displayTextualIdentity();
     void openFile();
     void saveFile();
     void showAboutDialog();
     void showIdentitySettingsDialog();
     void controlUnauthenticatedChanges();
     void pasteIdentityText();
-    void createNewIdentity();
+    void buildNewIdentity();
     void showBlockDesigner();
     void createSiteKeys();
     void decryptImkIlk();
