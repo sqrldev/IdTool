@@ -55,6 +55,7 @@ private:
 private slots:
     void createNewIdentity();
     void displayTextualIdentity();
+    void importTextualIdentity();
     void openFile();
     void saveFile();
     void showAboutDialog();

@@ -862,6 +862,8 @@ QByteArray CryptUtil::convertBigUnsignedToByteArray(BigUnsigned bigNum)
  *
  * See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf for
  * more information.
+ *
+ * \sa base56DecodeIdentity
  */
 
 QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
@@ -925,6 +927,41 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
 }
 
 /*!
+ * Decodes the given base-56-encoded \a textualIdentity and if successful
+ * returns the decoded binary identity data. If the \a textualIdentity is
+ * invalid, \c nullptr will be returned.
+ *
+ * See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf for
+ * more information.
+ *
+ * \sa base56EncodeIdentity
+ */
+
+QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
+{
+    if (!verifyTextualIdentity(textualIdentity))
+        return nullptr;
+
+    textualIdentity = stripWhitespace(textualIdentity);
+
+    BigUnsigned bigNum(0), powVal(0);
+
+    for (int i=0; i<textualIdentity.length(); i++)
+    {
+        if ((i+1) % 20 == 0 || i == textualIdentity.length()-1)
+            continue; // Skip check characters
+
+        if (powVal.isZero()) powVal = 1;
+        else powVal *= BASE56_BASE_NUM;
+        int index = BASE56_ALPHABET.indexOf(textualIdentity.at(i));
+        BigUnsigned newVal = powVal * index;
+        bigNum += newVal;
+    }
+
+    return convertBigUnsignedToByteArray(bigNum);
+}
+
+/*!
  * Formats the given \a textualIdentity string to groups of 5x4 characters
  * per line, separated by a space.
  *
@@ -954,4 +991,33 @@ QString CryptUtil::formatTextualIdentity(QString textualIdentity)
     }
 
     return result;
+}
+
+/*!
+ * Verifies if the given \a textualIdentity is a valid base56-encoded
+ * SQRL identity by checking the validity of the check characters.
+ *
+ * \returns Returns \c true if the identity is valid and \c false
+ * otherwise.
+ */
+
+bool CryptUtil::verifyTextualIdentity(QString textualIdentity)
+{
+    // TODO: implement
+    return true;
+}
+
+/*!
+ * Removes all occurrances of common "whitespace" characters
+ * from \a source and returns the result.
+ */
+
+QString CryptUtil::stripWhitespace(QString source)
+{
+    source.replace("\r", "");
+    source.replace("\n", "");
+    source.replace("\t", "");
+    source.replace(" ", "");
+
+    return source;
 }

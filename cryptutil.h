@@ -64,7 +64,10 @@ public:
     static BigUnsigned convertByteArrayToBigUnsigned(QByteArray data);
     static QByteArray convertBigUnsignedToByteArray(BigUnsigned bigNum);
     static QString base56EncodeIdentity(QByteArray identityData);
+    static QByteArray base56DecodeIdentity(QString textualIdentity);
     static QString formatTextualIdentity(QString textualIdentity);
+    static bool verifyTextualIdentity(QString textualIdentity);
+    static QString stripWhitespace(QString source);
 };
 
 #endif // CRYPTUTIL_H

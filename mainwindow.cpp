@@ -65,6 +65,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::displayTextualIdentity);
+    connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::importTextualIdentity);
+
+    QFile file("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1.sqrl");
+    file.open(QIODevice::ReadOnly);
+    QByteArray identityData = file.readAll();
+
+    QString b56 = CryptUtil::base56EncodeIdentity(identityData);
+    QByteArray dec = CryptUtil::base56DecodeIdentity(b56);
+
+    qDebug() << identityData;
+    qDebug() << dec;
+    qDebug() << (identityData == dec);
 }
 
 MainWindow::~MainWindow()
@@ -77,8 +89,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::showNoIdentityLoadedError()
 {
-    QMessageBox msgBox(this);
-    msgBox.critical(this, tr("Error"), tr("An identity needs to be loaded in order to complete this operation!"));
+    QMessageBox::critical(this, tr("Error"), tr("An identity needs to be loaded"
+                                                "in order to complete this operation!"));
 }
 
 void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
@@ -187,6 +199,36 @@ void MainWindow::displayTextualIdentity()
     showTextualIdentityInfoDialog();
 }
 
+void MainWindow::importTextualIdentity()
+{
+    bool ok = false;
+    QString result = QInputDialog::getMultiLineText(
+                this,
+                tr("Import textual identity data"),
+                tr("Type or paste textual identity data here:"),
+                "",
+                &ok);
+
+    if (!ok) return;
+
+    try
+    {
+        if (!CryptUtil::verifyTextualIdentity(result))
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Invalid identity data!"));
+            return;
+        }
+
+        m_pIdentityModel->clear();
+        m_pIdentityParser->parseText(result, m_pIdentityModel);
+        m_pUiBuilder->rebuild();
+    }
+    catch (std::exception& e)
+    {
+        QMessageBox::critical(this, tr("Error"), e.what());
+    }
+}
+
 void MainWindow::openFile()
 {
     QString dir = nullptr;
@@ -216,10 +258,7 @@ void MainWindow::openFile()
     }
     catch (std::exception& e)
     {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error"));
-        msgBox.setText(e.what());
-        msgBox.exec();
+        QMessageBox::critical(this, tr("Error"), e.what());
     }
 }
 
@@ -245,9 +284,7 @@ void MainWindow::saveFile()
     }
     catch (std::exception& e)
     {
-        QMessageBox msgBox(this);
-        msgBox.setText(e.what());
-        msgBox.exec();
+        QMessageBox::critical(this, tr("Error"), e.what());
     }
 }
 
@@ -330,8 +367,7 @@ void MainWindow::pasteIdentityText()
     {
         if (result.isEmpty())
         {
-            throw std::runtime_error(tr("Invalid identity data!")
-                                     .toStdString());
+            QMessageBox::critical(this, tr("Error"), tr("Invalid identity data!"));
         }
 
         m_pIdentityModel->clear();
@@ -340,10 +376,7 @@ void MainWindow::pasteIdentityText()
     }
     catch (std::exception& e)
     {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error"));
-        msgBox.setText(e.what());
-        msgBox.exec();
+        QMessageBox::critical(this, tr("Error"), e.what());
     }
 }
 
@@ -436,8 +469,7 @@ void MainWindow::createSiteKeys()
                 pBlock,
                 key))
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
         return;
     }
 
@@ -450,8 +482,8 @@ void MainWindow::createSiteKeys()
                 domain,
                 decryptedImk))
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Creation of site keys failed, probably due to an error in the crypto routines!"));
+        QMessageBox::critical(this, tr("Error"), tr("Creation of site keys failed,"
+                                              "probably due to an error in the crypto routines!"));
         return;
     }
 
@@ -482,8 +514,8 @@ void MainWindow::decryptImkIlk()
     IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
     if (pBlock1 == nullptr)
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
+        QMessageBox::critical(this, tr("Error"),
+                        tr("The loaded identity does not have a type 1 block!"));
         return;
     }
 
@@ -518,8 +550,7 @@ void MainWindow::decryptImkIlk()
                 pBlock1,
                 key))
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
         return;
     }
 
@@ -550,8 +581,7 @@ void MainWindow::decryptIuk()
     IdentityBlock* pBlock2 = m_pIdentityModel->getBlock(2);
     if (pBlock2 == nullptr)
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
+        QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
         return;
     }
 
@@ -619,8 +649,7 @@ void MainWindow::decryptPreviousIuks()
     IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
     if (pBlock3 == nullptr)
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
+        QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
         return;
     }
 
@@ -642,8 +671,7 @@ void MainWindow::decryptPreviousIuks()
         IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
         if (pBlock1 == nullptr)
         {
-            QMessageBox msgBox(this);
-            msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
+            QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
             return;
         }
 
@@ -673,8 +701,7 @@ void MainWindow::decryptPreviousIuks()
                     pBlock1,
                     key))
         {
-            QMessageBox msgBox(this);
-            msgBox.critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+            QMessageBox::critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
             return;
         }
     }
@@ -683,8 +710,7 @@ void MainWindow::decryptPreviousIuks()
         IdentityBlock* pBlock2 = m_pIdentityModel->getBlock(2);
         if (pBlock2 == nullptr)
         {
-            QMessageBox msgBox(this);
-            msgBox.critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
+            QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
             return;
         }
 
@@ -716,8 +742,8 @@ void MainWindow::decryptPreviousIuks()
 
         if (!ok)
         {
-            QMessageBox msgBox(this);
-            msgBox.critical(this, tr("Error"), tr("Decryption of identity unlock key failed! Wrong password?"));
+            QMessageBox::critical(this, tr("Error"), tr("Decryption of identity"
+                                                        "unlock key failed! Wrong password?"));
             return;
         }
 
@@ -731,8 +757,8 @@ void MainWindow::decryptPreviousIuks()
                 pBlock3,
                 decryptedImk))
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Decryption of previous identity keys failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"), tr("Decryption of previous identity keys"
+                                                    "failed! Wrong password?"));
         return;
     }
 
