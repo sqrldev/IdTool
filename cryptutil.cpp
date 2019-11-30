@@ -869,11 +869,9 @@ QByteArray CryptUtil::convertBigUnsignedToByteArray(BigUnsigned bigNum)
 QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
 {
     QByteArray textualId;
-    crypto_hash_sha256_state state;
-    crypto_hash_sha256_init(&state);
-    unsigned char hash[crypto_hash_sha256_BYTES];
+    QByteArray checksumBytes;
     int charsOnLine = 0;
-    unsigned char line = 0;
+    char lineNr = 0;
     BigUnsigned result(0);
 
     int maxLength = static_cast<int>(
@@ -886,44 +884,60 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
     {
         if(charsOnLine == BASE56_LINE_MAX_CHARS) // add check character
         {
-            crypto_hash_sha256_update(&state, &line, 1);
-            crypto_hash_sha256_final(&state, hash);
-            QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
-                                             crypto_hash_sha256_BYTES);
-            BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
-            BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
-            textualId.append(BASE56_ALPHABET[remainder.toInt()]);
-            crypto_hash_sha256_init(&state);
-            line++;
+            checksumBytes.append(lineNr);
+            textualId.append(createBase56CheckSumChar(checksumBytes));
+            checksumBytes.clear();
+            lineNr++;
             charsOnLine = 0;
         }
 
         if (bigNumber.isZero()) // zero padding
         {
             textualId.append(BASE56_ALPHABET[0]);
-            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(
-                                          &BASE56_ALPHABET.constData()[0]), 1);
+            checksumBytes.append(BASE56_ALPHABET[0]);
         }
         else
         {
             bigNumber.divideWithRemainder(BASE56_BASE_NUM, result); // bigNumber now holds remainder
             textualId.append(BASE56_ALPHABET[bigNumber.toInt()]);
-            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(
-                                          &BASE56_ALPHABET.constData()[bigNumber.toInt()]), 1);
+            checksumBytes.append(BASE56_ALPHABET[bigNumber.toInt()]);
             bigNumber = result;
         }
         charsOnLine++;
     }
 
-    crypto_hash_sha256_update(&state, &line, 1);
-    crypto_hash_sha256_final(&state, hash);
-    QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
-                                     crypto_hash_sha256_BYTES);
-    BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
-    BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
-    textualId.append(BASE56_ALPHABET[remainder.toInt()]);
+    checksumBytes.append(lineNr);
+    textualId.append(createBase56CheckSumChar(checksumBytes));
 
     return textualId;
+}
+
+/*!
+ * Creates a checksum character from the given \a dataBytes
+ * according to the SQRL specification for creating/verifying
+ * the textual identity version. See "Textual Identity Format"
+ * in https://www.grc.com/sqrl/SQRL_Cryptography.pdf for more
+ * information.
+ */
+
+char CryptUtil::createBase56CheckSumChar(QByteArray dataBytes)
+{
+    crypto_hash_sha256_state state;
+    crypto_hash_sha256_init(&state);
+    unsigned char hash[crypto_hash_sha256_BYTES];
+
+    crypto_hash_sha256_update(&state,
+                              reinterpret_cast<const unsigned char*>(dataBytes.constData()),
+                              static_cast<size_t>(dataBytes.length()));
+    crypto_hash_sha256_final(&state, hash);
+
+    QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
+                                     crypto_hash_sha256_BYTES);
+
+    BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
+    BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
+
+    return BASE56_ALPHABET[remainder.toInt()];
 }
 
 /*!
@@ -1003,7 +1017,31 @@ QString CryptUtil::formatTextualIdentity(QString textualIdentity)
 
 bool CryptUtil::verifyTextualIdentity(QString textualIdentity)
 {
-    // TODO: implement
+    textualIdentity = stripWhitespace(textualIdentity);
+
+    char lineNr = 0;
+
+    for (int i=0; i<textualIdentity.length(); i+=20)
+    {
+        QByteArray checksumBytes = textualIdentity.mid(i, 19).toLocal8Bit();
+        if (checksumBytes.count() < 19) // last line - remove check char
+            checksumBytes.remove(checksumBytes.length()-1, 1);
+
+        checksumBytes.append(lineNr);
+
+        char computedCheckChar = createBase56CheckSumChar(checksumBytes);
+
+        char checkChar = -1;
+        if (checksumBytes.count() < 20)
+            checkChar = textualIdentity.toLocal8Bit()[textualIdentity.length()-1];
+        else
+            checkChar = textualIdentity.toLocal8Bit()[i+19];
+
+        if (checkChar != computedCheckChar) return false;
+
+        lineNr++;
+    }
+
     return true;
 }
 

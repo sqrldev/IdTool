@@ -64,6 +64,7 @@ public:
     static BigUnsigned convertByteArrayToBigUnsigned(QByteArray data);
     static QByteArray convertBigUnsignedToByteArray(BigUnsigned bigNum);
     static QString base56EncodeIdentity(QByteArray identityData);
+    static char createBase56CheckSumChar(QByteArray dataBytes);
     static QByteArray base56DecodeIdentity(QString textualIdentity);
     static QString formatTextualIdentity(QString textualIdentity);
     static bool verifyTextualIdentity(QString textualIdentity);

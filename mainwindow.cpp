@@ -66,17 +66,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::displayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::importTextualIdentity);
-
-    QFile file("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1.sqrl");
-    file.open(QIODevice::ReadOnly);
-    QByteArray identityData = file.readAll();
-
-    QString b56 = CryptUtil::base56EncodeIdentity(identityData);
-    QByteArray dec = CryptUtil::base56DecodeIdentity(b56);
-
-    qDebug() << identityData;
-    qDebug() << dec;
-    qDebug() << (identityData == dec);
 }
 
 MainWindow::~MainWindow()
