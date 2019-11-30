@@ -804,7 +804,7 @@ QByteArray CryptUtil::reverseByteArray(QByteArray source)
  * https://mattmccutchen.net/bigint/ .
  */
 
-BigUnsigned CryptUtil::convertRawDataToBigUnsigned(QByteArray data)
+BigUnsigned CryptUtil::convertByteArrayToBigUnsigned(QByteArray data)
 {
     BigUnsigned num(0), exp(1);
 
@@ -818,6 +818,42 @@ BigUnsigned CryptUtil::convertRawDataToBigUnsigned(QByteArray data)
     }
 
     return num;
+}
+
+/*!
+ * Converts a \c BigUnsigned unsigned integer into a raw byte array.
+ */
+
+QByteArray CryptUtil::convertBigUnsignedToByteArray(BigUnsigned bigNum)
+{
+    QByteArray result;
+    BigUnsigned quotient(0);
+    int bitIndex = 0;
+    char currentByte = 0;
+    bool isDirty = false;
+
+    while (!bigNum.isZero())
+    {
+        if (bitIndex == 8)
+        {
+            result.append(currentByte);
+            currentByte = 0;
+            bitIndex = 0;
+            isDirty = false;
+        }
+
+        bigNum.divideWithRemainder(2, quotient); // bigNum now holds remainder
+
+        if (bigNum.toInt() == 1) currentByte |= 1 << bitIndex;
+
+        isDirty = true;
+        bigNum = quotient;
+        bitIndex++;
+    }
+
+    if (isDirty) result.append(currentByte);
+
+    return result;
 }
 
 /*!
@@ -842,7 +878,7 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
                 ceil((identityData.count()*8)/(log(BASE56_BASE_NUM)/log(2)))
                 );
 
-    BigUnsigned bigNumber = convertRawDataToBigUnsigned(identityData);
+    BigUnsigned bigNumber = convertByteArrayToBigUnsigned(identityData);
 
     for (int i=0; i<maxLength; i++)
     {
@@ -852,7 +888,7 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
             crypto_hash_sha256_final(&state, hash);
             QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
                                              crypto_hash_sha256_BYTES);
-            BigUnsigned checksumNum = convertRawDataToBigUnsigned(checksum);
+            BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
             BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
             textualId.append(BASE56_ALPHABET[remainder.toInt()]);
             crypto_hash_sha256_init(&state);
@@ -881,7 +917,7 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
     crypto_hash_sha256_final(&state, hash);
     QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
                                      crypto_hash_sha256_BYTES);
-    BigUnsigned checksumNum = convertRawDataToBigUnsigned(checksum);
+    BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
     BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
     textualId.append(BASE56_ALPHABET[remainder.toInt()]);
 
