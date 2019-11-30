@@ -61,7 +61,8 @@ public:
     static QString formatRescueCode(QString rescueCode);
     static bool createIdentity(IdentityModel& identity, QString &rescueCode, QString password, QProgressDialog *progressDialog = nullptr);
     static QByteArray reverseByteArray(QByteArray source);
-    static BigUnsigned convertRawDataToBigUnsigned(QByteArray data);
+    static BigUnsigned convertByteArrayToBigUnsigned(QByteArray data);
+    static QByteArray convertBigUnsignedToByteArray(BigUnsigned bigNum);
     static QString base56EncodeIdentity(QByteArray identityData);
     static QString formatTextualIdentity(QString textualIdentity);
 };
