@@ -120,8 +120,8 @@ bool MainWindow::showRescueCodeInputDialog(QString& rescueCode)
 
     if (!ok) return false;
 
-    rc = rescueCode.replace("-", "");
-    rc = rescueCode.replace(" ", "");
+    rc = rc.replace("-", "");
+    rc = rc.replace(" ", "");
 
     rescueCode = rc;
     return true;
