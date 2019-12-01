@@ -517,6 +517,96 @@ QByteArray CryptUtil::enHash(QByteArray data)
     return result;
 }
 
+IdentityBlock CryptUtil::createBlock1(QByteArray iuk, QString password,
+                                      QProgressDialog* progressDialog)
+{
+    bool ok = false;
+    QByteArray initVec(12, 0);
+    QByteArray randomSalt(16, 0);
+    QByteArray key(32, 0);
+    int iterationCount;
+
+    // Generate the random values we'll need
+    getRandomBytes(initVec);
+    getRandomBytes(randomSalt);
+
+    // Generate IMK, ILK and rescue code
+    QByteArray imk = createImkFromIuk(iuk);
+    QByteArray ilk = createIlkFromIuk(iuk);
+
+    //TODO: Add error handling
+
+    // Derive key from password
+    if (progressDialog != nullptr) progressDialog->setLabelText(
+                QObject::tr("Encrypting block 1..."));
+    ok = enSCryptTime(key, iterationCount, password, randomSalt, 9, 5, progressDialog);
+
+    IdentityBlock block1 = IdentityParser::createEmptyBlock(1);
+    block1.items[0].value = "125"; // Length
+    block1.items[1].value = "1";   // Type
+    block1.items[2].value = "45";  // Plain text length
+    block1.items[3].value = initVec.toHex();  // AES GCM initialization vector
+    block1.items[4].value = randomSalt.toHex();  // Scrypt random salt
+    block1.items[5].value = "9";  // Scrypt log-n-factor
+    block1.items[6].value = QString::number(iterationCount);  // Scrypt iterations
+    block1.items[7].value = "499";  // Option flags
+    block1.items[8].value = "4";  // QuickPass length
+    block1.items[9].value = "5";  // Password verify seconds
+    block1.items[10].value = "15";  // QuickPass timeout
+
+    // Encrypt identity keys
+    QByteArray unencryptedKeys = imk + ilk;
+    QByteArray additionalData;
+    for (size_t i=0; i<11; i++) additionalData.append(block1.items[i].toByteArray());
+    QByteArray encryptedData = aesGcmEncrypt(unencryptedKeys, additionalData, initVec, key);
+    QByteArray encryptedImk = encryptedData.left(32);
+    QByteArray encryptedIlk = encryptedData.mid(32, 32);
+    QByteArray authTag = encryptedData.right(16);
+
+    block1.items[11].value = encryptedImk.toHex();  // IMK
+    block1.items[12].value = encryptedIlk.toHex();  // ILK
+    block1.items[13].value = authTag.toHex();  // Authentication tag
+
+    return block1;
+}
+
+IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgressDialog *progressDialog)
+{
+    bool ok = false;
+    QByteArray initVec(12, 0);
+    QByteArray randomSalt(16, 0);
+    QByteArray key(32, 0);
+    QByteArray additionalData;
+    int iterationCount;
+
+    getRandomBytes(randomSalt);
+
+    IdentityBlock block2 = IdentityParser::createEmptyBlock(2);
+    block2.items[0].value = "73"; // Length
+    block2.items[1].value = "2";   // Type
+    block2.items[2].value = randomSalt.toHex();  // Scrypt random salt
+    block2.items[3].value = "9";  // Scrypt log-n-factor
+
+    // Derive key from rescue code
+    if (progressDialog != nullptr) progressDialog->setLabelText(
+                QObject::tr("Encrypting block 2..."));
+
+    ok = enSCryptTime(key, iterationCount, rescueCode, randomSalt, 9, 5, progressDialog);
+
+    block2.items[4].value = QString::number(iterationCount);
+
+    // Encrypt IUK
+    for (size_t i=0; i<5; i++) additionalData.append(block2.items[i].toByteArray());
+    QByteArray encryptedData = aesGcmEncrypt(iuk, additionalData, initVec, key);
+    QByteArray encryptedIuk = encryptedData.left(32);
+    QByteArray authTag = encryptedData.right(16);
+
+    block2.items[5].value = encryptedIuk.toHex();  // Encrypted IUK
+    block2.items[6].value = authTag.toHex();  // Verification tag
+
+    return block2;
+}
+
 /*!
  * \brief Re-encrypts and re-authenticates a type 1 block after a change to
  * the plain-text settings.
@@ -683,100 +773,15 @@ QString CryptUtil::formatRescueCode(QString rescueCode)
 bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
                                QString password, QProgressDialog *progressDialog)
 {
-    bool ok = false;
-    QByteArray initVec(12, 0);
-    QByteArray randomSalt(16, 0);
-    QByteArray key(32, 0);
-    int iterationCount;
-
-    /****** Block 1 *******/
-
-    // Generate the random values we'll need
-    ok = getRandomBytes(initVec);
-    if (!ok) return false;
-    ok = getRandomBytes(randomSalt);
-    if (!ok) return false;
-
-    // Generate IUK, IMK, ILK and rescue code
-    QByteArray iuk = createIuk();
-    QByteArray imk = createImkFromIuk(iuk);
-    QByteArray ilk = createIlkFromIuk(iuk);
     rescueCode = createNewRescueCode();
+    QByteArray iuk = createIuk();
 
-    if (iuk == nullptr || imk == nullptr ||
-        ilk == nullptr || rescueCode == nullptr) return false;
-
-    qDebug("IUK: " + iuk.toHex());
-    qDebug("IMK: " + imk.toHex());
-    qDebug("ILK: " + ilk.toHex());
-    qDebug("RC: " + rescueCode.toLocal8Bit());
-
-    // Derive key from password
-    if (progressDialog != nullptr) progressDialog->setLabelText(
-                QObject::tr("Encrypting block 1..."));
-    ok = enSCryptTime(key, iterationCount, password, randomSalt, 9, 5, progressDialog);
-
-    IdentityBlock block1 = IdentityParser::createEmptyBlock(1);
-    block1.items[0].value = "125"; // Length
-    block1.items[1].value = "1";   // Type
-    block1.items[2].value = "45";  // Plain text length
-    block1.items[3].value = initVec.toHex();  // AES GCM initialization vector
-    block1.items[4].value = randomSalt.toHex();  // Scrypt random salt
-    block1.items[5].value = "9";  // Scrypt log-n-factor
-    block1.items[6].value = QString::number(iterationCount);  // Scrypt iterations
-    block1.items[7].value = "499";  // Option flags
-    block1.items[8].value = "4";  // QuickPass length
-    block1.items[9].value = "5";  // Password verify seconds
-    block1.items[10].value = "15";  // QuickPass timeout
-
-    // Encrypt identity keys
-    QByteArray unencryptedKeys = imk + ilk;
-    QByteArray additionalData;
-    for (size_t i=0; i<11; i++) additionalData.append(block1.items[i].toByteArray());
-    QByteArray encryptedData = aesGcmEncrypt(unencryptedKeys, additionalData, initVec, key);
-    QByteArray encryptedImk = encryptedData.left(32);
-    QByteArray encryptedIlk = encryptedData.mid(32, 32);
-    QByteArray authTag = encryptedData.right(16);
-
-    block1.items[11].value = encryptedImk.toHex();  // IMK
-    block1.items[12].value = encryptedIlk.toHex();  // ILK
-    block1.items[13].value = authTag.toHex();  // Authentication tag
-
-    // Add the block to the identity
+    // Block 1
+    IdentityBlock block1 = createBlock1(iuk, password, progressDialog);
     identity.blocks.push_back(block1);
 
-    /****** Block 2 *******/
-
-    initVec.fill(0);  // Initialization vector for IUK encryption is all zeros
-    ok = getRandomBytes(randomSalt); // New random salt for the scrypt operation
-    if (!ok) return false;
-
-    IdentityBlock block2 = IdentityParser::createEmptyBlock(2);
-    block2.items[0].value = "73"; // Length
-    block2.items[1].value = "2";   // Type
-    block2.items[2].value = randomSalt.toHex();  // Scrypt random salt
-    block2.items[3].value = "9";  // Scrypt log-n-factor
-
-    // Derive key from rescue code
-    if (progressDialog != nullptr) progressDialog->setLabelText(
-                QObject::tr("Encrypting block 2..."));
-
-    ok = enSCryptTime(key, iterationCount, rescueCode, randomSalt, 9, 5, progressDialog);
-    if (!ok) return false;
-
-    block2.items[4].value = QString::number(iterationCount);  // Scrypt iterations
-
-    // Encrypt IUK
-    additionalData.clear();
-    for (size_t i=0; i<5; i++) additionalData.append(block2.items[i].toByteArray());
-    encryptedData = aesGcmEncrypt(iuk, additionalData, initVec, key);
-    QByteArray encryptedIuk = encryptedData.left(32);
-    authTag = encryptedData.right(16);
-
-    block2.items[5].value = encryptedIuk.toHex();  // Encrypted IUK
-    block2.items[6].value = authTag.toHex();  // Verification tag
-
-    // Add the block to the identity
+    // Block 2
+    IdentityBlock block2 = createBlock2(iuk, rescueCode, progressDialog);
     identity.blocks.push_back(block2);
 
     return true;

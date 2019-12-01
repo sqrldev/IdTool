@@ -42,6 +42,7 @@ private:
 public:
     void parseFile(QString fileName, IdentityModel* model);
     void parseText(QString identityText, IdentityModel* model);
+    void parseIdentityData(QByteArray data, IdentityModel* model);
     static bool hasBlockDefinition(uint16_t blockType);
     static QByteArray getBlockDefinitionBytes(uint16_t blockType);
     static bool parseBlockDefinition(QByteArray data, QJsonDocument* jsonDoc);
@@ -51,7 +52,6 @@ public:
     static QByteArray base64DecodeIdentity(QByteArray data);
 
 private:
-    void parse(QByteArray data, IdentityModel* model);
     IdentityBlock parseBlock(QByteArray data, QJsonDocument* blockDef);
     bool checkHeader(QByteArray data);
     QByteArray getUnknownBlockDefinition();

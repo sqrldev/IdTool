@@ -84,7 +84,9 @@ void MainWindow::showNoIdentityLoadedError()
 
 void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
 {
-    QString messageText = "!!!!" + tr("RECORD THIS INFORMATION AND STORE IT SAFELY") + "!!!!\r\n\r\n" ;
+    QString messageText = "!!!!" + tr("RECORD THIS INFORMATION AND STORE IT SAFELY") +
+            "!!!!\r\n\r\n" ;
+
     if (rescueCode != nullptr && rescueCode != "")
     {
         messageText += tr("Rescue code:") + " " + CryptUtil::formatRescueCode(rescueCode);
@@ -102,6 +104,60 @@ void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
     resultDialog.setLabelText(tr("The identity was successfully created!"));
     resultDialog.setTextValue(messageText);
     resultDialog.exec();
+}
+
+bool MainWindow::showRescueCodeInputDialog(QString& rescueCode)
+{
+    bool ok = false;
+
+    QString rc = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Identity rescue code:"),
+                QLineEdit::Normal,
+                "",
+                &ok);
+
+    if (!ok) return false;
+
+    rc = rescueCode.replace("-", "");
+    rc = rescueCode.replace(" ", "");
+
+    rescueCode = rc;
+    return true;
+}
+
+bool MainWindow::showGetNewPasswordDialog(QString &password)
+{
+    bool ok = false;
+    QString password1, password2;
+
+    password1 = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Set identity master password:"),
+                QLineEdit::Password,
+                "",
+                &ok);
+
+    if (!ok) return false;
+
+    do
+    {
+        password2 = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Confirm password:"),
+                QLineEdit::Password,
+                "",
+                &ok);
+
+        if (!ok) return false;
+    }
+    while (password1 != password2);
+
+    password = password1;
+    return true;
 }
 
 bool MainWindow::canDiscardCurrentIdentity()
@@ -129,42 +185,24 @@ void MainWindow::createNewIdentity()
 
     if (!canDiscardCurrentIdentity()) return;
 
-    QString password = QInputDialog::getText(
-                nullptr,
-                tr(""),
-                tr("Set identity master password:"),
-                QLineEdit::Password,
-                "",
-                &ok);
-
+    QString password;
+    ok = showGetNewPasswordDialog(password);
     if (!ok) return;
 
-    QString password2;
-    do
-    {
-        password2 = QInputDialog::getText(
-                nullptr,
-                tr(""),
-                tr("Confirm password:"),
-                QLineEdit::Password,
-                "",
-                &ok);
-
-        if (!ok) return;
-    }
-    while (password != password2);
-
-    QProgressDialog progressDialog(tr("Generating and encrypting identity..."), tr("Abort"), 0, 0, this);
+    QProgressDialog progressDialog(tr("Generating and encrypting identity..."),
+                                   tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    ok = CryptUtil::createIdentity(identity, rescueCode, password, &progressDialog);
+    ok = CryptUtil::createIdentity(identity, rescueCode, password,
+                                   &progressDialog);
 
     progressDialog.close();
 
     if (!ok)
     {
-        QMessageBox::critical(this, tr("Error"), tr("An error occured while creating the identity "
-                                                    "or the operation was aborted by the user."));
+        QMessageBox::critical(this, tr("Error"),
+                              tr("An error occured while creating the identity "
+                                 "or the operation was aborted by the user."));
         return;
     }
 
@@ -191,7 +229,7 @@ void MainWindow::displayTextualIdentity()
 void MainWindow::importTextualIdentity()
 {
     bool ok = false;
-    QString result = QInputDialog::getMultiLineText(
+    QString textualIdentity = QInputDialog::getMultiLineText(
                 this,
                 tr("Import textual identity data"),
                 tr("Type or paste textual identity data here:"),
@@ -202,14 +240,43 @@ void MainWindow::importTextualIdentity()
 
     try
     {
-        if (!CryptUtil::verifyTextualIdentity(result))
+        QByteArray identityBytes = CryptUtil::base56DecodeIdentity(textualIdentity);
+
+        if (identityBytes == nullptr)
         {
             QMessageBox::critical(this, tr("Error"), tr("Invalid identity data!"));
             return;
         }
 
+        identityBytes = IdentityParser::HEADER.toLocal8Bit() + identityBytes;
+
+        IdentityModel identity;
+        IdentityParser parser;
+        parser.parseIdentityData(identityBytes, &identity);
+
+        IdentityBlock* pBlock2 = identity.getBlock(2);
+
+        QString rescueCode;
+        ok = showRescueCodeInputDialog(rescueCode);
+        if (!ok) return;
+
+        QString password;
+        ok = showGetNewPasswordDialog(password);
+        if (!ok) return;
+
+        QByteArray decryptedIuk(32, 0);
+        QProgressDialog progressDialog(tr("Decrypting IUK..."),
+                                       tr("Abort"), 0, 0, this);
+        progressDialog.setWindowModality(Qt::WindowModal);
+        CryptUtil::decryptBlock2(decryptedIuk, pBlock2, rescueCode, &progressDialog);
+
+        progressDialog.setLabelText(tr("Encrypting IMK and ILK..."));
+        IdentityBlock block1 = CryptUtil::createBlock1(decryptedIuk, password, &progressDialog);
+
+        identity.blocks.insert(identity.blocks.begin(), block1);
+
         m_pIdentityModel->clear();
-        m_pIdentityParser->parseText(result, m_pIdentityModel);
+        m_pIdentityModel->import(identity);
         m_pUiBuilder->rebuild();
     }
     catch (std::exception& e)
@@ -574,20 +641,9 @@ void MainWindow::decryptIuk()
         return;
     }
 
-    bool ok = false;
-
-    QString rescueCode = QInputDialog::getText(
-                nullptr,
-                tr(""),
-                tr("Identity rescue code:"),
-                QLineEdit::Normal,
-                "",
-                &ok);
-
+    QString rescueCode;
+    bool ok = showRescueCodeInputDialog(rescueCode);
     if (!ok) return;
-
-    rescueCode = rescueCode.replace("-", "");
-    rescueCode = rescueCode.replace(" ", "");
 
     QByteArray decryptedIuk(32, 0);
 
