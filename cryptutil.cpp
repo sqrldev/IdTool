@@ -517,6 +517,14 @@ QByteArray CryptUtil::enHash(QByteArray data)
     return result;
 }
 
+/*!
+ * Creates an \c IdentityBlock of type 1, where the identity keys
+ * are being derived from \a iuk and encrypted under \a password.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ */
+
 IdentityBlock CryptUtil::createBlock1(QByteArray iuk, QString password,
                                       QProgressDialog* progressDialog)
 {
@@ -569,6 +577,14 @@ IdentityBlock CryptUtil::createBlock1(QByteArray iuk, QString password,
 
     return block1;
 }
+
+/*!
+ * Creates an \c IdentityBlock of type 2 using \a iuk as the identity
+ * unlock key and encrypted under \a rescueCode.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ */
 
 IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgressDialog *progressDialog)
 {
