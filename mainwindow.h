@@ -50,11 +50,14 @@ public:
 private:
     void showNoIdentityLoadedError();
     void showTextualIdentityInfoDialog(QString rescueCode = nullptr);
+    bool showRescueCodeInputDialog(QString& rescueCode);
+    bool showGetNewPasswordDialog(QString& password);
     bool canDiscardCurrentIdentity();
 
 private slots:
     void createNewIdentity();
     void displayTextualIdentity();
+    void importTextualIdentity();
     void openFile();
     void saveFile();
     void showAboutDialog();

@@ -518,6 +518,112 @@ QByteArray CryptUtil::enHash(QByteArray data)
 }
 
 /*!
+ * Creates an \c IdentityBlock of type 1, where the identity keys
+ * are being derived from \a iuk and encrypted under \a password.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ */
+
+IdentityBlock CryptUtil::createBlock1(QByteArray iuk, QString password,
+                                      QProgressDialog* progressDialog)
+{
+    bool ok = false;
+    QByteArray initVec(12, 0);
+    QByteArray randomSalt(16, 0);
+    QByteArray key(32, 0);
+    int iterationCount;
+
+    // Generate the random values we'll need
+    getRandomBytes(initVec);
+    getRandomBytes(randomSalt);
+
+    // Generate IMK, ILK and rescue code
+    QByteArray imk = createImkFromIuk(iuk);
+    QByteArray ilk = createIlkFromIuk(iuk);
+
+    //TODO: Add error handling
+
+    // Derive key from password
+    if (progressDialog != nullptr) progressDialog->setLabelText(
+                QObject::tr("Encrypting block 1..."));
+    ok = enSCryptTime(key, iterationCount, password, randomSalt, 9, 5, progressDialog);
+
+    IdentityBlock block1 = IdentityParser::createEmptyBlock(1);
+    block1.items[0].value = "125"; // Length
+    block1.items[1].value = "1";   // Type
+    block1.items[2].value = "45";  // Plain text length
+    block1.items[3].value = initVec.toHex();  // AES GCM initialization vector
+    block1.items[4].value = randomSalt.toHex();  // Scrypt random salt
+    block1.items[5].value = "9";  // Scrypt log-n-factor
+    block1.items[6].value = QString::number(iterationCount);  // Scrypt iterations
+    block1.items[7].value = "499";  // Option flags
+    block1.items[8].value = "4";  // QuickPass length
+    block1.items[9].value = "5";  // Password verify seconds
+    block1.items[10].value = "15";  // QuickPass timeout
+
+    // Encrypt identity keys
+    QByteArray unencryptedKeys = imk + ilk;
+    QByteArray additionalData;
+    for (size_t i=0; i<11; i++) additionalData.append(block1.items[i].toByteArray());
+    QByteArray encryptedData = aesGcmEncrypt(unencryptedKeys, additionalData, initVec, key);
+    QByteArray encryptedImk = encryptedData.left(32);
+    QByteArray encryptedIlk = encryptedData.mid(32, 32);
+    QByteArray authTag = encryptedData.right(16);
+
+    block1.items[11].value = encryptedImk.toHex();  // IMK
+    block1.items[12].value = encryptedIlk.toHex();  // ILK
+    block1.items[13].value = authTag.toHex();  // Authentication tag
+
+    return block1;
+}
+
+/*!
+ * Creates an \c IdentityBlock of type 2 using \a iuk as the identity
+ * unlock key and encrypted under \a rescueCode.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ */
+
+IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgressDialog *progressDialog)
+{
+    bool ok = false;
+    QByteArray initVec(12, 0);
+    QByteArray randomSalt(16, 0);
+    QByteArray key(32, 0);
+    QByteArray additionalData;
+    int iterationCount;
+
+    getRandomBytes(randomSalt);
+
+    IdentityBlock block2 = IdentityParser::createEmptyBlock(2);
+    block2.items[0].value = "73"; // Length
+    block2.items[1].value = "2";   // Type
+    block2.items[2].value = randomSalt.toHex();  // Scrypt random salt
+    block2.items[3].value = "9";  // Scrypt log-n-factor
+
+    // Derive key from rescue code
+    if (progressDialog != nullptr) progressDialog->setLabelText(
+                QObject::tr("Encrypting block 2..."));
+
+    ok = enSCryptTime(key, iterationCount, rescueCode, randomSalt, 9, 5, progressDialog);
+
+    block2.items[4].value = QString::number(iterationCount);
+
+    // Encrypt IUK
+    for (size_t i=0; i<5; i++) additionalData.append(block2.items[i].toByteArray());
+    QByteArray encryptedData = aesGcmEncrypt(iuk, additionalData, initVec, key);
+    QByteArray encryptedIuk = encryptedData.left(32);
+    QByteArray authTag = encryptedData.right(16);
+
+    block2.items[5].value = encryptedIuk.toHex();  // Encrypted IUK
+    block2.items[6].value = authTag.toHex();  // Verification tag
+
+    return block2;
+}
+
+/*!
  * \brief Re-encrypts and re-authenticates a type 1 block after a change to
  * the plain-text settings.
  *
@@ -683,100 +789,15 @@ QString CryptUtil::formatRescueCode(QString rescueCode)
 bool CryptUtil::createIdentity(IdentityModel& identity, QString &rescueCode,
                                QString password, QProgressDialog *progressDialog)
 {
-    bool ok = false;
-    QByteArray initVec(12, 0);
-    QByteArray randomSalt(16, 0);
-    QByteArray key(32, 0);
-    int iterationCount;
-
-    /****** Block 1 *******/
-
-    // Generate the random values we'll need
-    ok = getRandomBytes(initVec);
-    if (!ok) return false;
-    ok = getRandomBytes(randomSalt);
-    if (!ok) return false;
-
-    // Generate IUK, IMK, ILK and rescue code
-    QByteArray iuk = createIuk();
-    QByteArray imk = createImkFromIuk(iuk);
-    QByteArray ilk = createIlkFromIuk(iuk);
     rescueCode = createNewRescueCode();
+    QByteArray iuk = createIuk();
 
-    if (iuk == nullptr || imk == nullptr ||
-        ilk == nullptr || rescueCode == nullptr) return false;
-
-    qDebug("IUK: " + iuk.toHex());
-    qDebug("IMK: " + imk.toHex());
-    qDebug("ILK: " + ilk.toHex());
-    qDebug("RC: " + rescueCode.toLocal8Bit());
-
-    // Derive key from password
-    if (progressDialog != nullptr) progressDialog->setLabelText(
-                QObject::tr("Encrypting block 1..."));
-    ok = enSCryptTime(key, iterationCount, password, randomSalt, 9, 5, progressDialog);
-
-    IdentityBlock block1 = IdentityParser::createEmptyBlock(1);
-    block1.items[0].value = "125"; // Length
-    block1.items[1].value = "1";   // Type
-    block1.items[2].value = "45";  // Plain text length
-    block1.items[3].value = initVec.toHex();  // AES GCM initialization vector
-    block1.items[4].value = randomSalt.toHex();  // Scrypt random salt
-    block1.items[5].value = "9";  // Scrypt log-n-factor
-    block1.items[6].value = QString::number(iterationCount);  // Scrypt iterations
-    block1.items[7].value = "499";  // Option flags
-    block1.items[8].value = "4";  // QuickPass length
-    block1.items[9].value = "5";  // Password verify seconds
-    block1.items[10].value = "15";  // QuickPass timeout
-
-    // Encrypt identity keys
-    QByteArray unencryptedKeys = imk + ilk;
-    QByteArray additionalData;
-    for (size_t i=0; i<11; i++) additionalData.append(block1.items[i].toByteArray());
-    QByteArray encryptedData = aesGcmEncrypt(unencryptedKeys, additionalData, initVec, key);
-    QByteArray encryptedImk = encryptedData.left(32);
-    QByteArray encryptedIlk = encryptedData.mid(32, 32);
-    QByteArray authTag = encryptedData.right(16);
-
-    block1.items[11].value = encryptedImk.toHex();  // IMK
-    block1.items[12].value = encryptedIlk.toHex();  // ILK
-    block1.items[13].value = authTag.toHex();  // Authentication tag
-
-    // Add the block to the identity
+    // Block 1
+    IdentityBlock block1 = createBlock1(iuk, password, progressDialog);
     identity.blocks.push_back(block1);
 
-    /****** Block 2 *******/
-
-    initVec.fill(0);  // Initialization vector for IUK encryption is all zeros
-    ok = getRandomBytes(randomSalt); // New random salt for the scrypt operation
-    if (!ok) return false;
-
-    IdentityBlock block2 = IdentityParser::createEmptyBlock(2);
-    block2.items[0].value = "73"; // Length
-    block2.items[1].value = "2";   // Type
-    block2.items[2].value = randomSalt.toHex();  // Scrypt random salt
-    block2.items[3].value = "9";  // Scrypt log-n-factor
-
-    // Derive key from rescue code
-    if (progressDialog != nullptr) progressDialog->setLabelText(
-                QObject::tr("Encrypting block 2..."));
-
-    ok = enSCryptTime(key, iterationCount, rescueCode, randomSalt, 9, 5, progressDialog);
-    if (!ok) return false;
-
-    block2.items[4].value = QString::number(iterationCount);  // Scrypt iterations
-
-    // Encrypt IUK
-    additionalData.clear();
-    for (size_t i=0; i<5; i++) additionalData.append(block2.items[i].toByteArray());
-    encryptedData = aesGcmEncrypt(iuk, additionalData, initVec, key);
-    QByteArray encryptedIuk = encryptedData.left(32);
-    authTag = encryptedData.right(16);
-
-    block2.items[5].value = encryptedIuk.toHex();  // Encrypted IUK
-    block2.items[6].value = authTag.toHex();  // Verification tag
-
-    // Add the block to the identity
+    // Block 2
+    IdentityBlock block2 = createBlock2(iuk, rescueCode, progressDialog);
     identity.blocks.push_back(block2);
 
     return true;
@@ -862,16 +883,16 @@ QByteArray CryptUtil::convertBigUnsignedToByteArray(BigUnsigned bigNum)
  *
  * See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf for
  * more information.
+ *
+ * \sa base56DecodeIdentity
  */
 
 QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
 {
     QByteArray textualId;
-    crypto_hash_sha256_state state;
-    crypto_hash_sha256_init(&state);
-    unsigned char hash[crypto_hash_sha256_BYTES];
+    QByteArray checksumBytes;
     int charsOnLine = 0;
-    unsigned char line = 0;
+    char lineNr = 0;
     BigUnsigned result(0);
 
     int maxLength = static_cast<int>(
@@ -884,44 +905,95 @@ QString CryptUtil::base56EncodeIdentity(QByteArray identityData)
     {
         if(charsOnLine == BASE56_LINE_MAX_CHARS) // add check character
         {
-            crypto_hash_sha256_update(&state, &line, 1);
-            crypto_hash_sha256_final(&state, hash);
-            QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
-                                             crypto_hash_sha256_BYTES);
-            BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
-            BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
-            textualId.append(BASE56_ALPHABET[remainder.toInt()]);
-            crypto_hash_sha256_init(&state);
-            line++;
+            checksumBytes.append(lineNr);
+            textualId.append(createBase56CheckSumChar(checksumBytes));
+            checksumBytes.clear();
+            lineNr++;
             charsOnLine = 0;
         }
 
         if (bigNumber.isZero()) // zero padding
         {
             textualId.append(BASE56_ALPHABET[0]);
-            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(
-                                          &BASE56_ALPHABET.constData()[0]), 1);
+            checksumBytes.append(BASE56_ALPHABET[0]);
         }
         else
         {
             bigNumber.divideWithRemainder(BASE56_BASE_NUM, result); // bigNumber now holds remainder
             textualId.append(BASE56_ALPHABET[bigNumber.toInt()]);
-            crypto_hash_sha256_update(&state, reinterpret_cast<const unsigned char*>(
-                                          &BASE56_ALPHABET.constData()[bigNumber.toInt()]), 1);
+            checksumBytes.append(BASE56_ALPHABET[bigNumber.toInt()]);
             bigNumber = result;
         }
         charsOnLine++;
     }
 
-    crypto_hash_sha256_update(&state, &line, 1);
-    crypto_hash_sha256_final(&state, hash);
-    QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
-                                     crypto_hash_sha256_BYTES);
-    BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
-    BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
-    textualId.append(BASE56_ALPHABET[remainder.toInt()]);
+    checksumBytes.append(lineNr);
+    textualId.append(createBase56CheckSumChar(checksumBytes));
 
     return textualId;
+}
+
+/*!
+ * Creates a checksum character from the given \a dataBytes
+ * according to the SQRL specification for creating/verifying
+ * the textual identity version. See "Textual Identity Format"
+ * in https://www.grc.com/sqrl/SQRL_Cryptography.pdf for more
+ * information.
+ */
+
+char CryptUtil::createBase56CheckSumChar(QByteArray dataBytes)
+{
+    crypto_hash_sha256_state state;
+    crypto_hash_sha256_init(&state);
+    unsigned char hash[crypto_hash_sha256_BYTES];
+
+    crypto_hash_sha256_update(&state,
+                              reinterpret_cast<const unsigned char*>(dataBytes.constData()),
+                              static_cast<size_t>(dataBytes.length()));
+    crypto_hash_sha256_final(&state, hash);
+
+    QByteArray checksum = QByteArray(reinterpret_cast<const char*>(&hash),
+                                     crypto_hash_sha256_BYTES);
+
+    BigUnsigned checksumNum = convertByteArrayToBigUnsigned(checksum);
+    BigUnsigned remainder = checksumNum % BASE56_BASE_NUM;
+
+    return BASE56_ALPHABET[remainder.toInt()];
+}
+
+/*!
+ * Decodes the given base-56-encoded \a textualIdentity and if successful
+ * returns the decoded binary identity data. If the \a textualIdentity is
+ * invalid, \c nullptr will be returned.
+ *
+ * See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf for
+ * more information.
+ *
+ * \sa base56EncodeIdentity
+ */
+
+QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
+{
+    if (!verifyTextualIdentity(textualIdentity))
+        return nullptr;
+
+    textualIdentity = stripWhitespace(textualIdentity);
+
+    BigUnsigned bigNum(0), powVal(0);
+
+    for (int i=0; i<textualIdentity.length(); i++)
+    {
+        if ((i+1) % 20 == 0 || i == textualIdentity.length()-1)
+            continue; // Skip check characters
+
+        if (powVal.isZero()) powVal = 1;
+        else powVal *= BASE56_BASE_NUM;
+        int index = BASE56_ALPHABET.indexOf(textualIdentity.at(i));
+        BigUnsigned newVal = powVal * index;
+        bigNum += newVal;
+    }
+
+    return convertBigUnsignedToByteArray(bigNum);
 }
 
 /*!
@@ -954,4 +1026,57 @@ QString CryptUtil::formatTextualIdentity(QString textualIdentity)
     }
 
     return result;
+}
+
+/*!
+ * Verifies if the given \a textualIdentity is a valid base56-encoded
+ * SQRL identity by checking the validity of the check characters.
+ *
+ * \returns Returns \c true if the identity is valid and \c false
+ * otherwise.
+ */
+
+bool CryptUtil::verifyTextualIdentity(QString textualIdentity)
+{
+    textualIdentity = stripWhitespace(textualIdentity);
+
+    char lineNr = 0;
+
+    for (int i=0; i<textualIdentity.length(); i+=20)
+    {
+        QByteArray checksumBytes = textualIdentity.mid(i, 19).toLocal8Bit();
+        if (checksumBytes.count() < 19) // last line - remove check char
+            checksumBytes.remove(checksumBytes.length()-1, 1);
+
+        checksumBytes.append(lineNr);
+
+        char computedCheckChar = createBase56CheckSumChar(checksumBytes);
+
+        char checkChar = -1;
+        if (checksumBytes.count() < 20)
+            checkChar = textualIdentity.toLocal8Bit()[textualIdentity.length()-1];
+        else
+            checkChar = textualIdentity.toLocal8Bit()[i+19];
+
+        if (checkChar != computedCheckChar) return false;
+
+        lineNr++;
+    }
+
+    return true;
+}
+
+/*!
+ * Removes all occurrances of common "whitespace" characters
+ * from \a source and returns the result.
+ */
+
+QString CryptUtil::stripWhitespace(QString source)
+{
+    source.replace("\r", "");
+    source.replace("\n", "");
+    source.replace("\t", "");
+    source.replace(" ", "");
+
+    return source;
 }

@@ -125,8 +125,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>630</width>
-         <height>537</height>
+         <width>626</width>
+         <height>507</height>
         </rect>
        </property>
       </widget>
@@ -140,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>650</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -151,6 +151,7 @@
     <addaction name="actionBuildNewIdentity"/>
     <addaction name="actionOpenFile"/>
     <addaction name="actionPasteIdentityData"/>
+    <addaction name="actionImportTextualIdentity"/>
     <addaction name="separator"/>
     <addaction name="actionSaveIdentityFileAs"/>
     <addaction name="separator"/>
@@ -220,7 +221,10 @@
      <normaloff>:/res/img/Paste_16x.png</normaloff>:/res/img/Paste_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Paste identity data</string>
+    <string>Paste binary identity data (base64)</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste binary identity data which was converted to base64</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+V</string>
@@ -379,6 +383,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionImportTextualIdentity">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/TextualId.png</normaloff>:/res/img/TextualId.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import textual identity</string>
+   </property>
+   <property name="toolTip">
+    <string>Import textual identity version</string>
    </property>
   </action>
  </widget>

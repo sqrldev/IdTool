@@ -49,7 +49,7 @@ void IdentityParser::parseFile(QString fileName, IdentityModel* model)
     QByteArray ba = identityFile.readAll();
     identityFile.close();
 
-    parse(ba, model);
+    parseIdentityData(ba, model);
 }
 
 void IdentityParser::parseText(QString identityText, IdentityModel* model)
@@ -62,7 +62,7 @@ void IdentityParser::parseText(QString identityText, IdentityModel* model)
     }
 
     QByteArray ba = identityText.toLocal8Bit();
-    parse(ba, model);
+    parseIdentityData(ba, model);
 }
 
 bool IdentityParser::hasBlockDefinition(uint16_t blockType)
@@ -75,7 +75,7 @@ bool IdentityParser::hasBlockDefinition(uint16_t blockType)
     return file.exists();
 }
 
-void IdentityParser::parse(QByteArray data, IdentityModel* model)
+void IdentityParser::parseIdentityData(QByteArray data, IdentityModel* model)
 {
     m_bIsBase64 = false;
 
