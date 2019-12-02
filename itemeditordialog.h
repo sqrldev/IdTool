@@ -34,6 +34,10 @@ namespace Ui {
 class ItemEditorDialog;
 }
 
+/**********************************************
+ *    class ItemEditorDialog                  *
+ *********************************************/
+
 class ItemEditorDialog : public QDialog
 {
     Q_OBJECT

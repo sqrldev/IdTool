@@ -35,6 +35,10 @@ namespace Ui {
     class MainWindow;
 }
 
+/**********************************************
+ *    class UiBuilder                         *
+ *********************************************/
+
 class UiBuilder : public QObject
 {    
     Q_OBJECT
@@ -76,6 +80,10 @@ public slots:
     void onMoveItem();
 };
 
+/**********************************************
+ *    class BlockConnector                    *
+ *********************************************/
+
 class BlockConnector
 {
 public:
@@ -88,6 +96,10 @@ public:
     BlockConnector(IdentityBlock* block, bool moveUp = true);
     ~BlockConnector();
 };
+
+/**********************************************
+ *    class ItemConnector                     *
+ *********************************************/
 
 class ItemConnector
 {

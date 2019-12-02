@@ -31,6 +31,23 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
+/*!
+ *
+ * \class MainWindow
+ * \brief The app's main application window.
+ *
+ * \c MainWindow provides access to all the functionality offered
+ * by tge application through the GUI. It also houses the main
+ * application menu.
+ *
+ * The visual representation of a SQRL identity, represented by an
+ * instance of the \c IdentityModel class, is being rendered within
+ * the \MainWindow using the \c UiBuilder class.
+ *
+ * \sa UiBuilder, IdentityModel
+ *
+*/
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)

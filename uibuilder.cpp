@@ -26,6 +26,21 @@
 
 #include "uibuilder.h"
 
+/*!
+ *
+ * \class UiBuilder
+ * \brief A class for dynamically visualizing a SQRL identity within
+ * the application's \c MainWindow GUI.
+ *
+ * \c UiBuilder, upon being provided with an \c IdentityModel object,
+ * will dynamically render the identity's block structure by creating
+ * all the necessary UI controls and stylesheets "on the fly" and
+ * inserting them into the \c MainWindow GUI.
+ *
+ * \sa MainWindow, IdentityModel
+ *
+*/
+
 UiBuilder::UiBuilder(QMainWindow* mainWindow, IdentityModel* model)
 {
     m_pMainWindow = mainWindow;
@@ -254,6 +269,25 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     return pWidget;
 }
 
+bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
+{
+    bool ok;
+    int repititons = QInputDialog::getInt(
+                nullptr,
+                tr("Item repitition"),
+                tr("How many \"%1\" fields should be created?").arg(itemName),
+                1,
+                1,
+                1024,
+                1,
+                &ok);
+
+    if (ok) *result = repititons;
+
+    return ok;
+}
+
+
 void UiBuilder::onEditButtonClicked()
 {
     ItemConnector connector =
@@ -329,52 +363,6 @@ void UiBuilder::onBlockOptionsButtonClicked()
     if (m_bNeedsRebuild) rebuild();
 }
 
-BlockConnector::BlockConnector() :
-block(nullptr), moveUp(true)
-{
-}
-
-BlockConnector::BlockConnector(IdentityBlock* block, bool moveUp)
-{
-    this->block = block;
-    this->moveUp = moveUp;
-}
-
-BlockConnector::BlockConnector(const BlockConnector& other)
-{
-    this->block = other.block;
-    this->moveUp = other.moveUp;
-}
-
-BlockConnector::~BlockConnector()
-{
-}
-
-ItemConnector::ItemConnector() :
-    block(nullptr), item(nullptr), valueLabel(nullptr), moveUp(true)
-{
-}
-
-ItemConnector::ItemConnector(IdentityBlock* block, IdentityBlockItem* item, QLineEdit* valueLabel, bool moveUp)
-{
-    this->block = block;
-    this->item = item;
-    this->valueLabel = valueLabel;
-    this->moveUp = moveUp;
-}
-
-ItemConnector::ItemConnector(const ItemConnector& other)
-{
-    this->block = other.block;
-    this->item = other.item;
-    this->valueLabel = other.valueLabel;
-    this->moveUp = other.moveUp;
-}
-
-ItemConnector::~ItemConnector()
-{
-}
-
 void UiBuilder::onDeleteBlock()
 {
     BlockConnector connector =
@@ -416,24 +404,6 @@ void UiBuilder::onInsertBlock()
     {
         m_bNeedsRebuild = true;
     }
-}
-
-bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
-{
-    bool ok;
-    int repititons = QInputDialog::getInt(
-                nullptr,
-                tr("Item repitition"),
-                tr("How many \"%1\" fields should be created?").arg(itemName),
-                1,
-                1,
-                1024,
-                1,
-                &ok);
-
-    if (ok) *result = repititons;
-
-    return ok;
 }
 
 void UiBuilder::onItemOptionsButtonClicked()
@@ -568,4 +538,94 @@ void UiBuilder::onInsertItem()
     {
         m_bNeedsRebuild = true;
     }
+}
+
+
+
+
+
+/*!
+ *
+ * \class BlockConnector
+ * \brief A helper class for connecting GUI representations of \c IdentityBlock
+ * instances to their underlying data source.
+ *
+ * This helper class is instantiated and populated by the \c UiBuilder class to
+ * establish a connection between the individual GUI representation of block objects
+ * and their underlying data sources within the \c IdentityModel. To do so,
+ * \c UiBuilder will turn the \c BlockConnector instance into a \c QVariant and
+ * attach it to the GUI control using \c setProperty(), where it can be retrieved
+ * within the slot handling the specific user action which needs access to the
+ * data within the \c IdentityModel.
+ *
+ * \sa UiBuilder, IdentityModel, ItemConnector
+ *
+*/
+
+BlockConnector::BlockConnector() :
+block(nullptr), moveUp(true)
+{
+}
+
+BlockConnector::BlockConnector(IdentityBlock* block, bool moveUp)
+{
+    this->block = block;
+    this->moveUp = moveUp;
+}
+
+BlockConnector::BlockConnector(const BlockConnector& other)
+{
+    this->block = other.block;
+    this->moveUp = other.moveUp;
+}
+
+BlockConnector::~BlockConnector()
+{
+}
+
+
+
+
+
+/*!
+ *
+ * \class ItemConnector
+ * \brief A helper class for connecting GUI representations of \c IdentityBlockItem
+ * instances to their underlying data source.
+ *
+ * This helper class is instantiated and populated by the \c UiBuilder class to
+ * establish a connection between the individual GUI representation of block items
+ * and their underlying data sources within the \c IdentityModel. To do so,
+ * \c UiBuilder will turn the \c ItemConnector instance into a \c QVariant and
+ * attach it to the GUI control using \c setProperty(), where it can be retrieved
+ * within the slot handling the specific user action which needs access to the
+ * data within the \c IdentityModel.
+ *
+ * \sa UiBuilder, IdentityModel, BlockConnector
+ *
+*/
+
+ItemConnector::ItemConnector() :
+    block(nullptr), item(nullptr), valueLabel(nullptr), moveUp(true)
+{
+}
+
+ItemConnector::ItemConnector(IdentityBlock* block, IdentityBlockItem* item, QLineEdit* valueLabel, bool moveUp)
+{
+    this->block = block;
+    this->item = item;
+    this->valueLabel = valueLabel;
+    this->moveUp = moveUp;
+}
+
+ItemConnector::ItemConnector(const ItemConnector& other)
+{
+    this->block = other.block;
+    this->item = other.item;
+    this->valueLabel = other.valueLabel;
+    this->moveUp = other.moveUp;
+}
+
+ItemConnector::~ItemConnector()
+{
 }

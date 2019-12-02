@@ -27,6 +27,19 @@
 #include "idsetdialog.h"
 #include "ui_idsetdialog.h"
 
+/*!
+ *
+ * \class IdentitySettingsDialog
+ * \brief A UI dialog for editing user-defined settings of a SQRL identity.
+ *
+ * Upon saving any changed settings, the user will be asked for the identity
+ * password, which is being used to decrypt the identity's type 1 block,
+ * obtaining the block's identity keys (IMK and ILK). Consequently,
+ * the keys will be reencrypted using the (changed) settings as "additional
+ * data" for the authenticated re-encryption of the identity keys.
+ *
+*/
+
 IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::IdentitySettingsDialog)

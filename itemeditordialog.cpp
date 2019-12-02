@@ -27,6 +27,16 @@
 #include "itemeditordialog.h"
 #include "ui_itemeditordialog.h"
 
+/*!
+ *
+ * \class ItemEditorDialog
+ * \brief A UI dialog window for editing individual block items/settings.
+ *
+ * \sa BlockDesignerDialog, IdentityModel, IdentitiyBlock, IdentityBlockItem,
+ * IdentityParser
+ *
+*/
+
 ItemEditorDialog::ItemEditorDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ItemEditorDialog)

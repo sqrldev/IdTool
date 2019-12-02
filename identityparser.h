@@ -30,6 +30,10 @@
 #include "common.h"
 #include "identitymodel.h"
 
+/**********************************************
+ *    class IdentityParser                    *
+ *********************************************/
+
 class IdentityParser
 {
 public:

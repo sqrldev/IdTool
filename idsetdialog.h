@@ -36,6 +36,10 @@ namespace Ui {
 class IdentitySettingsDialog;
 }
 
+/**********************************************
+ *    class IdentitySettingsDialog            *
+ *********************************************/
+
 class IdentitySettingsDialog : public QDialog
 {
     Q_OBJECT

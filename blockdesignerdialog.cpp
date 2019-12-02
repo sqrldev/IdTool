@@ -27,6 +27,23 @@
 #include "blockdesignerdialog.h"
 #include "ui_blockdesignerdialog.h"
 
+/*!
+ *
+ * \class BlockDesignerDialog
+ * \brief A UI dialog window for designing S4 identity storage blocks.
+ *
+ * \c BlockDesignerDialog offers functionality for visually creating
+ * and editing json-templates representing \c IdentityBlock objects
+ * using the GUI.
+ *
+ * \c ItemEditorDialog will be used to edit individual items/settings within
+ * the current block.
+ *
+ * \sa ItemEditorDialog, IdentityModel, IdentitiyBlock, IdentityBlockItem,
+ * IdentityParser
+ *
+*/
+
 BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BlockDesignerDialog)

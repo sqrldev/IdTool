@@ -35,6 +35,10 @@ namespace Ui {
 class BlockDesignerDialog;
 }
 
+/**********************************************
+ *    class BlockDesignerDialog               *
+ *********************************************/
+
 class BlockDesignerDialog : public QDialog
 {
     Q_OBJECT
