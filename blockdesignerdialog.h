@@ -51,17 +51,17 @@ public:
     ~BlockDesignerDialog();
 
 private:
-    void createModelStub();
-    void createBlockDefinition();
-    bool loadBlockDefinition();
-    void reload(bool reloadBlockDefinition);
-
-private:
     Ui::BlockDesignerDialog *ui;
     WorkMode m_WorkMode;
     int m_BlockType = -1;
     QStandardItemModel* m_pItemModel = nullptr;
     QJsonDocument* m_pBlockDesign = nullptr;
+
+private:
+    void createModelStub();
+    void createBlockDefinition();
+    bool loadBlockDefinition();
+    void reload(bool reloadBlockDefinition);
 
 public slots:
     void onAddItemClicked();

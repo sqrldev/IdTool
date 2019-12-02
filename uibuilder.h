@@ -39,18 +39,6 @@ class UiBuilder : public QObject
 {    
     Q_OBJECT
 
-public:
-    UiBuilder(QMainWindow* ui, IdentityModel* model);
-    void rebuild();
-    void clearLayout();
-    bool hasBlocks();
-    IdentityModel* getModel();
-    void setEnableUnauthenticatedChanges(bool enable, bool rebuild = false);
-
-public:
-    static bool showGetBlockTypeDialog(QString* result, bool allowEdit = false);
-    static bool showGetRepeatCountDialog(QString itemName, int* result);
-
 private:
     QMainWindow *m_pMainWindow = nullptr;
     QScrollArea* m_pScrollArea = nullptr;
@@ -60,21 +48,32 @@ private:
     bool m_bNeedsRebuild = false;
     bool m_bEnableUnauthenticatedChanges = false;
 
+public:
+    UiBuilder(QMainWindow* ui, IdentityModel* model);
+    void rebuild();
+    void clearLayout();
+    bool hasBlocks();
+    IdentityModel* getModel();
+    void setEnableUnauthenticatedChanges(bool enable, bool rebuild = false);
+    static bool showGetBlockTypeDialog(QString* result, bool allowEdit = false);
+    static bool showGetRepeatCountDialog(QString itemName, int* result);
+
+private:
     QWidget* createBlock(IdentityBlock* block);
     QWidget* createBlockHeader(IdentityBlock *block);
     QWidget* createBlockItem(IdentityBlockItem* item, IdentityBlock* block = nullptr);
 
 public slots:
-    void editButtonClicked();
-    void copyButtonClicked();
-    void blockOptionsButtonClicked();
-    void itemOptionsButtonClicked();
-    void insertBlock();
-    void deleteBlock();
-    void moveBlock();
-    void insertItem();
-    void deleteItem();
-    void moveItem();
+    void onEditButtonClicked();
+    void onCopyButtonClicked();
+    void onBlockOptionsButtonClicked();
+    void onItemOptionsButtonClicked();
+    void onInsertBlock();
+    void onDeleteBlock();
+    void onMoveBlock();
+    void onInsertItem();
+    void onDeleteItem();
+    void onMoveItem();
 };
 
 class BlockConnector

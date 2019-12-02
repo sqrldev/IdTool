@@ -39,6 +39,7 @@ class ItemEditorDialog : public QDialog
     Q_OBJECT
 
 private:
+    Ui::ItemEditorDialog *ui;
     QJsonObject* m_pItem = nullptr;
 
 public:
@@ -47,17 +48,14 @@ public:
     ~ItemEditorDialog();
     QJsonObject* getItem();
 
-public slots:
-    void onDataTypeChanged(int currentIndex);
-    void onSaveButtonClicked();
-    void onResetButtonClicked();
-
 private:
     void loadDefaults();
     void loadItemData();
 
-private:
-    Ui::ItemEditorDialog *ui;
+public slots:
+    void onDataTypeChanged(int currentIndex);
+    void onSaveButtonClicked();
+    void onResetButtonClicked();  
 };
 
 #endif // ITEMEDITORDIALOG_H

@@ -168,7 +168,7 @@ QWidget* UiBuilder::createBlockHeader(IdentityBlock *block)
         pBlockOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
         QVariant blockConnectorContainer = QVariant::fromValue(BlockConnector(block));
         pBlockOptionsButton->setProperty("0", blockConnectorContainer );
-        connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(blockOptionsButtonClicked()));
+        connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(onBlockOptionsButtonClicked()));
         pLayout->addWidget(pBlockOptionsButton);
     }
 
@@ -225,7 +225,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     pCopyButton->setMinimumWidth(30);
     pCopyButton->setIcon(QIcon(":/res/img/CopyToClipboard_16x.png"));
     pCopyButton->setProperty("0", itemConnectorContainer);
-    connect(pCopyButton, SIGNAL(clicked()), this, SLOT(copyButtonClicked()));
+    connect(pCopyButton, SIGNAL(clicked()), this, SLOT(onCopyButtonClicked()));
     pLayout->addWidget(pCopyButton);
 
     if (m_bEnableUnauthenticatedChanges)
@@ -236,7 +236,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
         pNameLable->setMinimumWidth(30);
         pEditButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
         pEditButton->setProperty("0", itemConnectorContainer);
-        connect(pEditButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
+        connect(pEditButton, SIGNAL(clicked()), this, SLOT(onEditButtonClicked()));
         pLayout->addWidget(pEditButton);
 
         QPushButton* pOptionsButton = new QPushButton();
@@ -245,7 +245,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
         pOptionsButton->setMinimumWidth(30);
         pOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
         pOptionsButton->setProperty("0", itemConnectorContainer);
-        connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(itemOptionsButtonClicked()));
+        connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(onItemOptionsButtonClicked()));
         pLayout->addWidget(pOptionsButton);
     }
 
@@ -254,7 +254,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     return pWidget;
 }
 
-void UiBuilder::editButtonClicked()
+void UiBuilder::onEditButtonClicked()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -273,7 +273,7 @@ void UiBuilder::editButtonClicked()
     }
 }
 
-void UiBuilder::copyButtonClicked()
+void UiBuilder::onCopyButtonClicked()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -287,7 +287,7 @@ void UiBuilder::copyButtonClicked()
                     static_cast<QWidget*>(sender()));
 }
 
-void UiBuilder::blockOptionsButtonClicked()
+void UiBuilder::onBlockOptionsButtonClicked()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -318,10 +318,10 @@ void UiBuilder::blockOptionsButtonClicked()
     menu->addAction(pActionAddBlock);
     menu->addAction(pActionDeleteBlock);
 
-    connect(pActionMoveBlockUp, &QAction::triggered, this, &UiBuilder::moveBlock);
-    connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::moveBlock);
-    connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::insertBlock);
-    connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::deleteBlock);
+    connect(pActionMoveBlockUp, &QAction::triggered, this, &UiBuilder::onMoveBlock);
+    connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::onMoveBlock);
+    connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::onInsertBlock);
+    connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::onDeleteBlock);
 
     menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
@@ -375,7 +375,7 @@ ItemConnector::~ItemConnector()
 {
 }
 
-void UiBuilder::deleteBlock()
+void UiBuilder::onDeleteBlock()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -386,7 +386,7 @@ void UiBuilder::deleteBlock()
     }
 }
 
-void UiBuilder::moveBlock()
+void UiBuilder::onMoveBlock()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -397,7 +397,7 @@ void UiBuilder::moveBlock()
     }
 }
 
-void UiBuilder::insertBlock()
+void UiBuilder::onInsertBlock()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -436,7 +436,7 @@ bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
     return ok;
 }
 
-void UiBuilder::itemOptionsButtonClicked()
+void UiBuilder::onItemOptionsButtonClicked()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -471,10 +471,10 @@ void UiBuilder::itemOptionsButtonClicked()
     menu->addAction(pActionAddItem);
     menu->addAction(pActionDeleteItem);
 
-    connect(pActionMoveItemUp, &QAction::triggered, this, &UiBuilder::moveItem);
-    connect(pActionMoveItemDown, &QAction::triggered, this, &UiBuilder::moveItem);
-    connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::insertItem);
-    connect(pActionDeleteItem, &QAction::triggered, this, &UiBuilder::deleteItem);
+    connect(pActionMoveItemUp, &QAction::triggered, this, &UiBuilder::onMoveItem);
+    connect(pActionMoveItemDown, &QAction::triggered, this, &UiBuilder::onMoveItem);
+    connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::onInsertItem);
+    connect(pActionDeleteItem, &QAction::triggered, this, &UiBuilder::onDeleteItem);
 
     menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
@@ -482,7 +482,7 @@ void UiBuilder::itemOptionsButtonClicked()
     if (m_bNeedsRebuild) rebuild();
 }
 
-void UiBuilder::deleteItem()
+void UiBuilder::onDeleteItem()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -492,7 +492,7 @@ void UiBuilder::deleteItem()
     if (ok) m_bNeedsRebuild = true;
 }
 
-void UiBuilder::moveItem()
+void UiBuilder::onMoveItem()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -503,7 +503,7 @@ void UiBuilder::moveItem()
     }
 }
 
-void UiBuilder::insertItem()
+void UiBuilder::onInsertItem()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();

@@ -43,6 +43,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+private:
+    Ui::MainWindow *ui;
+    QFrame* m_pHeaderFrame = nullptr;
+    QScrollArea* m_pScrollArea = nullptr;
+    IdentityModel *m_pIdentityModel = nullptr;
+    IdentityParser* m_pIdentityParser = nullptr;
+    UiBuilder* m_pUiBuilder = nullptr;
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -55,31 +63,22 @@ private:
     bool canDiscardCurrentIdentity();
 
 private slots:
-    void createNewIdentity();
-    void displayTextualIdentity();
-    void importTextualIdentity();
-    void openFile();
-    void saveFile();
-    void showAboutDialog();
-    void showIdentitySettingsDialog();
-    void controlUnauthenticatedChanges();
-    void pasteIdentityText();
-    void buildNewIdentity();
-    void showBlockDesigner();
-    void createSiteKeys();
-    void decryptImkIlk();
-    void decryptIuk();
-    void decryptPreviousIuks();
-    void quit();
-
-private:
-    Ui::MainWindow *ui;
-    QFrame* m_pHeaderFrame = nullptr;
-    QScrollArea* m_pScrollArea = nullptr;
-    IdentityModel *m_pIdentityModel = nullptr;
-    IdentityParser* m_pIdentityParser = nullptr;
-    UiBuilder* m_pUiBuilder = nullptr;
-
+    void onCreateNewIdentity();
+    void onDisplayTextualIdentity();
+    void onImportTextualIdentity();
+    void onOpenFile();
+    void onSaveFile();
+    void onShowAboutDialog();
+    void onShowIdentitySettingsDialog();
+    void onControlUnauthenticatedChanges();
+    void onPasteIdentityText();
+    void onBuildNewIdentity();
+    void onShowBlockDesigner();
+    void onCreateSiteKeys();
+    void onDecryptImkIlk();
+    void onDecryptIuk();
+    void onDecryptPreviousIuks();
+    void onQuit();
 };
 
 #endif // MAINWINDOW_H
