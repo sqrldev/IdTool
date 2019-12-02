@@ -54,13 +54,13 @@ public:
     static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);
     static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
-    static QByteArray createKeyFromPassword(IdentityBlock* block, QString password, QProgressDialog* progressDialog = nullptr);
+    static bool createKeyFromPassword(QByteArray& key, IdentityBlock& block, QString password, QProgressDialog* progressDialog = nullptr);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
     static QByteArray createIlkFromIuk(QByteArray decryptedIuk);
     static QByteArray enHash(QByteArray data);
     static IdentityBlock createBlock1(QByteArray iuk, QString password, QProgressDialog* progressDialog);
     static IdentityBlock createBlock2(QByteArray iuk, QString rescueCode, QProgressDialog* progressDialog);
-    static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QByteArray key);
+    static bool updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock, QString password, QProgressDialog* progressDialog);
     static QByteArray aesGcmEncrypt(QByteArray message, QByteArray additionalData, QByteArray iv, QByteArray key);
     static QByteArray createIuk();
     static QString createNewRescueCode();
