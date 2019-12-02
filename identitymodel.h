@@ -31,7 +31,7 @@
 
 // Forward declarations
 class CryptUtil;
-// End of forward declarations
+
 
 struct ItemDataTypeInfo
 {
@@ -53,6 +53,10 @@ enum ItemDataType
 class IdentityBlock;
 class IdentityBlockItem;
 
+/**********************************************
+ *    class IdentityModel                     *
+ *********************************************/
+
 class IdentityModel
 {     
 public:
@@ -71,6 +75,10 @@ public:
     QString getTextualVersionFormatted();
 };
 
+/**********************************************
+ *    class IdentityBlock                     *
+ *********************************************/
+
 class IdentityBlock
 {
 public:
@@ -87,6 +95,10 @@ public:
     bool insertItem(IdentityBlockItem item, IdentityBlockItem* after);
     QByteArray toByteArray();
 };
+
+/**********************************************
+ *    class IdentityBlockItem                 *
+ *********************************************/
 
 class IdentityBlockItem
 {

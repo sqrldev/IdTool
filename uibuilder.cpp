@@ -26,6 +26,21 @@
 
 #include "uibuilder.h"
 
+/*!
+ *
+ * \class UiBuilder
+ * \brief A class for dynamically visualizing a SQRL identity within
+ * the application's \c MainWindow GUI.
+ *
+ * \c UiBuilder, upon being provided with an \c IdentityModel object,
+ * will dynamically render the identity's block structure by creating
+ * all the necessary UI controls and stylesheets "on the fly" and
+ * inserting them into the \c MainWindow GUI.
+ *
+ * \sa MainWindow, IdentityModel
+ *
+*/
+
 UiBuilder::UiBuilder(QMainWindow* mainWindow, IdentityModel* model)
 {
     m_pMainWindow = mainWindow;
@@ -168,7 +183,7 @@ QWidget* UiBuilder::createBlockHeader(IdentityBlock *block)
         pBlockOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
         QVariant blockConnectorContainer = QVariant::fromValue(BlockConnector(block));
         pBlockOptionsButton->setProperty("0", blockConnectorContainer );
-        connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(blockOptionsButtonClicked()));
+        connect(pBlockOptionsButton, SIGNAL(clicked()), this, SLOT(onBlockOptionsButtonClicked()));
         pLayout->addWidget(pBlockOptionsButton);
     }
 
@@ -225,7 +240,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     pCopyButton->setMinimumWidth(30);
     pCopyButton->setIcon(QIcon(":/res/img/CopyToClipboard_16x.png"));
     pCopyButton->setProperty("0", itemConnectorContainer);
-    connect(pCopyButton, SIGNAL(clicked()), this, SLOT(copyButtonClicked()));
+    connect(pCopyButton, SIGNAL(clicked()), this, SLOT(onCopyButtonClicked()));
     pLayout->addWidget(pCopyButton);
 
     if (m_bEnableUnauthenticatedChanges)
@@ -236,7 +251,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
         pNameLable->setMinimumWidth(30);
         pEditButton->setIcon(QIcon(":/res/img/Edit_16x.png"));
         pEditButton->setProperty("0", itemConnectorContainer);
-        connect(pEditButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
+        connect(pEditButton, SIGNAL(clicked()), this, SLOT(onEditButtonClicked()));
         pLayout->addWidget(pEditButton);
 
         QPushButton* pOptionsButton = new QPushButton();
@@ -245,7 +260,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
         pOptionsButton->setMinimumWidth(30);
         pOptionsButton->setIcon(QIcon(":/res/img/OptionsDropdown_16x.png"));
         pOptionsButton->setProperty("0", itemConnectorContainer);
-        connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(itemOptionsButtonClicked()));
+        connect(pOptionsButton, SIGNAL(clicked()), this, SLOT(onItemOptionsButtonClicked()));
         pLayout->addWidget(pOptionsButton);
     }
 
@@ -254,7 +269,26 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     return pWidget;
 }
 
-void UiBuilder::editButtonClicked()
+bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
+{
+    bool ok;
+    int repititons = QInputDialog::getInt(
+                nullptr,
+                tr("Item repitition"),
+                tr("How many \"%1\" fields should be created?").arg(itemName),
+                1,
+                1,
+                1024,
+                1,
+                &ok);
+
+    if (ok) *result = repititons;
+
+    return ok;
+}
+
+
+void UiBuilder::onEditButtonClicked()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -273,7 +307,7 @@ void UiBuilder::editButtonClicked()
     }
 }
 
-void UiBuilder::copyButtonClicked()
+void UiBuilder::onCopyButtonClicked()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -287,7 +321,7 @@ void UiBuilder::copyButtonClicked()
                     static_cast<QWidget*>(sender()));
 }
 
-void UiBuilder::blockOptionsButtonClicked()
+void UiBuilder::onBlockOptionsButtonClicked()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -318,10 +352,10 @@ void UiBuilder::blockOptionsButtonClicked()
     menu->addAction(pActionAddBlock);
     menu->addAction(pActionDeleteBlock);
 
-    connect(pActionMoveBlockUp, &QAction::triggered, this, &UiBuilder::moveBlock);
-    connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::moveBlock);
-    connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::insertBlock);
-    connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::deleteBlock);
+    connect(pActionMoveBlockUp, &QAction::triggered, this, &UiBuilder::onMoveBlock);
+    connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::onMoveBlock);
+    connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::onInsertBlock);
+    connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::onDeleteBlock);
 
     menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
@@ -329,53 +363,7 @@ void UiBuilder::blockOptionsButtonClicked()
     if (m_bNeedsRebuild) rebuild();
 }
 
-BlockConnector::BlockConnector() :
-block(nullptr), moveUp(true)
-{
-}
-
-BlockConnector::BlockConnector(IdentityBlock* block, bool moveUp)
-{
-    this->block = block;
-    this->moveUp = moveUp;
-}
-
-BlockConnector::BlockConnector(const BlockConnector& other)
-{
-    this->block = other.block;
-    this->moveUp = other.moveUp;
-}
-
-BlockConnector::~BlockConnector()
-{
-}
-
-ItemConnector::ItemConnector() :
-    block(nullptr), item(nullptr), valueLabel(nullptr), moveUp(true)
-{
-}
-
-ItemConnector::ItemConnector(IdentityBlock* block, IdentityBlockItem* item, QLineEdit* valueLabel, bool moveUp)
-{
-    this->block = block;
-    this->item = item;
-    this->valueLabel = valueLabel;
-    this->moveUp = moveUp;
-}
-
-ItemConnector::ItemConnector(const ItemConnector& other)
-{
-    this->block = other.block;
-    this->item = other.item;
-    this->valueLabel = other.valueLabel;
-    this->moveUp = other.moveUp;
-}
-
-ItemConnector::~ItemConnector()
-{
-}
-
-void UiBuilder::deleteBlock()
+void UiBuilder::onDeleteBlock()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -386,7 +374,7 @@ void UiBuilder::deleteBlock()
     }
 }
 
-void UiBuilder::moveBlock()
+void UiBuilder::onMoveBlock()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -397,7 +385,7 @@ void UiBuilder::moveBlock()
     }
 }
 
-void UiBuilder::insertBlock()
+void UiBuilder::onInsertBlock()
 {
     BlockConnector connector =
             sender()->property("0").value<BlockConnector>();
@@ -418,25 +406,7 @@ void UiBuilder::insertBlock()
     }
 }
 
-bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
-{
-    bool ok;
-    int repititons = QInputDialog::getInt(
-                nullptr,
-                tr("Item repitition"),
-                tr("How many \"%1\" fields should be created?").arg(itemName),
-                1,
-                1,
-                1024,
-                1,
-                &ok);
-
-    if (ok) *result = repititons;
-
-    return ok;
-}
-
-void UiBuilder::itemOptionsButtonClicked()
+void UiBuilder::onItemOptionsButtonClicked()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -471,10 +441,10 @@ void UiBuilder::itemOptionsButtonClicked()
     menu->addAction(pActionAddItem);
     menu->addAction(pActionDeleteItem);
 
-    connect(pActionMoveItemUp, &QAction::triggered, this, &UiBuilder::moveItem);
-    connect(pActionMoveItemDown, &QAction::triggered, this, &UiBuilder::moveItem);
-    connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::insertItem);
-    connect(pActionDeleteItem, &QAction::triggered, this, &UiBuilder::deleteItem);
+    connect(pActionMoveItemUp, &QAction::triggered, this, &UiBuilder::onMoveItem);
+    connect(pActionMoveItemDown, &QAction::triggered, this, &UiBuilder::onMoveItem);
+    connect(pActionAddItem, &QAction::triggered, this, &UiBuilder::onInsertItem);
+    connect(pActionDeleteItem, &QAction::triggered, this, &UiBuilder::onDeleteItem);
 
     menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
@@ -482,7 +452,7 @@ void UiBuilder::itemOptionsButtonClicked()
     if (m_bNeedsRebuild) rebuild();
 }
 
-void UiBuilder::deleteItem()
+void UiBuilder::onDeleteItem()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -492,7 +462,7 @@ void UiBuilder::deleteItem()
     if (ok) m_bNeedsRebuild = true;
 }
 
-void UiBuilder::moveItem()
+void UiBuilder::onMoveItem()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -503,7 +473,7 @@ void UiBuilder::moveItem()
     }
 }
 
-void UiBuilder::insertItem()
+void UiBuilder::onInsertItem()
 {
     ItemConnector connector =
             sender()->property("0").value<ItemConnector>();
@@ -568,4 +538,94 @@ void UiBuilder::insertItem()
     {
         m_bNeedsRebuild = true;
     }
+}
+
+
+
+
+
+/*!
+ *
+ * \class BlockConnector
+ * \brief A helper class for connecting GUI representations of \c IdentityBlock
+ * instances to their underlying data source.
+ *
+ * This helper class is instantiated and populated by the \c UiBuilder class to
+ * establish a connection between the individual GUI representation of block objects
+ * and their underlying data sources within the \c IdentityModel. To do so,
+ * \c UiBuilder will turn the \c BlockConnector instance into a \c QVariant and
+ * attach it to the GUI control using \c setProperty(), where it can be retrieved
+ * within the slot handling the specific user action which needs access to the
+ * data within the \c IdentityModel.
+ *
+ * \sa UiBuilder, IdentityModel, ItemConnector
+ *
+*/
+
+BlockConnector::BlockConnector() :
+block(nullptr), moveUp(true)
+{
+}
+
+BlockConnector::BlockConnector(IdentityBlock* block, bool moveUp)
+{
+    this->block = block;
+    this->moveUp = moveUp;
+}
+
+BlockConnector::BlockConnector(const BlockConnector& other)
+{
+    this->block = other.block;
+    this->moveUp = other.moveUp;
+}
+
+BlockConnector::~BlockConnector()
+{
+}
+
+
+
+
+
+/*!
+ *
+ * \class ItemConnector
+ * \brief A helper class for connecting GUI representations of \c IdentityBlockItem
+ * instances to their underlying data source.
+ *
+ * This helper class is instantiated and populated by the \c UiBuilder class to
+ * establish a connection between the individual GUI representation of block items
+ * and their underlying data sources within the \c IdentityModel. To do so,
+ * \c UiBuilder will turn the \c ItemConnector instance into a \c QVariant and
+ * attach it to the GUI control using \c setProperty(), where it can be retrieved
+ * within the slot handling the specific user action which needs access to the
+ * data within the \c IdentityModel.
+ *
+ * \sa UiBuilder, IdentityModel, BlockConnector
+ *
+*/
+
+ItemConnector::ItemConnector() :
+    block(nullptr), item(nullptr), valueLabel(nullptr), moveUp(true)
+{
+}
+
+ItemConnector::ItemConnector(IdentityBlock* block, IdentityBlockItem* item, QLineEdit* valueLabel, bool moveUp)
+{
+    this->block = block;
+    this->item = item;
+    this->valueLabel = valueLabel;
+    this->moveUp = moveUp;
+}
+
+ItemConnector::ItemConnector(const ItemConnector& other)
+{
+    this->block = other.block;
+    this->item = other.item;
+    this->valueLabel = other.valueLabel;
+    this->moveUp = other.moveUp;
+}
+
+ItemConnector::~ItemConnector()
+{
 }

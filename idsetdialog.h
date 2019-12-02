@@ -36,11 +36,16 @@ namespace Ui {
 class IdentitySettingsDialog;
 }
 
+/**********************************************
+ *    class IdentitySettingsDialog            *
+ *********************************************/
+
 class IdentitySettingsDialog : public QDialog
 {
     Q_OBJECT
 
 private:
+    Ui::IdentitySettingsDialog *ui;
     IdentityBlock* m_pBlock1 = nullptr;
 
 public:
@@ -57,8 +62,6 @@ private:
     bool hasChanges();
     int createOptionFlagsInt();
 
-private:
-    Ui::IdentitySettingsDialog *ui;
 };
 
 #endif // IDSETDIALOG_H

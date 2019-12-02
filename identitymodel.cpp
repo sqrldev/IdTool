@@ -28,6 +28,22 @@
 #include "identityparser.h"
 #include "cryptutil.h"
 
+/*!
+ *
+ * \class IdentityModel
+ * \brief Represents a SQRL identity stored in the S4-format.
+ *
+ * \c IdentityModel holds a vector of \c IdentityBlock objects,
+ * modelling an object-oriented reproduction of the S4 identity
+ * storage format.
+ *
+ * More information SQRL's storage format can be found here:
+ * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ *
+ * \sa IdentityBlock, IdentityBlockItem
+ *
+*/
+
 void IdentityModel::writeToFile(QString fileName)
 {
     QFile file(fileName);
@@ -167,6 +183,25 @@ QString IdentityModel::getTextualVersionFormatted()
                 getTextualVersion());
 }
 
+
+
+
+/*!
+ *
+ * \class IdentityBlock
+ * \brief Represents a single identity block within the SQRL's
+ * S4 identity storage format.
+ *
+ * \c IdentityBlock holds a vector of \c IdentityBlockItem objects,
+ * representing a single block within the \c IdentityModel.
+ *
+ * More information SQRL's storage format can be found here:
+ * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ *
+ * \sa IdentityModel, IdentityBlockItem
+ *
+*/
+
 IdentityBlockItem *IdentityBlock::getItem(QString name)
 {
     for (auto iter=items.begin(); iter!=items.end(); iter++)
@@ -255,6 +290,21 @@ bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
 
     return false;
 }
+
+
+
+
+/*!
+ *
+ * \class IdentityBlockItem
+ * \brief Represents a single item/setting within an \c IdentityBlock.
+ *
+ * More information SQRL's storage format can be found here:
+ * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ *
+ * \sa IdentityModel, IdentityBlock
+ *
+*/
 
 std::map<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
     {ItemDataType::UINT_8, {"UINT_8", 1}},

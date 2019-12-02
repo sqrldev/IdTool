@@ -26,6 +26,17 @@
 
 #include "cryptutil.h"
 
+/*!
+ *
+ * \class CryptUtil
+ * \brief A collection of static utility functions mostly dealing with
+ * SQRL-related cryptographic operations.
+ *
+ * \c CryptUtil implements most of the functionality described in
+ * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ *
+*/
+
 const QByteArray CryptUtil::BASE56_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
 const int CryptUtil::BASE56_LINE_MAX_CHARS = 19;
 const int CryptUtil::BASE56_BASE_NUM = 56;

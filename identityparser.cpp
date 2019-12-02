@@ -26,6 +26,31 @@
 
 #include "identityparser.h"
 
+/*!
+ *
+ * \class IdentityParser
+ * \brief A class for parsing identity information stored in the S4 format.
+ *
+ * \c IdentityParser offers methods for parsing identity data (binary
+ * or base64-encoded) and converting the raw data into an \c IdentityModel
+ * object.
+ *
+ * \c IdentityParser does not employ simple static parsing of the S4 format.
+ * Instead, it uses json templates to dynamically parse identity blocks.
+ * IdTool comes with pre-built json templates for all currently known block
+ * types (Types 1, 2 and 3).
+ *
+ * To create custom block types, look at the standard templates provided
+ * with the app (within the blockdev/ subdirectory) to get a sense for how
+ * data types, repitition and dynamic item lengths are handled.
+ *
+ * More information SQRL's storage format can be found here:
+ * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ *
+ * \sa IdentityModel
+ *
+*/
+
 const QString IdentityParser::HEADER = "sqrldata";
 const QString IdentityParser::HEADER_BASE64 = "SQRLDATA";
 

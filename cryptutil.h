@@ -32,6 +32,10 @@
 #include "identityparser.h"
 #include "sodium.h"
 
+/**********************************************
+ *    class CryptUtil                         *
+ *********************************************/
+
 class CryptUtil
 {
 public:

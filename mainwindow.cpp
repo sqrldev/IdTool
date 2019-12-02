@@ -31,6 +31,23 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
+/*!
+ *
+ * \class MainWindow
+ * \brief The app's main application window.
+ *
+ * \c MainWindow provides access to all the functionality offered
+ * by tge application through the GUI. It also houses the main
+ * application menu.
+ *
+ * The visual representation of a SQRL identity, represented by an
+ * instance of the \c IdentityModel class, is being rendered within
+ * the \MainWindow using the \c UiBuilder class.
+ *
+ * \sa UiBuilder, IdentityModel
+ *
+*/
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -48,24 +65,24 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pHeaderFrame->setVisible(false);
 
     m_pScrollArea->setWidgetResizable(true);
-    controlUnauthenticatedChanges();
+    onControlUnauthenticatedChanges();
 
-    connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::createNewIdentity);
-    connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::openFile);
-    connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::saveFile);
-    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
-    connect(ui->actionPasteIdentityData, &QAction::triggered, this, &MainWindow::pasteIdentityText);
-    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::quit);
-    connect(ui->actionBuildNewIdentity, &QAction::triggered, this, &MainWindow::buildNewIdentity);
-    connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::showBlockDesigner);
-    connect(ui->actionDecryptImkIlk, &QAction::triggered, this, &MainWindow::decryptImkIlk);
-    connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::decryptIuk);
-    connect(ui->actionDecryptPreviousIuks, &QAction::triggered, this, &MainWindow::decryptPreviousIuks);
-    connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::createSiteKeys);
-    connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::showIdentitySettingsDialog);
-    connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::controlUnauthenticatedChanges);
-    connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::displayTextualIdentity);
-    connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::importTextualIdentity);
+    connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::onCreateNewIdentity);
+    connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::onOpenFile);
+    connect(ui->actionSaveIdentityFileAs, &QAction::triggered, this, &MainWindow::onSaveFile);
+    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::onShowAboutDialog);
+    connect(ui->actionPasteIdentityData, &QAction::triggered, this, &MainWindow::onPasteIdentityText);
+    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onQuit);
+    connect(ui->actionBuildNewIdentity, &QAction::triggered, this, &MainWindow::onBuildNewIdentity);
+    connect(ui->actionBlockDesigner, &QAction::triggered, this, &MainWindow::onShowBlockDesigner);
+    connect(ui->actionDecryptImkIlk, &QAction::triggered, this, &MainWindow::onDecryptImkIlk);
+    connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::onDecryptIuk);
+    connect(ui->actionDecryptPreviousIuks, &QAction::triggered, this, &MainWindow::onDecryptPreviousIuks);
+    connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::onCreateSiteKeys);
+    connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::onShowIdentitySettingsDialog);
+    connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::onControlUnauthenticatedChanges);
+    connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
+    connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
 }
 
 MainWindow::~MainWindow()
@@ -177,7 +194,7 @@ bool MainWindow::canDiscardCurrentIdentity()
     return true;
 }
 
-void MainWindow::createNewIdentity()
+void MainWindow::onCreateNewIdentity()
 {
     IdentityModel identity;
     QString rescueCode;
@@ -211,10 +228,10 @@ void MainWindow::createNewIdentity()
 
     showTextualIdentityInfoDialog(rescueCode);
 
-    saveFile();
+    onSaveFile();
 }
 
-void MainWindow::displayTextualIdentity()
+void MainWindow::onDisplayTextualIdentity()
 {
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
@@ -226,7 +243,7 @@ void MainWindow::displayTextualIdentity()
     showTextualIdentityInfoDialog();
 }
 
-void MainWindow::importTextualIdentity()
+void MainWindow::onImportTextualIdentity()
 {
     bool ok = false;
     QString textualIdentity = QInputDialog::getMultiLineText(
@@ -285,7 +302,7 @@ void MainWindow::importTextualIdentity()
     }
 }
 
-void MainWindow::openFile()
+void MainWindow::onOpenFile()
 {
     QString dir = nullptr;
 
@@ -318,7 +335,7 @@ void MainWindow::openFile()
     }
 }
 
-void MainWindow::saveFile()
+void MainWindow::onSaveFile()
 {
     QString dir = nullptr;
 
@@ -344,7 +361,7 @@ void MainWindow::saveFile()
     }
 }
 
-void MainWindow::showAboutDialog()
+void MainWindow::onShowAboutDialog()
 {
     QString message = "<b>IdTool</b><br>";
     message.append(tr("Version") + ": ");
@@ -358,7 +375,7 @@ void MainWindow::showAboutDialog()
     QMessageBox::about(this, "About", message);
 }
 
-void MainWindow::showIdentitySettingsDialog()
+void MainWindow::onShowIdentitySettingsDialog()
 {
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
@@ -376,7 +393,7 @@ void MainWindow::showIdentitySettingsDialog()
     m_pUiBuilder->rebuild();
 }
 
-void MainWindow::controlUnauthenticatedChanges()
+void MainWindow::onControlUnauthenticatedChanges()
 {
     bool enable = ui->actionEnableUnauthenticatedChanges->isChecked();
 
@@ -407,7 +424,7 @@ void MainWindow::controlUnauthenticatedChanges()
     ui->actionBuildNewIdentity->setVisible(enable);
 }
 
-void MainWindow::pasteIdentityText()
+void MainWindow::onPasteIdentityText()
 {
     bool ok = false;
     QString result = QInputDialog::getMultiLineText(
@@ -436,7 +453,7 @@ void MainWindow::pasteIdentityText()
     }
 }
 
-void MainWindow::buildNewIdentity()
+void MainWindow::onBuildNewIdentity()
 {
     QString sBlockType;
 
@@ -456,7 +473,7 @@ void MainWindow::buildNewIdentity()
     m_pUiBuilder->rebuild();
 }
 
-void MainWindow::showBlockDesigner()
+void MainWindow::onShowBlockDesigner()
 {
     bool ok = false;
     QString sBlockType;
@@ -472,7 +489,7 @@ void MainWindow::showBlockDesigner()
     dialog.exec();
 }
 
-void MainWindow::createSiteKeys()
+void MainWindow::onCreateSiteKeys()
 {
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
@@ -558,7 +575,7 @@ void MainWindow::createSiteKeys()
     resultDialog.exec();
 }
 
-void MainWindow::decryptImkIlk()
+void MainWindow::onDecryptImkIlk()
 {
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
@@ -625,7 +642,7 @@ void MainWindow::decryptImkIlk()
     resultDialog.exec();
 }
 
-void MainWindow::decryptIuk()
+void MainWindow::onDecryptIuk()
 {
     if (m_pIdentityModel == nullptr ||
         m_pIdentityModel->blocks.size() < 1)
@@ -677,7 +694,7 @@ void MainWindow::decryptIuk()
     resultDialog.exec();
 }
 
-void MainWindow::decryptPreviousIuks()
+void MainWindow::onDecryptPreviousIuks()
 {
     const QString DECRYPTION_METHOD_PASSWORD = tr("Password");
     const QString DECRYPTION_METHOD_RESCUE_CODE = tr("Rescue Code");
@@ -826,7 +843,7 @@ void MainWindow::decryptPreviousIuks()
 
 }
 
-void MainWindow::quit()
+void MainWindow::onQuit()
 {
     QApplication::quit();
 }
