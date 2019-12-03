@@ -87,6 +87,11 @@ BlockDesignerDialog::~BlockDesignerDialog()
     if (m_pBlockDesign != nullptr) delete m_pBlockDesign;
 }
 
+/*!
+ * Creates a new \c QStandardItemModel, sets the correct header
+ * labels and puts a pointer to the model into \c m_pItemModel.
+ */
+
 void BlockDesignerDialog::createModelStub()
 {
     m_pItemModel = new QStandardItemModel(0, 6);
@@ -100,6 +105,12 @@ void BlockDesignerDialog::createModelStub()
                                 tr("RepeatCount")
                             }));
 }
+
+/*!
+ * Creates a new \c QJsonDocument representing the block design
+ * by asking the user for the block description and color, and
+ * finally puts a pointer to the block definition into \c m_pBlockDesign.
+ */
 
 void BlockDesignerDialog::createBlockDefinition()
 {
@@ -147,6 +158,17 @@ void BlockDesignerDialog::createBlockDefinition()
     m_pBlockDesign->setObject(o);
 }
 
+/*!
+ * Loads an existing json block definition from disk, and places
+ * its address into \c m_pBlockDesign.
+ *
+ * The block type to be loaded is set in the \c BlockDesignerDialog
+ * constructor.
+ *
+ * \returns Returns \c true if a valid block definition could be loaded,
+ * and \c false otherwise.
+ */
+
 bool BlockDesignerDialog::loadBlockDefinition()
 {
     if (m_pBlockDesign == nullptr) m_pBlockDesign = new QJsonDocument();
@@ -167,6 +189,14 @@ bool BlockDesignerDialog::loadBlockDefinition()
 
     return true;
 }
+
+/*!
+ * Reloads block items from the block definition into the item model,
+ * discarding any changes which might have occured in the table view.
+ *
+ * If \a reloadBlockDefinition is \c true, the block definition is
+ * reloaded from disk prior to reloading the items.
+*/
 
 void BlockDesignerDialog::reload(bool reloadBlockDefinition)
 {
