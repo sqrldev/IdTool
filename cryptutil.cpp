@@ -29,6 +29,7 @@
 /*!
  *
  * \class CryptUtil
+ *
  * \brief A collection of static utility functions mostly dealing with
  * SQRL-related cryptographic operations.
  *
