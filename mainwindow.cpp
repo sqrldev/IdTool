@@ -48,6 +48,11 @@
  *
 */
 
+
+/*!
+ * Creates a new \c MainWindow, using \a parent as the parent form.
+ */
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -85,6 +90,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
 }
 
+/*!
+ * Destructor, frees allocated resources.
+ */
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -93,11 +102,24 @@ MainWindow::~MainWindow()
     delete m_pUiBuilder;
 }
 
+/*!
+ * Displays an error message-box, telling the user that an identity
+ * needs to be loaded to complete the operation.
+ */
+
 void MainWindow::showNoIdentityLoadedError()
 {
     QMessageBox::critical(this, tr("Error"), tr("An identity needs to be loaded"
                                                 "in order to complete this operation!"));
 }
+
+/*!
+ * Displays a dialog window containing the currently loaded itentity's textual
+ * representation along with some descriptive information.
+ *
+ * If \a rescueCode is provided, it will also be shown right before the textual
+ * identity.
+ */
 
 void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
 {
@@ -123,6 +145,16 @@ void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
     resultDialog.exec();
 }
 
+/*!
+ * Displays a dialog, prompting the user to input the current identity's
+ * rescue code. The string being input is then stripped of all dashes ("-")
+ * and spaces (" ").
+ *
+ * If the dialog was not cancelled and the string is not empty after stripping
+ * it of unwanted characters, \c true is returned and the input string is
+ * placed into \a rescueCode. Otherwise, \c false is returned.
+ */
+
 bool MainWindow::showRescueCodeInputDialog(QString& rescueCode)
 {
     bool ok = false;
@@ -140,9 +172,20 @@ bool MainWindow::showRescueCodeInputDialog(QString& rescueCode)
     rc = rc.replace("-", "");
     rc = rc.replace(" ", "");
 
+    if (rc == "") return false;
+
     rescueCode = rc;
     return true;
 }
+
+/*!
+ * Displays a dialog, prompting the user to input and confirm a new identity
+ * master password.
+ *
+ * If the dialog was not cancelled and if the password and the confirmation
+ * match up, \c true is returned and the input string is placed into
+ * \a password. Otherwise, \c false is returned.
+ */
 
 bool MainWindow::showGetNewPasswordDialog(QString &password)
 {
@@ -177,6 +220,13 @@ bool MainWindow::showGetNewPasswordDialog(QString &password)
     return true;
 }
 
+/*!
+ * Displays a dialog, asking the user to confirm that any changes that were
+ * made to the the currently loaded identity can be discarded.
+ *
+ * Returns \c true if the user confirmed the message, or \c false otherwise.
+ */
+
 bool MainWindow::canDiscardCurrentIdentity()
 {
     if (m_pUiBuilder->hasBlocks())
@@ -193,6 +243,12 @@ bool MainWindow::canDiscardCurrentIdentity()
 
     return true;
 }
+
+
+/***************************************************
+ *                S L O T S                        *
+ * ************************************************/
+
 
 void MainWindow::onCreateNewIdentity()
 {
