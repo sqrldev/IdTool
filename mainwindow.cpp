@@ -444,7 +444,7 @@ void MainWindow::onPasteIdentityText()
         }
 
         m_pIdentityModel->clear();
-        m_pIdentityParser->parseText(result, m_pIdentityModel);
+        m_pIdentityParser->parseString(result, m_pIdentityModel);
         m_pUiBuilder->rebuild();
     }
     catch (std::exception& e)

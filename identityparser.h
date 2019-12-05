@@ -45,7 +45,7 @@ private:
 
 public:
     void parseFile(QString fileName, IdentityModel* model);
-    void parseText(QString identityText, IdentityModel* model);
+    void parseString(QString identityString, IdentityModel* model);
     void parseIdentityData(QByteArray data, IdentityModel* model);
     static bool hasBlockDefinition(uint16_t blockType);
     static QByteArray getBlockDefinitionBytes(uint16_t blockType);
