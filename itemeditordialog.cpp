@@ -37,35 +37,51 @@
  *
 */
 
-ItemEditorDialog::ItemEditorDialog(QWidget *parent) :
+
+/*!
+ * Creates a new \c ItemEditorDialog window, using \a parent as the
+ * parent form and storing the \a item pointer internally for accessing
+ * the block item definition values.
+ */
+
+ItemEditorDialog::ItemEditorDialog(QWidget *parent, QJsonObject *item) :
     QDialog(parent),
     ui(new Ui::ItemEditorDialog)
 {
     ui->setupUi(this);
-    loadDefaults();
+    m_pItem = item;
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
     connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), SLOT(onResetButtonClicked()));
-}
-
-ItemEditorDialog::ItemEditorDialog(QWidget *parent, QJsonObject *item) :
-    ItemEditorDialog(parent)
-{
-    m_pItem = item;
 
     loadDefaults();
     if (m_pItem != nullptr) loadItemData();
 }
+
+/*!
+ * Destructor, frees allocated resources.
+ */
 
 ItemEditorDialog::~ItemEditorDialog()
 {
     delete ui;
 }
 
+/*!
+ * Returns a pointer to the \a item definition which was provided in the
+ * constructor and stored internally for accessing the block item definition.
+ */
+
 QJsonObject *ItemEditorDialog::getItem()
 {
     return m_pItem;
 }
+
+
+/***************************************************
+ *                S L O T S                        *
+ * ************************************************/
+
 
 void ItemEditorDialog::onDataTypeChanged(int currentIndex)
 {
