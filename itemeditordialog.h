@@ -47,8 +47,7 @@ private:
     QJsonObject* m_pItem = nullptr;
 
 public:
-    explicit ItemEditorDialog(QWidget *parent = nullptr);
-    ItemEditorDialog(QWidget *parent, QJsonObject* item);
+    ItemEditorDialog(QWidget *parent, QJsonObject* item = nullptr);
     ~ItemEditorDialog();
     QJsonObject* getItem();
 
