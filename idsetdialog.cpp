@@ -40,27 +40,73 @@
  *
 */
 
-IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent) :
+
+/*!
+ * Creates a new \c IdentitySettingsDialog window, using \a parent as the
+ * parent form and storing a \a block1 pointer internally for accessing the
+ * identity's settings.
+ */
+
+IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1) :
     QDialog(parent),
     ui(new Ui::IdentitySettingsDialog)
 {
     ui->setupUi(this);
+    m_pBlock1 = block1;
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
     connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), SLOT(onResetButtonClicked()));
-}
 
-IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1) :
-    IdentitySettingsDialog(parent)
-{
-    m_pBlock1 = block1;
     if (m_pBlock1 != nullptr) loadBlockData();
 }
+
+/*!
+ * Destructor, frees allocated resources.
+ */
 
 IdentitySettingsDialog::~IdentitySettingsDialog()
 {
     delete ui;
 }
+
+/*!
+ * Loads the identity settings from the type 1 block provided in the
+ * constructor and and pre-fills the UI controls according to the
+ * settings values.
+ */
+
+void IdentitySettingsDialog::loadBlockData()
+{
+    int optionFlags = m_pBlock1->items[7].value.toInt();
+
+    ui->chkCheckForUpdates->setChecked(optionFlags & 0x0001);
+    ui->chkUpdateAutonomously->setChecked((optionFlags & 0x0002) >> 1);
+    ui->chkRequestSqrlOnlyLogin->setChecked((optionFlags & 0x0004) >> 2);
+    ui->chkRequstNoSqrlBypass->setChecked((optionFlags & 0x0008) >> 3);
+    ui->chkMitmWarning->setChecked((optionFlags & 0x0010) >> 4);
+    ui->chkClearQuickPassOnSleep->setChecked((optionFlags & 0x0020) >> 5);
+    ui->chkClearQuickPassOnUserSwitch->setChecked((optionFlags & 0x0040) >> 6);
+    ui->chkEnableQuickPassTimeout->setChecked((optionFlags & 0x0080) >> 7);
+    ui->chkWarnOnNonCps->setChecked((optionFlags & 0x0100) >> 8);
+
+    int quickPassLength = m_pBlock1->items[8].value.toInt();
+    ui->spnQuickPassLength->setValue(quickPassLength);
+
+    int passwordVerifySecs = m_pBlock1->items[9].value.toInt();
+    ui->spnPasswordVerifySeconds->setValue(passwordVerifySecs);
+
+    int quickPassTimeout = m_pBlock1->items[10].value.toInt();
+    ui->spnQuickPassTimeout->setValue(quickPassTimeout);
+}
+
+/*!
+ * Determines whether the identity settings were changed in the UI,
+ * by comparing the values in the UI controls to those in the stored
+ * identity block of type 1.
+ *
+ * Returns \c true if any of the settings were changed, and \c false
+ * otherwise.
+ */
 
 bool IdentitySettingsDialog::hasChanges()
 {
@@ -80,6 +126,11 @@ bool IdentitySettingsDialog::hasChanges()
     return false;
 }
 
+/*!
+ * Checks the values of the checkboxes representing the SQRL identity's
+ * "option flags", and returns an integer representation of those bitflags.
+ */
+
 int IdentitySettingsDialog::createOptionFlagsInt()
 {
     int optionFlags = 0;
@@ -95,6 +146,12 @@ int IdentitySettingsDialog::createOptionFlagsInt()
 
     return optionFlags;
 }
+
+
+/***************************************************
+ *                S L O T S                        *
+ * ************************************************/
+
 
 void IdentitySettingsDialog::onSaveButtonClicked()
 {
@@ -135,28 +192,4 @@ void IdentitySettingsDialog::onSaveButtonClicked()
 void IdentitySettingsDialog::onResetButtonClicked()
 {
     loadBlockData();
-}
-
-void IdentitySettingsDialog::loadBlockData()
-{
-    int optionFlags = m_pBlock1->items[7].value.toInt();
-
-    ui->chkCheckForUpdates->setChecked(optionFlags & 0x0001);
-    ui->chkUpdateAutonomously->setChecked((optionFlags & 0x0002) >> 1);
-    ui->chkRequestSqrlOnlyLogin->setChecked((optionFlags & 0x0004) >> 2);
-    ui->chkRequstNoSqrlBypass->setChecked((optionFlags & 0x0008) >> 3);
-    ui->chkMitmWarning->setChecked((optionFlags & 0x0010) >> 4);
-    ui->chkClearQuickPassOnSleep->setChecked((optionFlags & 0x0020) >> 5);
-    ui->chkClearQuickPassOnUserSwitch->setChecked((optionFlags & 0x0040) >> 6);
-    ui->chkEnableQuickPassTimeout->setChecked((optionFlags & 0x0080) >> 7);
-    ui->chkWarnOnNonCps->setChecked((optionFlags & 0x0100) >> 8);
-
-    int quickPassLength = m_pBlock1->items[8].value.toInt();
-    ui->spnQuickPassLength->setValue(quickPassLength);
-
-    int passwordVerifySecs = m_pBlock1->items[9].value.toInt();
-    ui->spnPasswordVerifySeconds->setValue(passwordVerifySecs);
-
-    int quickPassTimeout = m_pBlock1->items[10].value.toInt();
-    ui->spnQuickPassTimeout->setValue(quickPassTimeout);
 }

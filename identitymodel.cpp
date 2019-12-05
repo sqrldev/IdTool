@@ -235,6 +235,7 @@ QByteArray IdentityModel::getRawBytes()
 
 /*!
  * Returns an unformatted textual version of the identity.
+ * If no block of type 2 is present, an empty string is returned.
  *
  * See https://www.grc.com/sqrl/SQRL_Cryptography.pdf
  * on page 27 for further details.

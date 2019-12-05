@@ -49,18 +49,17 @@ private:
     IdentityBlock* m_pBlock1 = nullptr;
 
 public:
-    explicit IdentitySettingsDialog(QWidget *parent = nullptr);
     IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1);
     ~IdentitySettingsDialog();
-
-public slots:
-    void onSaveButtonClicked();
-    void onResetButtonClicked();
 
 private:
     void loadBlockData();
     bool hasChanges();
-    int createOptionFlagsInt();
+    int  createOptionFlagsInt();
+
+public slots:
+    void onSaveButtonClicked();
+    void onResetButtonClicked();
 
 };
 
