@@ -73,6 +73,7 @@ public:
     QByteArray getRawBytes();
     QString getTextualVersion();
     QString getTextualVersionFormatted();
+    bool hasBlocks();
 };
 
 /**********************************************

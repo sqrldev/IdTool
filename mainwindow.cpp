@@ -229,7 +229,7 @@ bool MainWindow::showGetNewPasswordDialog(QString &password)
 
 bool MainWindow::canDiscardCurrentIdentity()
 {
-    if (m_pUiBuilder->hasBlocks())
+    if (m_pIdentityModel->hasBlocks())
     {
         QMessageBox msgBox;
         msgBox.setText(tr("This operation will discard any existing identity information!"));

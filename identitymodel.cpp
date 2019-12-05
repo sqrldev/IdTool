@@ -260,6 +260,17 @@ QString IdentityModel::getTextualVersion()
 }
 
 /*!
+ * Returns \c true if the identity isn't empty (the number of  identity
+ * blocks is greater than 0), or \c false otherwise.
+ */
+
+bool IdentityModel::hasBlocks()
+{
+    if (blocks.size() > 0) return true;
+    else return false;
+}
+
+/*!
  * Returns a formatted textual version of the identity.
  * The output looks something like this:
  *
