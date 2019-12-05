@@ -182,6 +182,7 @@
     </property>
     <addaction name="actionEnableUnauthenticatedChanges"/>
     <addaction name="separator"/>
+    <addaction name="actionChangePassword"/>
     <addaction name="actionIdentitySettings"/>
    </widget>
    <addaction name="menuFile"/>
@@ -395,6 +396,15 @@
    </property>
    <property name="toolTip">
     <string>Import textual identity version</string>
+   </property>
+  </action>
+  <action name="actionChangePassword">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/Password_16x.png</normaloff>:/res/img/Password_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Change identity master password</string>
    </property>
   </action>
  </widget>

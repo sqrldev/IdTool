@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::onControlUnauthenticatedChanges);
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
+    connect(ui->actionChangePassword, &QAction::triggered, this, &MainWindow::onChangePassword);
 }
 
 /*!
@@ -429,6 +430,18 @@ void MainWindow::onShowAboutDialog()
                    "https://github.com/sqrldev/IdTool</a>");
 
     QMessageBox::about(this, "About", message);
+}
+
+void MainWindow::onChangePassword()
+{
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        showNoIdentityLoadedError();
+        return;
+    }
+
+    //TODO: Implement
 }
 
 void MainWindow::onShowIdentitySettingsDialog()

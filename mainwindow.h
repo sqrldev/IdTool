@@ -73,6 +73,7 @@ private slots:
     void onOpenFile();
     void onSaveFile();
     void onShowAboutDialog();
+    void onChangePassword();
     void onShowIdentitySettingsDialog();
     void onControlUnauthenticatedChanges();
     void onPasteIdentityText();
