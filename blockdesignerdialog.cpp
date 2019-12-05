@@ -44,6 +44,17 @@
  *
 */
 
+/*!
+ * \fn BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent)
+ *
+ * Creates a new \c BlockDesignerDialog form, using \a parent as the parent
+ * form, and setting the type of the block to be edited/created to \a blockType.
+ *
+ * If a block definition for \a blockType already exists, \c m_WorkMode is set to
+ * \c EDIT, enabling editing mode. Otherwise, \c m_WorkMode is set to \c ADD,
+ * indicating that a new block definition should be created.
+ */
+
 BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BlockDesignerDialog)
@@ -80,12 +91,21 @@ BlockDesignerDialog::BlockDesignerDialog(int blockType, QWidget *parent) :
     }
 }
 
+/*!
+ * Destructor, frees allocated resources.
+ */
+
 BlockDesignerDialog::~BlockDesignerDialog()
 {
     delete ui;
     if (m_pItemModel != nullptr) delete m_pItemModel;
     if (m_pBlockDesign != nullptr) delete m_pBlockDesign;
 }
+
+/*!
+ * Creates a new \c QStandardItemModel, sets the correct header
+ * labels and puts a pointer to the model into \c m_pItemModel.
+ */
 
 void BlockDesignerDialog::createModelStub()
 {
@@ -100,6 +120,16 @@ void BlockDesignerDialog::createModelStub()
                                 tr("RepeatCount")
                             }));
 }
+
+/*!
+ * Creates a new \c QJsonDocument representing the block definition,
+ * asking the user to provide a block description and -color. Finally,
+ * a pointer to the block definition is stored within \c m_pBlockDesign.
+ *
+ * The block's type is set in the constructor of \c BlockDesignerDialog.
+ *
+ * \sa loadBlockDefinition
+ */
 
 void BlockDesignerDialog::createBlockDefinition()
 {
@@ -147,6 +177,19 @@ void BlockDesignerDialog::createBlockDefinition()
     m_pBlockDesign->setObject(o);
 }
 
+/*!
+ * Loads an existing json block definition from disk, and places
+ * a pointer to the definition into \c m_pBlockDesign.
+ *
+ * The block type to be loaded is set in the \c BlockDesignerDialog
+ * constructor.
+ *
+ * \returns Returns \c true if a valid block definition could be loaded,
+ * and \c false otherwise.
+ *
+ * \sa createBlockDefinition
+ */
+
 bool BlockDesignerDialog::loadBlockDefinition()
 {
     if (m_pBlockDesign == nullptr) m_pBlockDesign = new QJsonDocument();
@@ -167,6 +210,16 @@ bool BlockDesignerDialog::loadBlockDefinition()
 
     return true;
 }
+
+/*!
+ * Reloads block items from the block definition into the item model,
+ * discarding any changes which might have occured through the table view.
+ *
+ * If \a reloadBlockDefinition is \c true, the block definition gets
+ * reloaded from disk prior to reloading the items.
+ *
+ * \sa loadBlockDefinition
+*/
 
 void BlockDesignerDialog::reload(bool reloadBlockDefinition)
 {
@@ -193,6 +246,11 @@ void BlockDesignerDialog::reload(bool reloadBlockDefinition)
     ui->tableView->setModel(m_pItemModel);
     ui->tableView->resizeColumnToContents(0);
 }
+
+/***************************************************
+ *                S L O T S                        *
+ * ************************************************/
+
 
 void BlockDesignerDialog::onAddItemClicked()
 {

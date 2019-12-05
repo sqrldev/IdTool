@@ -119,16 +119,14 @@ void IdentitySettingsDialog::onSaveButtonClicked()
 
     if (!ok) return;
 
-    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+    QProgressDialog progressDialog("", tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    QByteArray key = CryptUtil::createKeyFromPassword(m_pBlock1, password, &progressDialog);
-    ok = CryptUtil::updateBlock1(m_pBlock1, &newBlock1, key);
+    ok = CryptUtil::updateBlock1(m_pBlock1, &newBlock1, password, &progressDialog);
 
     if (!ok)
     {
-        QMessageBox msgBox(this);
-        msgBox.critical(this, tr("Error"), tr("Reencryption failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"), tr("Operation failed! Wrong password?"));
     }
 
     *m_pBlock1 = newBlock1;

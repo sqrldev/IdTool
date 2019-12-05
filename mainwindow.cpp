@@ -444,7 +444,7 @@ void MainWindow::onPasteIdentityText()
         }
 
         m_pIdentityModel->clear();
-        m_pIdentityParser->parseText(result, m_pIdentityModel);
+        m_pIdentityParser->parseString(result, m_pIdentityModel);
         m_pUiBuilder->rebuild();
     }
     catch (std::exception& e)
@@ -526,12 +526,14 @@ void MainWindow::onCreateSiteKeys()
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    QByteArray key = CryptUtil::createKeyFromPassword(
-                pBlock,
+    QByteArray key;
+    ok = CryptUtil::createKeyFromPassword(
+                key,
+                *pBlock,
                 password,
                 &progressDialog);
-
     progressDialog.close();
+    if (!ok) return;
 
     QByteArray decryptedImk(32, 0);
     QByteArray decryptedIlk(32, 0);
@@ -607,12 +609,14 @@ void MainWindow::onDecryptImkIlk()
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    QByteArray key = CryptUtil::createKeyFromPassword(
-                pBlock1,
+    QByteArray key;
+    ok = CryptUtil::createKeyFromPassword(
+                key,
+                *pBlock1,
                 password,
                 &progressDialog);
-
     progressDialog.close();
+    if (!ok) return;
 
     QByteArray decryptedImk(32, 0);
     QByteArray decryptedIlk(32, 0);
@@ -750,12 +754,14 @@ void MainWindow::onDecryptPreviousIuks()
         QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
         progressDialog.setWindowModality(Qt::WindowModal);
 
-        QByteArray key = CryptUtil::createKeyFromPassword(
-                    pBlock1,
+        QByteArray key;
+        ok = CryptUtil::createKeyFromPassword(
+                    key,
+                    *pBlock1,
                     password,
                     &progressDialog);
-
         progressDialog.close();
+        if (!ok) return;
 
         if (!CryptUtil::decryptBlock1(
                     decryptedImk,

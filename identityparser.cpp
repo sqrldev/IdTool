@@ -54,6 +54,16 @@
 const QString IdentityParser::HEADER = "sqrldata";
 const QString IdentityParser::HEADER_BASE64 = "SQRLDATA";
 
+/*!
+ * Parses the file specified by \a fileName, and places a pointer to
+ * the resulting \c IdentiyModel object into \a model.
+ *
+ * \throws A \c std::invalid_argument error is thrown if either
+ * \a fileName or \a model are invalid. A \c std::runtime_error
+ * is thrown if the specified file cannot be read or if parsing
+ * failed.
+ */
+
 void IdentityParser::parseFile(QString fileName, IdentityModel* model)
 {
     if (fileName.isEmpty() || !model)
@@ -77,18 +87,37 @@ void IdentityParser::parseFile(QString fileName, IdentityModel* model)
     parseIdentityData(ba, model);
 }
 
-void IdentityParser::parseText(QString identityText, IdentityModel* model)
+/*!
+ * Parses \a identityString, and places a pointer to the resulting
+ * \c IdentiyModel object into \a model.
+ *
+ * This is especially useful for parsing a base64-encoded identity string.
+ *
+ * \throws A \c std::invalid_argument error is thrown if either
+ * \a identityString is empty or \a model is invalid. A \c std::runtime_error
+ * is thrown if the parsing failed.
+ */
+
+void IdentityParser::parseString(QString identityString, IdentityModel* model)
 {
-    if (identityText.isEmpty() || !model)
+    if (identityString.isEmpty() || !model)
     {
         throw std::invalid_argument(
-                    QObject::tr("Both filename and model must be valid arguments!")
+                    QObject::tr("Both identityText and model must be valid arguments!")
                     .toStdString());
     }
 
-    QByteArray ba = identityText.toLocal8Bit();
+    QByteArray ba = identityString.toLocal8Bit();
     parseIdentityData(ba, model);
 }
+
+/*!
+ * Checks whether a json block definition exists for the given
+ * \a blockType.
+ *
+ * Returns \c true if a definition for \a blockType exists, and
+ * \c false otherwise.
+ */
 
 bool IdentityParser::hasBlockDefinition(uint16_t blockType)
 {
@@ -100,6 +129,13 @@ bool IdentityParser::hasBlockDefinition(uint16_t blockType)
     return file.exists();
 }
 
+/*!
+ * Parses the raw data specified by \a data, and places a pointer to
+ * the resulting \c IdentiyModel object into \a model.
+ *
+ * \throws A \c std::runtime_error is thrown if parsing of the data failed.
+ */
+
 void IdentityParser::parseIdentityData(QByteArray data, IdentityModel* model)
 {
     m_bIsBase64 = false;
@@ -110,11 +146,7 @@ void IdentityParser::parseIdentityData(QByteArray data, IdentityModel* model)
                                  .toStdString());
     }
 
-    if (m_bIsBase64)
-    {
-        data = base64DecodeIdentity(data);
-    }
-
+    if (m_bIsBase64) data = base64DecodeIdentity(data);
     data = data.mid(HEADER.length()); // skip header
 
     while (data.length() > 0)
@@ -145,6 +177,12 @@ void IdentityParser::parseIdentityData(QByteArray data, IdentityModel* model)
         data = data.mid(blockLength);
     }
 }
+
+/*!
+ * Base64-decodes \a data and returns the decoded binary identity.
+ *
+ * \throws A \c std::runtime_error is thrown if \a data is invalid.
+ */
 
 QByteArray IdentityParser::base64DecodeIdentity(QByteArray data)
 {
@@ -179,6 +217,14 @@ QByteArray IdentityParser::base64DecodeIdentity(QByteArray data)
 
     return (HEADER.toLocal8Bit() + decodedData);
 }
+
+/*!
+ * Parses a single binary identity block provided within \a data,
+ * using the json block definition \a blockDef as a parsing template,
+ * and returns the resulting \c IdentityBlock object.
+ *
+ * \throws A \c std::runtime_error is thrown if the parsing failed.
+ */
 
 IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDef)
 {
@@ -265,6 +311,19 @@ IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDe
     return newBlock;
 }
 
+/*!
+ * Checks whether a valid SQRL identity header is present within
+ * the identity data provided in \a data.
+ *
+ * Valid identity headers are either "sqrldata", signalling
+ * binary identity data, or "SQRLDATA", signalling base64-
+ * encoded identity data following immediately after the
+ * header.
+ *
+ * Returns \c true if a valid header was found at the beginning
+ * of \a data, or \c false otherwise.
+ */
+
 bool IdentityParser::checkHeader(QByteArray data)
 {
     if (data.length() < HEADER.length())
@@ -290,6 +349,15 @@ bool IdentityParser::checkHeader(QByteArray data)
     return true;
 }
 
+/*!
+ * \brief Gets the raw, binary data for a json block definition for a block
+ * of type \a blockType.
+ *
+ * Searches the "/blockdef" subdirectory for a block definition file named
+ * <blockType>.json and returns its contents. If the file does not exists,
+ * an empty byte array is returned.
+ */
+
 QByteArray IdentityParser::getBlockDefinitionBytes(uint16_t blockType)
 {
     QDir path = QDir::currentPath();
@@ -308,6 +376,13 @@ QByteArray IdentityParser::getBlockDefinitionBytes(uint16_t blockType)
     return ba;
 }
 
+/*!
+ * Parses the raw, binary json block definition provided in \a data,
+ * creates a \c QJsonDocument object, and stores a pointer to it in \a jsonDoc .
+ *
+ * Returns \c true if parsing succeeded, and \c false otherwise.
+ */
+
 bool IdentityParser::parseBlockDefinition(QByteArray data, QJsonDocument* jsonDoc)
 {
     QJsonParseError error;
@@ -320,6 +395,13 @@ bool IdentityParser::parseBlockDefinition(QByteArray data, QJsonDocument* jsonDo
 
     return false;
 }
+
+/*!
+ * Converts \a item into a number of \c QStandardItem objects and returns
+ * a list of pointers to those objects.
+ *
+ * This is used to display block items in a UI view using the view/model paradigm.
+ */
 
 QList<QStandardItem*> IdentityParser::toStandardItems(QJsonObject *item)
 {
@@ -339,6 +421,16 @@ QList<QStandardItem*> IdentityParser::toStandardItems(QJsonObject *item)
     return result;
 }
 
+/*!
+ * Returns the raw, binary json block definition for an "unknown block".
+ * This block definition is embedded into the application binary and is
+ * being used as a fallback if no "specialized" block definition can be
+ * found within the "blockdef/" subdirectory for a specific block type.
+ *
+ * The "unknown block" definition only defines the length, type and raw
+ * data for an identity block.
+ */
+
 QByteArray IdentityParser::getUnknownBlockDefinition()
 {
     QByteArray ba;
@@ -355,6 +447,14 @@ QByteArray IdentityParser::getUnknownBlockDefinition()
 
     return ba;
 }
+
+/*!
+ * Creates an \c IdentityBlock object of the given \a blockType,
+ * with all item values left blank or undefined, and returns it.
+ *
+ * If no valid block definition can be found for \a blockType,
+ * an empty \c IdentityBlock object is returned.
+ */
 
 IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
 {
@@ -402,6 +502,11 @@ IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
     return result;
 }
 
+/*!
+ * Creates and returns an \c IdentityBlockItem object with the
+ * provided \a name, \a description, \a dataType and \a nrOfBytes.
+ */
+
 IdentityBlockItem IdentityParser::createEmptyItem(QString name, QString description,
                                                   ItemDataType dataType, int nrOfBytes)
 {
@@ -414,36 +519,104 @@ IdentityBlockItem IdentityParser::createEmptyItem(QString name, QString descript
     return item;
 }
 
+/*!
+ * Gets the block length, stored within the first two bytes
+ * of \a data, and returns it.
+ *
+ * If \a data holds less than two bytes, \c 0  is returned.
+ */
 
 uint16_t IdentityParser::getBlockLength(QByteArray data)
 {
+    if (data.count() < 2) return 0;
+
     unsigned char c1 = static_cast<unsigned char>(data[0]);
     unsigned char c2 = static_cast<unsigned char>(data[1]);
     return static_cast<uint16_t>(c1 | (c2 << 8));
 }
 
+/*!
+ * Gets the block type, stored within the third and fourth
+ * byte of \a data, and returns it.
+ *
+ * \throws A \c std::invalid_argument is thrown if \a data
+ * holds less than four bytes.
+ */
+
 uint16_t IdentityParser::getBlockType(QByteArray data)
 {
+    if (data.count() < 4)
+    {
+        throw std::invalid_argument(
+                    QObject::tr("The provided byte array is too short!")
+                    .toStdString());
+    }
+
     unsigned char c1 = static_cast<unsigned char>(data[2]);
     unsigned char c2 = static_cast<unsigned char>(data[3]);
     return static_cast<uint16_t>(c1 | (c2 << 8));
 }
 
+/*!
+ * Converts the byte stored in \a data at offset \a offset into
+ * a string and returns it.
+ *
+ * \throws A \c std::invalid_argument error is thrown
+ * if \c {data.count() <= offset}.
+ */
+
 QString IdentityParser::parseUint8(QByteArray data, int offset)
 {
+    if (data.count() <= offset)
+    {
+        throw std::invalid_argument(
+                    QObject::tr("The provided byte array is too short!")
+                    .toStdString());
+    }
+
     return QString::number(static_cast<unsigned char>(data[offset]));
 }
 
+/*!
+ * Converts the uint16 stored as two bytes within \a data at offset
+ * \a offset into a string and returns it.
+ *
+ * \throws A \c std::invalid_argument error is thrown
+ * if \c {data.count() <= offset + 1}.
+ */
+
 QString IdentityParser::parseUint16(QByteArray data, int offset)
 {
+    if (data.count() <= offset + 1)
+    {
+        throw std::invalid_argument(
+                    QObject::tr("The provided byte array is too short!")
+                    .toStdString());
+    }
+
     unsigned char c1 = static_cast<unsigned char>(data[offset]);
     unsigned char c2 = static_cast<unsigned char>(data[offset+1]);
     uint32_t num = static_cast<uint32_t>(c1 | (c2 << 8));
     return QString::number(num);
 }
 
+/*!
+ * Converts the uint32 stored as four bytes within \a data at offset
+ * \a offset into a string and returns it.
+ *
+ * \throws A \c std::invalid_argument error is thrown
+ * if \c {data.count() <= offset + 3}.
+ */
+
 QString IdentityParser::parseUint32(QByteArray data, int offset)
 {
+    if (data.count() <= offset + 3)
+    {
+        throw std::invalid_argument(
+                    QObject::tr("The provided byte array is too short!")
+                    .toStdString());
+    }
+
     unsigned char c1 = static_cast<unsigned char>(data[offset]);
     unsigned char c2 = static_cast<unsigned char>(data[offset+1]);
     unsigned char c3 = static_cast<unsigned char>(data[offset+2]);
@@ -452,7 +625,22 @@ QString IdentityParser::parseUint32(QByteArray data, int offset)
     return QString::number(num);
 }
 
+/*!
+ * Converts the binary data within \a data at offset \a offset and with a
+ * length of \a bytes number of bytes into a hex-encoded string and returns it.
+ *
+ * \throws A \c std::invalid_argument error is thrown
+ * if \c {data.count() <= offset + bytes - 1}.
+ */
+
 QString IdentityParser::parseByteArray(QByteArray data, int offset, int bytes)
 {    
+    if (data.count() <= offset + bytes - 1)
+    {
+        throw std::invalid_argument(
+                    QObject::tr("The provided byte array is too short!")
+                    .toStdString());
+    }
+
     return QString::fromLocal8Bit(data.mid(offset, bytes).toHex());
 }

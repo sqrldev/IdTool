@@ -35,14 +35,24 @@
  *
  * \c IdentityModel holds a vector of \c IdentityBlock objects,
  * modelling an object-oriented reproduction of the S4 identity
- * storage format.
+ * storage format. Following this pattern, \c IdentityBlock
+ * holds a vector of \a IdentityBlockItem objects, each representing
+ * a single setting/value.
  *
- * More information SQRL's storage format can be found here:
+ * More information SQRL's storage format can be found at
  * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
  *
  * \sa IdentityBlock, IdentityBlockItem
  *
 */
+
+/*!
+ * Retrieves the raw binary representation of the identity model
+ * and writes it to a file specified by \a fileName.
+ *
+ * \throws A \c std::runtime_error is raised if the file cannot
+ * be written.
+ */
 
 void IdentityModel::writeToFile(QString fileName)
 {
@@ -60,6 +70,16 @@ void IdentityModel::writeToFile(QString fileName)
     file.close();
 }
 
+/*!
+ * Returns the \c IdentityBlock of type \a blockType stored
+ * within the identity's list of blocks.
+ *
+ * If no block of type \a blockType is present, \c nullptr
+ * is returned.
+ *
+ * \sa IdentityBlock
+ */
+
 IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
 {
     for (size_t i=0; i<blocks.size(); i++)
@@ -70,6 +90,10 @@ IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
 
     return nullptr;
 }
+
+/*!
+ * Returns the raw binary representation of the identity block.
+ */
 
 QByteArray IdentityBlock::toByteArray()
 {
@@ -82,6 +106,16 @@ QByteArray IdentityBlock::toByteArray()
 
     return ba;
 }
+
+/*!
+ * Deletes the \c IdentityBlock of type \a blockType from
+ * the identity's list of blocks.
+ *
+ * \return Returns \c true if a block of type \a blockType
+ * was found and deleted, and \c false otherwise.
+ *
+ * \sa IdentityBlock
+ */
 
 bool IdentityModel::deleteBlock(IdentityBlock* block)
 {
@@ -96,6 +130,15 @@ bool IdentityModel::deleteBlock(IdentityBlock* block)
 
     return false;
 }
+
+/*!
+ * Moves \a block one step upwards or downwards within the identity's
+ * list of blocks (imagine a vertical index going from low index (up)
+ * to high index (down)).
+ *
+ * If \a up is \c true, \a block will be moved upwards (index -= 1),
+ * or downwards (index += 1) otherwise.
+ */
 
 bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
 {
@@ -126,6 +169,17 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
     return false;
 }
 
+/*!
+ * Inserts the \c IdentityBlock \a block into the identity's block
+ * list, placing it directly after the existing block pointed to
+ * by \a after.
+ *
+ * Returns \c true if \a after was found and \a block was inserted
+ * right after it, and \c false if \a after was not found in the list.
+ *
+ * \sa IdentityBlock
+ */
+
 bool IdentityModel::insertBlock(IdentityBlock block, IdentityBlock* after)
 {
     auto iter = blocks.begin();
@@ -144,16 +198,28 @@ bool IdentityModel::insertBlock(IdentityBlock block, IdentityBlock* after)
     return false;
 }
 
+/*!
+ * Clears the identity's list of blocks.
+ */
+
 void IdentityModel::clear()
 {
     blocks.clear();
 }
+
+/*!
+ * Clears the identity and imports all blocks from \a model.
+ */
 
 void IdentityModel::import(IdentityModel &model)
 {
     clear();
     blocks = model.blocks;
 }
+
+/*!
+ * Returns the raw binary data representation of the identity.
+ */
 
 QByteArray IdentityModel::getRawBytes()
 {
@@ -167,15 +233,50 @@ QByteArray IdentityModel::getRawBytes()
     return ba;
 }
 
+/*!
+ * Returns an unformatted textual version of the identity.
+ *
+ * See https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ * on page 27 for further details.
+ *
+ * \note For a human-friendly version of the textual identity,
+ * call \c getTextualVersionFormatted().
+ *
+ * \sa getTextualVersionFormatted
+ */
+
 QString IdentityModel::getTextualVersion()
 {
     IdentityBlock* block2 = getBlock(2);
-    if (block2 == nullptr) return "";
+    IdentityBlock* block3 = getBlock(3);
+
+    if (block2 == nullptr) return ""; // We need block 2
 
     QByteArray identityData = block2->toByteArray();
+    if (block3 != nullptr) identityData += block3->toByteArray();
 
     return CryptUtil::base56EncodeIdentity(identityData);
 }
+
+/*!
+ * Returns a formatted textual version of the identity.
+ * The output looks something like this:
+ *
+ * jWJX JmD3 hUKQ qcRQ YRis
+ * Gnmx uQHs LaE5 vR2f V7At
+ * vW5g UQ5m B5kK gBjH 9uJr
+ * JQEF T7sm yYm7 USzH tmfu
+ * 6ktj U86K Dqdz p8Gh TfZS
+ * UA8a G3F
+ *
+ * See https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ * on page 27 for further details.
+ *
+ * \note For an unformatted version of the textual identity,
+ * call \c getTextualVersion().
+ *
+ * \sa getTextualVersion
+ */
 
 QString IdentityModel::getTextualVersionFormatted()
 {
@@ -183,8 +284,8 @@ QString IdentityModel::getTextualVersionFormatted()
                 getTextualVersion());
 }
 
-
-
+/**************************************************************
+ *************************************************************/
 
 /*!
  *
@@ -202,6 +303,12 @@ QString IdentityModel::getTextualVersionFormatted()
  *
 */
 
+
+/*!
+ * Returns the first \c IdentityBlockItem which has its "name" property
+ * set to \a name, or \c nullptr if such an item could not be found.
+ */
+
 IdentityBlockItem *IdentityBlock::getItem(QString name)
 {
     for (auto iter=items.begin(); iter!=items.end(); iter++)
@@ -214,6 +321,14 @@ IdentityBlockItem *IdentityBlock::getItem(QString name)
 
     return nullptr;
 }
+
+/*!
+ * Duplicates \a item and inserts the exact copy into the block's
+ * item list right behind \a item.
+ *
+ * Returns \c true if \a item was found and could be duplicated,
+ * or \c false otherwise.
+ */
 
 bool IdentityBlock::duplicateItem(IdentityBlockItem* item)
 {
@@ -230,6 +345,13 @@ bool IdentityBlock::duplicateItem(IdentityBlockItem* item)
     return false;
 }
 
+/*!
+ * Deletes \a item from the block's item list.
+ *
+ * Returns \c true if \a item was found and could be deleted,
+ * or \c false otherwise.
+ */
+
 bool IdentityBlock::deleteItem(IdentityBlockItem* item)
 {
     for (auto iter=items.begin(); iter!=items.end(); iter++)
@@ -243,6 +365,15 @@ bool IdentityBlock::deleteItem(IdentityBlockItem* item)
 
     return false;
 }
+
+/*!
+ * Moves \a item one step upwards or downwards within the block's
+ * list of items (imagine a vertical index going from low index (up)
+ * to high index (down)).
+ *
+ * If \a up is \c true, \a item will be moved upwards (index -= 1),
+ * or downwards (index += 1) otherwise.
+ */
 
 bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
 {
@@ -273,6 +404,14 @@ bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
     return false;
 }
 
+/*!
+ * Inserts \a item into the block's item list, placing it directly
+ * after the existing item pointed to by \a after.
+ *
+ * Returns \c true if \a after was found and \a item was inserted,
+ * and \c false if \a after could not be found in the list.
+ */
+
 bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
 {
     auto iter = items.begin();
@@ -291,15 +430,18 @@ bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
     return false;
 }
 
-
-
+/**************************************************************
+ *************************************************************/
 
 /*!
  *
  * \class IdentityBlockItem
  * \brief Represents a single item/setting within an \c IdentityBlock.
  *
- * More information SQRL's storage format can be found here:
+ * \note Values are stored as strings within \c IdentityBlockItem
+ * objects and only converted to their native types once needed.
+ *
+ * More information SQRL's storage format can be found at
  * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
  *
  * \sa IdentityModel, IdentityBlock
@@ -314,6 +456,12 @@ std::map<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
     {ItemDataType::STRING, {"STRING", 0}},
     {ItemDataType::UNDEFINED, {"UNDEFINED", 0}}
 };
+
+/*!
+ * Searches the \c DataTypeMap for an \c ItemDataType with a name of
+ * \a dataType. If the \c ItemDataType is found, it is being returned.
+ * If no such data type exists, \c ItemDataType::UNDEFINED is returned.
+ */
 
 ItemDataType IdentityBlockItem::findDataType(QString dataType)
 {
@@ -332,6 +480,10 @@ ItemDataType IdentityBlockItem::findDataType(QString dataType)
     return key;
 }
 
+/*!
+ * Returns a list of possible \c IdentityBlockItem data types.
+ */
+
 QStringList IdentityBlockItem::getDataTypeList()
 {
     std::map<ItemDataType, ItemDataTypeInfo>::const_iterator it;
@@ -344,6 +496,10 @@ QStringList IdentityBlockItem::getDataTypeList()
 
     return result;
 }
+
+/*!
+ * Returns the raw binary representation of the \c IdentityBlockItem.
+ */
 
 QByteArray IdentityBlockItem::toByteArray()
 {
