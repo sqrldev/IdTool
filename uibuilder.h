@@ -53,10 +53,9 @@ private:
     bool m_bEnableUnauthenticatedChanges = false;
 
 public:
-    UiBuilder(QMainWindow* ui, IdentityModel* model);
+    UiBuilder(QMainWindow* ui, IdentityModel* identityModel);
     void rebuild();
     void clearLayout();
-    bool hasBlocks();
     IdentityModel* getModel();
     void setEnableUnauthenticatedChanges(bool enable, bool rebuild = false);
     static bool showGetBlockTypeDialog(QString* result, bool allowEdit = false);

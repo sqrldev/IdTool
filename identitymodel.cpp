@@ -235,6 +235,7 @@ QByteArray IdentityModel::getRawBytes()
 
 /*!
  * Returns an unformatted textual version of the identity.
+ * If no block of type 2 is present, an empty string is returned.
  *
  * See https://www.grc.com/sqrl/SQRL_Cryptography.pdf
  * on page 27 for further details.
@@ -256,6 +257,17 @@ QString IdentityModel::getTextualVersion()
     if (block3 != nullptr) identityData += block3->toByteArray();
 
     return CryptUtil::base56EncodeIdentity(identityData);
+}
+
+/*!
+ * Returns \c true if the identity isn't empty (the number of  identity
+ * blocks is greater than 0), or \c false otherwise.
+ */
+
+bool IdentityModel::hasBlocks()
+{
+    if (blocks.size() > 0) return true;
+    else return false;
 }
 
 /*!

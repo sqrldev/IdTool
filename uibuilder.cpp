@@ -41,12 +41,30 @@
  *
 */
 
-UiBuilder::UiBuilder(QMainWindow* mainWindow, IdentityModel* model)
+
+/*!
+ * Creates a new UiBuilder object, storing a pointer to the application's
+ * \a mainWindow and currently active \a identityModel, which is being
+ * used to visualize the identity structure within the GUI.
+ */
+
+UiBuilder::UiBuilder(QMainWindow* mainWindow, IdentityModel* identityModel)
 {
     m_pMainWindow = mainWindow;
     m_pScrollArea = mainWindow->findChild<QScrollArea*>("scrollArea");
-    m_pModel = model;
+    m_pModel = identityModel;
 }
+
+/*!
+ * Rebuilds the visual representation of the stored identity model.
+ *
+ * \note This method is usually called if changes to the underlying
+ * identity model should be reflected in the UI representation.
+ *
+ * \throws A \c std::runtime_error is thrown if either the
+ * parent widget onto which the identity should be drawn or the
+ * identity model are invalid.
+ */
 
 void UiBuilder::rebuild()
 {
@@ -79,27 +97,69 @@ void UiBuilder::rebuild()
     m_bNeedsRebuild = false;
 }
 
+/*!
+ * Deletes the layout representing the identity from the UI.
+ */
+
 void UiBuilder::clearLayout()
 {
     if (m_pLastLayout) m_pLastLayout->deleteLater();
 }
 
-bool UiBuilder::hasBlocks()
-{
-    if (m_pModel->blocks.size() > 0) return true;
-    else return false;
-}
+/*!
+ * Returns a pointer to the \c IdentityModel currently active
+ * in this \c UiBuilder instance.
+ */
 
 IdentityModel *UiBuilder::getModel()
 {
     return m_pModel;
 }
 
+/*!
+ * \brief Sets an internal flag that signals whether unauthenticated changes
+ * to the identity should be enabled or disabled.
+ *
+ * Any settings and values within a SQRL identitiy are being protected against
+ * unauthorized manipulation by applying the AES-GCM authenticated encryption.
+ * With this method, the plain text within an identity is included with the
+ * encryption of the identity keys as "additional data". Therefore, if any
+ * information within an identity changes, the decryption of the keys will fail.
+ *
+ * "Unauthenticated changes" are changes to the identity which don't get
+ * cryptographically "reauthenticated". This means, any well behaving client
+ * will reject such "rogue" identities.
+ *
+ * If \a enable is \c true, unauthenticated changes are being enabled,
+ * if it is set to \c false, they are being disabled.
+ *
+ * If \a rebuild is set to \c true, any change is immediately reflected
+ * within the visual representation of the identity. For example, if
+ * unauthenticated changes are being disabled and \a rebuild is \c true,
+ * buttons for editing and moving identity blocks and items are removed
+ * from the GUI.
+ */
+
 void UiBuilder::setEnableUnauthenticatedChanges(bool enable, bool rebuild)
 {
     m_bEnableUnauthenticatedChanges = enable;
     if (rebuild) this->rebuild();
 }
+
+/*!
+ * Displays a dialog, asking the user to select or enter a block type.
+ *
+ * The dialog provides a list of existing block types to choose from
+ * (meaning block types that do have a block definition file present).
+ * If \a allowEdit is \c true, the user can enter a block type that
+ * does not exist, allowing for the creation of new block type definitions.
+ * If \a allowEdit is \c false, the user can only choose from the list of
+ * existing block types.
+ *
+ * If the dialog was not cancelled and the user chose or entered a block
+ * type, \c true is returned and the block type is put into \a result.
+ * Otherwise, \c false is returned.
+ */
 
 bool UiBuilder::showGetBlockTypeDialog(QString *result, bool allowEdit)
 {
@@ -130,6 +190,11 @@ bool UiBuilder::showGetBlockTypeDialog(QString *result, bool allowEdit)
     return ok;
 }
 
+/*!
+ * Creates a visual representation of the \c IdentityBlock \a block and returns
+ * it as a pointer to a \c QWidget object.
+ */
+
 QWidget* UiBuilder::createBlock(IdentityBlock *block)
 {
     QString objectName = "obj_" + QUuid::createUuid().toByteArray().toHex();
@@ -159,6 +224,13 @@ QWidget* UiBuilder::createBlock(IdentityBlock *block)
 
     return pFrame;
 }
+
+/*!
+ * Creates a visual block header using the information provided
+ * within \a block, displaying the block type and description as
+ * well as user controls for block manipulation, and returns it
+ * as a pointer to a \c QWidget object.
+ */
 
 QWidget* UiBuilder::createBlockHeader(IdentityBlock *block)
 {
@@ -191,6 +263,14 @@ QWidget* UiBuilder::createBlockHeader(IdentityBlock *block)
 
     return pWidget;
 }
+
+/*!
+ * Creates a visual representation of \a item, displaying the item name,
+ * description and value as well as user controls for item manipulation,
+ * and returns it as a pointer to a \c QWidget object.
+ *
+ * Within \a block, the item's parent \c IdentityBlock must be provided.
+ */
 
 QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* block)
 {
@@ -269,6 +349,15 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
     return pWidget;
 }
 
+/*!
+ * Displays a dialog, asking the user to enter the number of repititions
+ * for the item named \a itemName.
+ *
+ * If the dialog was not cancelled and the user entered a valid repitition
+ * count, \c true is returned and the repitition count is put into \a result.
+ * Otherwise, \c false is returned.
+ */
+
 bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
 {
     bool ok;
@@ -286,6 +375,11 @@ bool UiBuilder::showGetRepeatCountDialog(QString itemName, int* result)
 
     return ok;
 }
+
+
+/***************************************************
+ *                S L O T S                        *
+ * ************************************************/
 
 
 void UiBuilder::onEditButtonClicked()
