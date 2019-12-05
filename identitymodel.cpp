@@ -248,9 +248,12 @@ QByteArray IdentityModel::getRawBytes()
 QString IdentityModel::getTextualVersion()
 {
     IdentityBlock* block2 = getBlock(2);
-    if (block2 == nullptr) return "";
+    IdentityBlock* block3 = getBlock(3);
+
+    if (block2 == nullptr) return ""; // We need block 2
 
     QByteArray identityData = block2->toByteArray();
+    if (block3 != nullptr) identityData += block3->toByteArray();
 
     return CryptUtil::base56EncodeIdentity(identityData);
 }
