@@ -109,7 +109,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::showNoIdentityLoadedError()
 {
-    QMessageBox::critical(this, tr("Error"), tr("An identity needs to be loaded"
+    QMessageBox::critical(this, tr("Error"), tr("An identity needs to be loaded "
                                                 "in order to complete this operation!"));
 }
 
