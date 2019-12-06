@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::onControlUnauthenticatedChanges);
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
+    connect(ui->actionChangePassword, &QAction::triggered, this, &MainWindow::onChangePassword);
 }
 
 /*!
@@ -179,6 +180,29 @@ bool MainWindow::showRescueCodeInputDialog(QString& rescueCode)
 }
 
 /*!
+ * Displays a dialog, prompting the user to input the identity's master
+ * password.
+ *
+ * If the dialog was not cancelled, \c true is returned and the input
+ * string is placed into \a password. Otherwise, \c false is returned.
+ */
+
+bool MainWindow::showGetPasswordDialog(QString &password, QWidget* parent)
+{
+    bool ok = false;
+    QString pwTemp = QInputDialog::getText(
+                parent,
+                tr(""),
+                tr("Please enter your current identity master password:"),
+                QLineEdit::Password,
+                "",
+                &ok);
+
+    if (ok) password = pwTemp;
+    return ok;
+}
+
+/*!
  * Displays a dialog, prompting the user to input and confirm a new identity
  * master password.
  *
@@ -187,15 +211,15 @@ bool MainWindow::showRescueCodeInputDialog(QString& rescueCode)
  * \a password. Otherwise, \c false is returned.
  */
 
-bool MainWindow::showGetNewPasswordDialog(QString &password)
+bool MainWindow::showGetNewPasswordDialog(QString &password, QWidget* parent)
 {
     bool ok = false;
     QString password1, password2;
 
     password1 = QInputDialog::getText(
-                nullptr,
+                parent,
                 tr(""),
-                tr("Set identity master password:"),
+                tr("Please enter the new identity master password:"),
                 QLineEdit::Password,
                 "",
                 &ok);
@@ -205,9 +229,9 @@ bool MainWindow::showGetNewPasswordDialog(QString &password)
     do
     {
         password2 = QInputDialog::getText(
-                nullptr,
+                parent,
                 tr(""),
-                tr("Confirm password:"),
+                tr("Please confirm the new password:"),
                 QLineEdit::Password,
                 "",
                 &ok);
@@ -431,6 +455,42 @@ void MainWindow::onShowAboutDialog()
     QMessageBox::about(this, "About", message);
 }
 
+void MainWindow::onChangePassword()
+{
+    if (m_pIdentityModel == nullptr ||
+        m_pIdentityModel->blocks.size() < 1)
+    {
+        showNoIdentityLoadedError();
+        return;
+    }
+
+    QString password;
+    bool ok = showGetPasswordDialog(password, this);
+    if (!ok) return;
+
+    QString newPassword;
+    ok = showGetNewPasswordDialog(newPassword);
+    if (!ok) return;
+
+    IdentityBlock* block1 = m_pIdentityModel->getBlock(1);
+    if (block1 == nullptr) return;
+    IdentityBlock newBlock1 = *block1;
+
+    QProgressDialog progressDialog("", tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
+    ok = CryptUtil::updateBlock1(block1, &newBlock1, password, newPassword, &progressDialog);
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Error updating password! Wrong current password?"));
+        return;
+    }
+
+    *block1 = newBlock1;
+    m_pUiBuilder->rebuild();
+}
+
 void MainWindow::onShowIdentitySettingsDialog()
 {
     if (m_pIdentityModel == nullptr ||
@@ -569,14 +629,8 @@ void MainWindow::onCreateSiteKeys()
 
     if (!ok) return;
 
-    QString password = QInputDialog::getText(
-                nullptr,
-                tr(""),
-                tr("Identity password:"),
-                QLineEdit::Password,
-                "",
-                &ok);
-
+    QString password;
+    ok = showGetPasswordDialog(password, this);
     if (!ok) return;
 
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
@@ -652,14 +706,8 @@ void MainWindow::onDecryptImkIlk()
 
     bool ok = false;
 
-    QString password = QInputDialog::getText(
-                nullptr,
-                tr(""),
-                tr("Identity password:"),
-                QLineEdit::Password,
-                "",
-                &ok);
-
+    QString password;
+    ok = showGetPasswordDialog(password, this);
     if (!ok) return;
 
     QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
@@ -797,14 +845,8 @@ void MainWindow::onDecryptPreviousIuks()
             return;
         }
 
-        QString password = QInputDialog::getText(
-                    nullptr,
-                    tr(""),
-                    tr("Identity password:"),
-                    QLineEdit::Password,
-                    "",
-                    &ok);
-
+        QString password;
+        ok = showGetPasswordDialog(password, this);
         if (!ok) return;
 
         QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);

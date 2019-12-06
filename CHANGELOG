@@ -1,11 +1,12 @@
 Version 0.4.0
   Features
     * Create new identity (authenticated)
+    * Change identity master password
     * Display textual version of an identity
     * Import textual version if an identity
   Changes:
     * Added QDoc documentation to the source code
-    * Refactored slot names to "onXyz..."
+    * Refactored slot names
   Fixes:
     * Fixed changing identity settings would not update
       key derivation settings and re-run PBKDF

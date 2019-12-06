@@ -638,14 +638,20 @@ IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgr
 
 /*!
  * \brief Re-encrypts and re-authenticates a type 1 block after a change to
- * the plain-text settings.
+ * the plain-text settings or password.
  *
  * This function will decrypt the IMK and ILK of the (unmodified) \a oldBlock
- * using \a password and subsequently re-encrypt and re-authenticate them within
- * \a updatedBlock, using the updated plain-text data already stored in
- * \a updatedBlock as "additional data" for the AES GCM authenticated encryption.
- * This function will create a new AES-GCM initialization vector as well as a new
- * scrypt random salt and replace the existing values in \a updatedBlock.
+ * using \a oldPassword and subsequently re-encrypt and re-authenticate them
+ * within \a updatedBlock using \a newPassword.
+ *
+ * If no password change is required, just pass in an identical password to
+ * \a oldPassword and \a newPassword.
+ *
+ * \a updatedBlock must be a copy of \a oldBlock but shall already contain the
+ * required plain text changes, which are passed in as "additional data" to the
+ * AES GCM authenticated encryption. This function will create a new AES-GCM
+ * initialization vector as well as a new scrypt random salt and replace the
+ * existing values in \a updatedBlock.
  *
  * If a valid \a progressDialog pointer is given, the operation will use it
  * to publish its progress. Otherwise, it will be ignored.
@@ -657,7 +663,7 @@ IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgr
  */
 
 bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock,
-                             QString password, QProgressDialog* progressDialog)
+                             QString oldPassword, QString newPassword, QProgressDialog* progressDialog)
 {
     QByteArray oldImk(32, 0);
     QByteArray oldIlk(32, 0);
@@ -675,7 +681,7 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
         progressDialog->setLabelText(QObject::tr("Decrypting identity keys..."));
 
     QByteArray key;
-    bool ok = CryptUtil::createKeyFromPassword(key, *oldBlock, password, progressDialog);
+    bool ok = CryptUtil::createKeyFromPassword(key, *oldBlock, oldPassword, progressDialog);
     if (!ok) return false;
 
     ok = decryptBlock1(oldImk, oldIlk, oldBlock, key);
@@ -690,12 +696,12 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
         progressDialog->setLabelText(QObject::tr("Running PBKDF and re-encrypting identity..."));
 
     ok = enSCryptTime(newKey,
-                          newIterationCount,
-                          password,
-                          newRandomSalt,
-                          scryptLogNFactor,
-                          passwordVerifySeconds,
-                          progressDialog);
+                      newIterationCount,
+                      newPassword,
+                      newRandomSalt,
+                      scryptLogNFactor,
+                      passwordVerifySeconds,
+                      progressDialog);
 
     if (!ok) return false;
 
