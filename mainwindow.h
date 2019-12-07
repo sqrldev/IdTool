@@ -34,6 +34,7 @@
 #include "blockdesignerdialog.h"
 #include "idsetdialog.h"
 #include "cryptutil.h"
+#include "tabmanager.h"
 
 namespace Ui {
 class MainWindow;
@@ -49,11 +50,8 @@ class MainWindow : public QMainWindow
 
 private:
     Ui::MainWindow *ui;
-    QFrame* m_pHeaderFrame = nullptr;
-    QScrollArea* m_pScrollArea = nullptr;
-    IdentityModel *m_pIdentityModel = nullptr;
-    IdentityParser* m_pIdentityParser = nullptr;
-    UiBuilder* m_pUiBuilder = nullptr;
+    QTabWidget* m_pTabWidget = nullptr;
+    TabManager* m_pTabManager = nullptr;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

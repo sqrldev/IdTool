@@ -38,6 +38,7 @@ SOURCES += \
         itemeditordialog.cpp \
         main.cpp \
         mainwindow.cpp \
+        tabmanager.cpp \
         uibuilder.cpp
 
 HEADERS += \
@@ -56,6 +57,7 @@ HEADERS += \
         inc/bigint/NumberlikeArray.hh \
         itemeditordialog.h \
         mainwindow.h \
+        tabmanager.h \
         uibuilder.h
 
 FORMS += \

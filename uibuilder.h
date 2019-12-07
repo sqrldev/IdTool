@@ -44,8 +44,7 @@ class UiBuilder : public QObject
     Q_OBJECT
 
 private:
-    QMainWindow *m_pMainWindow = nullptr;
-    QScrollArea* m_pScrollArea = nullptr;
+    QScrollArea* m_pContentRoot = nullptr;
     QWidget* m_pLastWidget = nullptr;
     QLayout* m_pLastLayout = nullptr;
     IdentityModel* m_pModel = nullptr;
@@ -53,7 +52,7 @@ private:
     bool m_bEnableUnauthenticatedChanges = false;
 
 public:
-    UiBuilder(QMainWindow* ui, IdentityModel* identityModel);
+    UiBuilder(QScrollArea* contentRoot, IdentityModel* identityModel);
     void rebuild();
     void clearLayout();
     IdentityModel* getModel();
