@@ -76,7 +76,7 @@ RESOURCES += \
 
 RC_FILE = IdTool.rc
 
-VERSION = 0.4.0    # major.minor.patch
+VERSION = 0.4.1    # major.minor.patch
 DEFINES += APP_VERSION=\\\"$$VERSION\\\" \
     SODIUM_STATIC
 
