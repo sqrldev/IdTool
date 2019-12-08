@@ -56,7 +56,7 @@ public:
     void rebuild();
     void clearLayout();
     IdentityModel* getModel();
-    void setEnableUnauthenticatedChanges(bool enable, bool rebuild = false);
+    void setEnableUnauthenticatedChanges(bool enable, bool rebuild = true);
     static bool showGetBlockTypeDialog(QString* result, bool allowEdit = false);
     static bool showGetRepeatCountDialog(QString itemName, int* result);
 

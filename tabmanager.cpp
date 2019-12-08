@@ -9,10 +9,10 @@ TabManager::TabManager(QTabWidget *tabWidget)
     connect(m_pTabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
 }
 
-int TabManager::addTab(IdentityModel &identityModel,
-                       QFileInfo fileInfo, bool setActive)
+int TabManager::addTab(IdentityModel &identityModel, QFileInfo fileInfo, bool setActive)
 {
     IdentityTab* pTab= new IdentityTab(identityModel, fileInfo);
+    pTab->getUiBuilder().setEnableUnauthenticatedChanges(m_bEnableUnauthenticatedChanges);
     m_Tabs.append(pTab);
     m_pTabWidget->addTab(pTab, fileInfo.fileName());
 
@@ -56,6 +56,20 @@ bool TabManager::isCurrentTabDirty()
     return getCurrentTab().isDirty();
 }
 
+void TabManager::rebuildAllTabs()
+{
+    for (IdentityTab* pTab : m_Tabs)
+        pTab->rebuild();
+}
+
+void TabManager::setEnableUnauthenticatedChanges(bool enable, bool rebuild)
+{
+    m_bEnableUnauthenticatedChanges = enable;
+
+    for (IdentityTab* pTab : m_Tabs)
+        pTab->getUiBuilder().setEnableUnauthenticatedChanges(enable, rebuild);
+}
+
 void TabManager::onTabCloseRequested(int index)
 {
     if (m_Tabs[index]->isDirty())
@@ -80,7 +94,7 @@ void TabManager::onCurrentTabChanged(int index)
 }
 
 IdentityTab::IdentityTab(IdentityModel& identityModel,
-                         QFileInfo fileInfo, QWidget *parent) :
+    QFileInfo fileInfo, QWidget *parent) :
     QWidget(parent)
 {
     m_FileInfo = fileInfo;

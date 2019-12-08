@@ -119,7 +119,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionCreateNewIdentity"/>
-   <addaction name="actionBuildNewIdentity"/>
    <addaction name="actionOpenFile"/>
    <addaction name="actionPasteIdentityData"/>
    <addaction name="actionSaveIdentityFileAs"/>

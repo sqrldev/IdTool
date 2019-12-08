@@ -19,6 +19,7 @@ class TabManager : public QObject
 private:
     QTabWidget* m_pTabWidget;
     QList<IdentityTab*> m_Tabs;
+    bool m_bEnableUnauthenticatedChanges = false;
 
 public:
     explicit TabManager(QTabWidget* tabWidget);
@@ -30,6 +31,8 @@ public:
     bool hasTabs();
     void setCurrentTabDirty(bool dirty);
     bool isCurrentTabDirty();
+    void rebuildAllTabs();
+    void setEnableUnauthenticatedChanges(bool enable, bool rebuild = true);
 
 signals:
     void currentTabChanged(int index);

@@ -170,7 +170,7 @@ void MainWindow::configureMenuItems()
     ui->actionSaveIdentityFileAs->setEnabled(enable);
     ui->actionDecryptPreviousIuks->setEnabled(enable && enableBlock3Ops);
     ui->actionDisplayTextualIdentity->setEnabled(enable);
-    ui->actionEnableUnauthenticatedChanges->setEnabled(enable);
+    //ui->actionEnableUnauthenticatedChanges->setEnabled(enable);
 }
 
 /*!
@@ -271,32 +271,6 @@ bool MainWindow::showGetNewPasswordDialog(QString &password, QWidget* parent)
     return true;
 }
 
-/*!
- * Displays a dialog, asking the user to confirm that any changes that were
- * made to the the currently loaded identity can be discarded.
- *
- * Returns \c true if the user confirmed the message, or \c false otherwise.
- */
-
-bool MainWindow::canDiscardCurrentIdentity()
-{
-    IdentityModel& identityModel = m_pTabManager->getCurrentTab().getIdentityModel();
-
-    if (identityModel.hasBlocks())
-    {
-        QMessageBox msgBox;
-        msgBox.setText(tr("This operation will discard any existing identity information!"));
-        msgBox.setInformativeText(tr("Do you really want to continue and discard all unsaved changes?"));
-        msgBox.setIcon(QMessageBox::Question);
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-
-        if (msgBox.exec() != QMessageBox::Ok) return false;
-    }
-
-    return true;
-}
-
 
 /***************************************************
  *                S L O T S                        *
@@ -329,7 +303,7 @@ void MainWindow::onCreateNewIdentity()
         return;
     }
 
-    m_pTabManager->addTab(identity, tr("Untitled*"));
+    m_pTabManager->addTab(identity, QFileInfo());
     m_pTabManager->getCurrentTab().rebuild();
 
     showTextualIdentityInfoDialog(rescueCode);
@@ -519,7 +493,6 @@ void MainWindow::onControlUnauthenticatedChanges()
     if (enable)
     {
         QMessageBox::StandardButton reply;
-
         reply = QMessageBox::question(
                     this,
                     tr("Enabling unauthenticated changes"),
@@ -533,16 +506,13 @@ void MainWindow::onControlUnauthenticatedChanges()
         if (reply == QMessageBox::No)
         {
             ui->actionEnableUnauthenticatedChanges->setChecked(false);
+            m_pTabManager->setEnableUnauthenticatedChanges(false);
             return;
         }
     }
 
     ui->actionBuildNewIdentity->setVisible(enable);
-
-    if (!m_pTabManager->hasTabs()) return;
-
-    m_pTabManager->getCurrentTab().getUiBuilder()
-            .setEnableUnauthenticatedChanges(enable, true);
+    m_pTabManager->setEnableUnauthenticatedChanges(enable);
 }
 
 void MainWindow::onPasteIdentityText()
@@ -568,7 +538,7 @@ void MainWindow::onPasteIdentityText()
         IdentityParser parser;
         IdentityModel* pModel = new IdentityModel();
         parser.parseString(result, pModel);
-        m_pTabManager->addTab(*pModel, tr("Untitled*"));
+        m_pTabManager->addTab(*pModel, QFileInfo());
     }
     catch (std::exception& e)
     {
@@ -580,8 +550,6 @@ void MainWindow::onBuildNewIdentity()
 {
     QString sBlockType;
 
-    if (!canDiscardCurrentIdentity()) return;
-
     bool ok = UiBuilder::showGetBlockTypeDialog(&sBlockType);
     if (!ok) return;
 
@@ -591,10 +559,10 @@ void MainWindow::onBuildNewIdentity()
     IdentityBlock block = IdentityParser::
             createEmptyBlock(blockType);
 
-    IdentityModel& model = m_pTabManager->getCurrentTab().getIdentityModel();
-    model.clear();
-    model.blocks.push_back(block);
-    m_pTabManager->getCurrentTab().rebuild();
+
+    IdentityModel* pModel = new IdentityModel();
+    pModel->blocks.push_back(block);
+    m_pTabManager->addTab(*pModel, QFileInfo());
 }
 
 void MainWindow::onShowBlockDesigner()
