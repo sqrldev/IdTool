@@ -48,8 +48,8 @@ public:
     static QByteArray xorByteArrays(QByteArray a, QByteArray b);
     static bool getRandomBytes(QByteArray& buffer);
     static bool getRandomByte(unsigned char& byte);
-    static bool enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt, int logNFactor, int iterationCount, QProgressDialog* progressDialog = nullptr);
-    static bool enSCryptTime(QByteArray& result, int& iterationCount, QString password, QByteArray randomSalt, int logNFactor, int secondsToRun, QProgressDialog* progressDialog = nullptr);
+    static bool enScryptIterations(QByteArray& result, QString password, QByteArray randomSalt, int logNFactor, int iterationCount, QProgressDialog* progressDialog = nullptr);
+    static bool enScryptTime(QByteArray& result, int& iterationCount, QString password, QByteArray randomSalt, int logNFactor, int secondsToRun, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QByteArray key);
     static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);

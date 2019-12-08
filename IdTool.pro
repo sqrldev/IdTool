@@ -38,6 +38,7 @@ SOURCES += \
         itemeditordialog.cpp \
         main.cpp \
         mainwindow.cpp \
+        tabmanager.cpp \
         uibuilder.cpp
 
 HEADERS += \
@@ -56,6 +57,7 @@ HEADERS += \
         inc/bigint/NumberlikeArray.hh \
         itemeditordialog.h \
         mainwindow.h \
+        tabmanager.h \
         uibuilder.h
 
 FORMS += \
@@ -74,7 +76,7 @@ RESOURCES += \
 
 RC_FILE = IdTool.rc
 
-VERSION = 0.4.0    # major.minor.patch
+VERSION = 0.4.1    # major.minor.patch
 DEFINES += APP_VERSION=\\\"$$VERSION\\\" \
     SODIUM_STATIC
 

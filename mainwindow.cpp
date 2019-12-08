@@ -28,6 +28,7 @@
 #include "identityparser.h"
 #include "ui_mainwindow.h"
 #include "cryptutil.h"
+#include "tabmanager.h"
 #include <QFileDialog>
 #include <QStandardPaths>
 
@@ -62,14 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSize desktopSize = QDesktopWidget().availableGeometry(this).size() * 0.9;
     resize(geometry().width(), desktopSize.height());
 
-    m_pHeaderFrame = this->findChild<QFrame*>("headerFrame");
-    m_pScrollArea = this->findChild<QScrollArea*>("scrollArea");
-    m_pIdentityParser = new IdentityParser();
-    m_pIdentityModel = new IdentityModel();
-    m_pUiBuilder = new UiBuilder(this, m_pIdentityModel);
-    m_pHeaderFrame->setVisible(false);
-
-    m_pScrollArea->setWidgetResizable(true);
+    m_pTabManager = new TabManager(ui->tabWidget);
     onControlUnauthenticatedChanges();
 
     connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::onCreateNewIdentity);
@@ -89,6 +83,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
     connect(ui->actionChangePassword, &QAction::triggered, this, &MainWindow::onChangePassword);
+    connect(m_pTabManager, &TabManager::currentTabChanged, this, &MainWindow::onCurrentTabChanged);
+
+    configureMenuItems();
 }
 
 /*!
@@ -98,9 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete m_pIdentityParser;
-    delete m_pIdentityModel;
-    delete m_pUiBuilder;
+    delete m_pTabManager;
 }
 
 /*!
@@ -134,7 +129,8 @@ void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
     }
     messageText += tr("Textual version of the identity:");
     messageText += "\r\n\r\n";
-    messageText += m_pIdentityModel->getTextualVersionFormatted();
+    messageText += m_pTabManager->getCurrentTab()
+            .getIdentityModel().getTextualVersionFormatted();
 
     QInputDialog resultDialog(this);
     resultDialog.setInputMode(QInputDialog::TextInput);
@@ -144,6 +140,37 @@ void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
     resultDialog.setLabelText(tr("The identity was successfully created!"));
     resultDialog.setTextValue(messageText);
     resultDialog.exec();
+}
+
+/*!
+ * Checks if at least one identity is loaded and enables or
+ * disables main menu entries / actions accrodingly.
+ */
+
+void MainWindow::configureMenuItems()
+{
+    int currentIndex = m_pTabManager->getCurrentTabIndex();
+    bool enable = currentIndex != -1 ? true : false;
+    bool enableBlock3Ops = false;
+
+    if (currentIndex != -1)
+    {
+        if (m_pTabManager->getCurrentTab()
+                .getIdentityModel().hasBlockType(3))
+        {
+            enableBlock3Ops = true;
+        }
+    }
+
+    ui->actionDecryptIuk->setEnabled(enable);
+    ui->actionDecryptImkIlk->setEnabled(enable);
+    ui->actionChangePassword->setEnabled(enable);
+    ui->actionCreateSiteKeys->setEnabled(enable);
+    ui->actionIdentitySettings->setEnabled(enable);
+    ui->actionSaveIdentityFileAs->setEnabled(enable);
+    ui->actionDecryptPreviousIuks->setEnabled(enable && enableBlock3Ops);
+    ui->actionDisplayTextualIdentity->setEnabled(enable);
+    //ui->actionEnableUnauthenticatedChanges->setEnabled(enable);
 }
 
 /*!
@@ -246,26 +273,37 @@ bool MainWindow::showGetNewPasswordDialog(QString &password, QWidget* parent)
 
 /*!
  * Displays a dialog, asking the user to confirm that any changes that were
- * made to the the currently loaded identity can be discarded.
+ * made to any of the loaded identities can be discarded.
  *
  * Returns \c true if the user confirmed the message, or \c false otherwise.
  */
 
-bool MainWindow::canDiscardCurrentIdentity()
+bool MainWindow::canDiscardChanges()
 {
-    if (m_pIdentityModel->hasBlocks())
-    {
-        QMessageBox msgBox;
-        msgBox.setText(tr("This operation will discard any existing identity information!"));
-        msgBox.setInformativeText(tr("Do you really want to continue and discard all unsaved changes?"));
-        msgBox.setIcon(QMessageBox::Question);
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Ok);
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(m_pTabWidget, tr("Unsaved changes"),
+        tr("You have unsaved changes! Do you really want to close the "
+           "application without saving the changes?"));
 
-        if (msgBox.exec() != QMessageBox::Ok) return false;
+    if (reply == QMessageBox::No)  return false;
+    else return true;
+}
+
+
+/***************************************************
+ *              O V E R R I D E S                  *
+ * ************************************************/
+
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (m_pTabManager->hasDirtyTabs())
+    {
+        if (!canDiscardChanges()) event->ignore();
+        return;
     }
 
-    return true;
+    event->accept();
 }
 
 
@@ -276,13 +314,11 @@ bool MainWindow::canDiscardCurrentIdentity()
 
 void MainWindow::onCreateNewIdentity()
 {
-    IdentityModel identity;
+    IdentityModel* pIidentity = new IdentityModel();
+    QString password;
     QString rescueCode;
     bool ok = false;
 
-    if (!canDiscardCurrentIdentity()) return;
-
-    QString password;
     ok = showGetNewPasswordDialog(password);
     if (!ok) return;
 
@@ -290,21 +326,20 @@ void MainWindow::onCreateNewIdentity()
                                    tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    ok = CryptUtil::createIdentity(identity, rescueCode, password,
+    ok = CryptUtil::createIdentity(*pIidentity, rescueCode, password,
                                    &progressDialog);
-
     progressDialog.close();
 
     if (!ok)
     {
         QMessageBox::critical(this, tr("Error"),
-                              tr("An error occured while creating the identity "
-                                 "or the operation was aborted by the user."));
+            tr("An error occured while creating the identity "
+               "or the operation was aborted by the user."));
         return;
     }
 
-    m_pIdentityModel->import(identity);
-    m_pUiBuilder->rebuild();
+    m_pTabManager->addTab(*pIidentity, QFileInfo());
+    m_pTabManager->setCurrentTabDirty(true);
 
     showTextualIdentityInfoDialog(rescueCode);
 
@@ -313,13 +348,6 @@ void MainWindow::onCreateNewIdentity()
 
 void MainWindow::onDisplayTextualIdentity()
 {
-    if (m_pIdentityModel == nullptr ||
-        m_pIdentityModel->blocks.size() < 1)
-    {
-        showNoIdentityLoadedError();
-        return;
-    }
-
     showTextualIdentityInfoDialog();
 }
 
@@ -347,11 +375,11 @@ void MainWindow::onImportTextualIdentity()
 
         identityBytes = IdentityParser::HEADER.toLocal8Bit() + identityBytes;
 
-        IdentityModel identity;
+        IdentityModel* pIdentity = new IdentityModel();
         IdentityParser parser;
-        parser.parseIdentityData(identityBytes, &identity);
+        parser.parseIdentityData(identityBytes, pIdentity);
 
-        IdentityBlock* pBlock2 = identity.getBlock(2);
+        IdentityBlock* pBlock2 = pIdentity->getBlock(2);
 
         QString rescueCode;
         ok = showRescueCodeInputDialog(rescueCode);
@@ -370,11 +398,10 @@ void MainWindow::onImportTextualIdentity()
         progressDialog.setLabelText(tr("Encrypting IMK and ILK..."));
         IdentityBlock block1 = CryptUtil::createBlock1(decryptedIuk, password, &progressDialog);
 
-        identity.blocks.insert(identity.blocks.begin(), block1);
+        pIdentity->blocks.insert(pIdentity->blocks.begin(), block1);
 
-        m_pIdentityModel->clear();
-        m_pIdentityModel->import(identity);
-        m_pUiBuilder->rebuild();
+        m_pTabManager->addTab(*pIdentity, QFileInfo());
+        m_pTabManager->setCurrentTabDirty(true);
     }
     catch (std::exception& e)
     {
@@ -398,16 +425,12 @@ void MainWindow::onOpenFile()
 
     if (fileName.isEmpty()) return;
 
-    QByteArray ba = fileName.toLocal8Bit();
-    char *pszFileName = ba.data();
-
     try
     {
-        m_pIdentityModel->clear();
-        m_pIdentityParser->parseFile(pszFileName, m_pIdentityModel);
-        m_pUiBuilder->rebuild();
-
-        //m_pHeaderFrame->setVisible(true);
+        IdentityModel* pModel = new IdentityModel();
+        IdentityParser parser;
+        parser.parseFile(fileName, pModel);
+        m_pTabManager->addTab(*pModel, QFileInfo(fileName));
     }
     catch (std::exception& e)
     {
@@ -433,7 +456,12 @@ void MainWindow::onSaveFile()
 
     try
     {
-        m_pIdentityModel->writeToFile(fileName);
+        m_pTabManager->getCurrentTab().getIdentityModel()
+                .writeToFile(fileName);
+        QFileInfo fileInfo(fileName);
+        m_pTabManager->getCurrentTab().updateFileInfo(fileInfo);
+        m_pTabManager->setCurrentTabDirty(false);
+        m_pTabManager->updateCurrentTabText();
     }
     catch (std::exception& e)
     {
@@ -457,13 +485,6 @@ void MainWindow::onShowAboutDialog()
 
 void MainWindow::onChangePassword()
 {
-    if (m_pIdentityModel == nullptr ||
-        m_pIdentityModel->blocks.size() < 1)
-    {
-        showNoIdentityLoadedError();
-        return;
-    }
-
     QString password;
     bool ok = showGetPasswordDialog(password, this);
     if (!ok) return;
@@ -472,7 +493,8 @@ void MainWindow::onChangePassword()
     ok = showGetNewPasswordDialog(newPassword);
     if (!ok) return;
 
-    IdentityBlock* block1 = m_pIdentityModel->getBlock(1);
+    IdentityBlock* block1 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(1);
     if (block1 == nullptr) return;
     IdentityBlock newBlock1 = *block1;
 
@@ -488,25 +510,22 @@ void MainWindow::onChangePassword()
     }
 
     *block1 = newBlock1;
-    m_pUiBuilder->rebuild();
+    m_pTabManager->getCurrentTab().rebuild();
+    m_pTabManager->setCurrentTabDirty(true);
 }
 
 void MainWindow::onShowIdentitySettingsDialog()
 {
-    if (m_pIdentityModel == nullptr ||
-        m_pIdentityModel->blocks.size() < 1)
-    {
-        showNoIdentityLoadedError();
-        return;
-    }
-
-    IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+    IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(1);
     if (pBlock1 == nullptr) return;
 
     IdentitySettingsDialog dialog(this, pBlock1);
-    dialog.exec();
-
-    m_pUiBuilder->rebuild();
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_pTabManager->getCurrentTab().rebuild();
+        m_pTabManager->setCurrentTabDirty(true);
+    }
 }
 
 void MainWindow::onControlUnauthenticatedChanges()
@@ -516,7 +535,6 @@ void MainWindow::onControlUnauthenticatedChanges()
     if (enable)
     {
         QMessageBox::StandardButton reply;
-
         reply = QMessageBox::question(
                     this,
                     tr("Enabling unauthenticated changes"),
@@ -530,14 +548,13 @@ void MainWindow::onControlUnauthenticatedChanges()
         if (reply == QMessageBox::No)
         {
             ui->actionEnableUnauthenticatedChanges->setChecked(false);
+            m_pTabManager->setEnableUnauthenticatedChanges(false);
             return;
         }
     }
 
-    m_pUiBuilder->setEnableUnauthenticatedChanges(
-                enable, true);
-
     ui->actionBuildNewIdentity->setVisible(enable);
+    m_pTabManager->setEnableUnauthenticatedChanges(enable);
 }
 
 void MainWindow::onPasteIdentityText()
@@ -552,16 +569,19 @@ void MainWindow::onPasteIdentityText()
 
     if (!ok) return;
 
+    if (result.isEmpty())
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Invalid identity data!"));
+    }
+
     try
     {
-        if (result.isEmpty())
-        {
-            QMessageBox::critical(this, tr("Error"), tr("Invalid identity data!"));
-        }
-
-        m_pIdentityModel->clear();
-        m_pIdentityParser->parseString(result, m_pIdentityModel);
-        m_pUiBuilder->rebuild();
+        IdentityParser parser;
+        IdentityModel* pModel = new IdentityModel();
+        parser.parseString(result, pModel);
+        m_pTabManager->addTab(*pModel, QFileInfo());
+        m_pTabManager->setCurrentTabDirty(true);
     }
     catch (std::exception& e)
     {
@@ -573,20 +593,20 @@ void MainWindow::onBuildNewIdentity()
 {
     QString sBlockType;
 
-    if (!canDiscardCurrentIdentity()) return;
-
     bool ok = UiBuilder::showGetBlockTypeDialog(&sBlockType);
     if (!ok) return;
 
     ushort blockType = sBlockType.toUShort(&ok);
     if (!ok) return;
 
-    IdentityBlock block = m_pIdentityParser->
+    IdentityBlock block = IdentityParser::
             createEmptyBlock(blockType);
 
-    m_pIdentityModel->clear();
-    m_pIdentityModel->blocks.push_back(block);
-    m_pUiBuilder->rebuild();
+
+    IdentityModel* pModel = new IdentityModel();
+    pModel->blocks.push_back(block);
+    m_pTabManager->addTab(*pModel, QFileInfo());
+    m_pTabManager->setCurrentTabDirty(true);
 }
 
 void MainWindow::onShowBlockDesigner()
@@ -607,14 +627,8 @@ void MainWindow::onShowBlockDesigner()
 
 void MainWindow::onCreateSiteKeys()
 {
-    if (m_pIdentityModel == nullptr ||
-        m_pIdentityModel->blocks.size() < 1)
-    {
-        showNoIdentityLoadedError();
-        return;
-    }
-
-    IdentityBlock* pBlock = m_pIdentityModel->getBlock(1);
+    IdentityBlock* pBlock = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(1);
     if (pBlock == nullptr) return;
 
     bool ok = false;
@@ -633,7 +647,8 @@ void MainWindow::onCreateSiteKeys()
     ok = showGetPasswordDialog(password, this);
     if (!ok) return;
 
-    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+    QProgressDialog progressDialog(tr("Decrypting identity keys..."),
+                                   tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
     QByteArray key;
@@ -654,7 +669,8 @@ void MainWindow::onCreateSiteKeys()
                 pBlock,
                 key))
     {
-        QMessageBox::critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"),
+            tr("Decryption of identity keys failed! Wrong password?"));
         return;
     }
 
@@ -667,8 +683,9 @@ void MainWindow::onCreateSiteKeys()
                 domain,
                 decryptedImk))
     {
-        QMessageBox::critical(this, tr("Error"), tr("Creation of site keys failed,"
-                                              "probably due to an error in the crypto routines!"));
+        QMessageBox::critical(this, tr("Error"),
+            tr("Creation of site keys failed, probably due"
+               "to an error in the crypto routines!"));
         return;
     }
 
@@ -689,14 +706,8 @@ void MainWindow::onCreateSiteKeys()
 
 void MainWindow::onDecryptImkIlk()
 {
-    if (m_pIdentityModel == nullptr ||
-        m_pIdentityModel->blocks.size() < 1)
-    {
-        showNoIdentityLoadedError();
-        return;
-    }
-
-    IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+    IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(1);
     if (pBlock1 == nullptr)
     {
         QMessageBox::critical(this, tr("Error"),
@@ -710,7 +721,8 @@ void MainWindow::onDecryptImkIlk()
     ok = showGetPasswordDialog(password, this);
     if (!ok) return;
 
-    QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+    QProgressDialog progressDialog(tr("Decrypting identity keys..."),
+                                   tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
     QByteArray key;
@@ -731,7 +743,8 @@ void MainWindow::onDecryptImkIlk()
                 pBlock1,
                 key))
     {
-        QMessageBox::critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"),
+            tr("Decryption of identity keys failed! Wrong password?"));
         return;
     }
 
@@ -752,17 +765,12 @@ void MainWindow::onDecryptImkIlk()
 
 void MainWindow::onDecryptIuk()
 {
-    if (m_pIdentityModel == nullptr ||
-        m_pIdentityModel->blocks.size() < 1)
-    {
-        showNoIdentityLoadedError();
-        return;
-    }
-
-    IdentityBlock* pBlock2 = m_pIdentityModel->getBlock(2);
+    IdentityBlock* pBlock2 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(2);
     if (pBlock2 == nullptr)
     {
-        QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
+        QMessageBox::critical(this, tr("Error"),
+            tr("The loaded identity does not have a type 2 block!"));
         return;
     }
 
@@ -772,7 +780,8 @@ void MainWindow::onDecryptIuk()
 
     QByteArray decryptedIuk(32, 0);
 
-    QProgressDialog progressDialog(tr("Decrypting identity unlock key..."), tr("Abort"), 0, 0, this);
+    QProgressDialog progressDialog(tr("Decrypting identity unlock key..."),
+                                   tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
     ok = CryptUtil::decryptBlock2(
@@ -785,7 +794,8 @@ void MainWindow::onDecryptIuk()
 
     if (!ok)
     {
-        QMessageBox::critical(this, tr("Error"), tr("Decryption of identity unlock key failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"),
+            tr("Decryption of identity unlock key failed! Wrong password?"));
         return;
     }
 
@@ -809,17 +819,12 @@ void MainWindow::onDecryptPreviousIuks()
     QByteArray decryptedImk(32, 0);
     QByteArray decryptedIlk(32, 0);
 
-    if (m_pIdentityModel == nullptr ||
-        m_pIdentityModel->blocks.size() < 1)
-    {
-        showNoIdentityLoadedError();
-        return;
-    }
-
-    IdentityBlock* pBlock3 = m_pIdentityModel->getBlock(3);
+    IdentityBlock* pBlock3 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(3);
     if (pBlock3 == nullptr)
     {
-        QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 3 block!"));
+        QMessageBox::critical(this, tr("Error"),
+            tr("The loaded identity does not have a type 3 block!"));
         return;
     }
 
@@ -829,7 +834,8 @@ void MainWindow::onDecryptPreviousIuks()
                 this,
                 tr(""),
                 tr("Choose decrytion method:"),
-                QStringList( { QString(DECRYPTION_METHOD_PASSWORD), QString(DECRYPTION_METHOD_RESCUE_CODE) } ),
+                QStringList( { QString(DECRYPTION_METHOD_PASSWORD),
+                               QString(DECRYPTION_METHOD_RESCUE_CODE) } ),
                 0,
                 false,
                 &ok);
@@ -838,10 +844,13 @@ void MainWindow::onDecryptPreviousIuks()
 
     if (decryptionMethod == DECRYPTION_METHOD_PASSWORD)
     {
-        IdentityBlock* pBlock1 = m_pIdentityModel->getBlock(1);
+        IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
+                .getIdentityModel().getBlock(1);
+
         if (pBlock1 == nullptr)
         {
-            QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 1 block!"));
+            QMessageBox::critical(this, tr("Error"),
+                tr("The loaded identity does not have a type 1 block!"));
             return;
         }
 
@@ -849,7 +858,8 @@ void MainWindow::onDecryptPreviousIuks()
         ok = showGetPasswordDialog(password, this);
         if (!ok) return;
 
-        QProgressDialog progressDialog(tr("Decrypting identity keys..."), tr("Abort"), 0, 0, this);
+        QProgressDialog progressDialog(tr("Decrypting identity keys..."),
+                                       tr("Abort"), 0, 0, this);
         progressDialog.setWindowModality(Qt::WindowModal);
 
         QByteArray key;
@@ -867,16 +877,19 @@ void MainWindow::onDecryptPreviousIuks()
                     pBlock1,
                     key))
         {
-            QMessageBox::critical(this, tr("Error"), tr("Decryption of identity keys failed! Wrong password?"));
+            QMessageBox::critical(this, tr("Error"),
+                tr("Decryption of identity keys failed! Wrong password?"));
             return;
         }
     }
     else if (decryptionMethod == DECRYPTION_METHOD_RESCUE_CODE)
     {
-        IdentityBlock* pBlock2 = m_pIdentityModel->getBlock(2);
+        IdentityBlock* pBlock2 = m_pTabManager->getCurrentTab().
+                getIdentityModel().getBlock(2);
         if (pBlock2 == nullptr)
         {
-            QMessageBox::critical(this, tr("Error"), tr("The loaded identity does not have a type 2 block!"));
+            QMessageBox::critical(this, tr("Error"),
+                tr("The loaded identity does not have a type 2 block!"));
             return;
         }
 
@@ -893,7 +906,8 @@ void MainWindow::onDecryptPreviousIuks()
         rescueCode = rescueCode.replace("-", "");
         rescueCode = rescueCode.replace(" ", "");
 
-        QProgressDialog progressDialog(tr("Decrypting identity unlock key..."), tr("Abort"), 0, 0, this);
+        QProgressDialog progressDialog(tr("Decrypting identity unlock key..."),
+                                       tr("Abort"), 0, 0, this);
         progressDialog.setWindowModality(Qt::WindowModal);
 
         QByteArray decryptedIuk(32, 0);
@@ -908,8 +922,9 @@ void MainWindow::onDecryptPreviousIuks()
 
         if (!ok)
         {
-            QMessageBox::critical(this, tr("Error"), tr("Decryption of identity"
-                                                        "unlock key failed! Wrong password?"));
+            QMessageBox::critical(this, tr("Error"),
+                tr("Decryption of identity unlock key failed! "
+                   "Wrong password?"));
             return;
         }
 
@@ -947,7 +962,18 @@ void MainWindow::onDecryptPreviousIuks()
 
 }
 
+void MainWindow::onCurrentTabChanged(int index)
+{
+    configureMenuItems();
+}
+
 void MainWindow::onQuit()
 {
+
+    if (m_pTabManager->hasDirtyTabs())
+    {
+        if (!canDiscardChanges()) return;
+    }
+
     QApplication::quit();
 }

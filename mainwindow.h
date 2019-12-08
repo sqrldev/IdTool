@@ -34,6 +34,7 @@
 #include "blockdesignerdialog.h"
 #include "idsetdialog.h"
 #include "cryptutil.h"
+#include "tabmanager.h"
 
 namespace Ui {
 class MainWindow;
@@ -49,11 +50,8 @@ class MainWindow : public QMainWindow
 
 private:
     Ui::MainWindow *ui;
-    QFrame* m_pHeaderFrame = nullptr;
-    QScrollArea* m_pScrollArea = nullptr;
-    IdentityModel *m_pIdentityModel = nullptr;
-    IdentityParser* m_pIdentityParser = nullptr;
-    UiBuilder* m_pUiBuilder = nullptr;
+    QTabWidget* m_pTabWidget = nullptr;
+    TabManager* m_pTabManager = nullptr;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -62,10 +60,14 @@ public:
 private:
     void showNoIdentityLoadedError();
     void showTextualIdentityInfoDialog(QString rescueCode = nullptr);
+    void configureMenuItems();
     bool showRescueCodeInputDialog(QString& rescueCode);
     bool showGetPasswordDialog(QString& password, QWidget* parent = nullptr);
     bool showGetNewPasswordDialog(QString& password, QWidget* parent = nullptr);
-    bool canDiscardCurrentIdentity();
+    bool canDiscardChanges();
+
+private: // Overrides
+    void closeEvent(QCloseEvent* event);
 
 private slots:
     void onCreateNewIdentity();
@@ -84,6 +86,7 @@ private slots:
     void onDecryptImkIlk();
     void onDecryptIuk();
     void onDecryptPreviousIuks();
+    void onCurrentTabChanged(int index);
     void onQuit();
 };
 

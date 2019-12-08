@@ -74,6 +74,7 @@ public:
     QString getTextualVersion();
     QString getTextualVersionFormatted();
     bool hasBlocks();
+    bool hasBlockType(uint16_t blockType);
 };
 
 /**********************************************

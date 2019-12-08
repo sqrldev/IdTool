@@ -43,15 +43,17 @@
 
 
 /*!
- * Creates a new UiBuilder object, storing a pointer to the application's
- * \a mainWindow and currently active \a identityModel, which is being
- * used to visualize the identity structure within the GUI.
+ * Creates a new UiBuilder object, storing a pointer to the \a contentRoot
+ * \c QScrollArea widget, which acts as the "canvas" onto which the identity
+ * representation is being drawn, and the \a identityModel representing
+ * the identity structure to be visualized.
  */
 
-UiBuilder::UiBuilder(QMainWindow* mainWindow, IdentityModel* identityModel)
+UiBuilder::UiBuilder(QScrollArea* contentRoot, IdentityModel* identityModel)
 {
-    m_pMainWindow = mainWindow;
-    m_pScrollArea = mainWindow->findChild<QScrollArea*>("scrollArea");
+    m_pContentRoot = contentRoot;
+    m_pContentRoot->setStyleSheet("QScrollArea{border: 0px;}");
+    m_pContentRoot->setWidgetResizable(true);
     m_pModel = identityModel;
 }
 
@@ -68,7 +70,7 @@ UiBuilder::UiBuilder(QMainWindow* mainWindow, IdentityModel* identityModel)
 
 void UiBuilder::rebuild()
 {
-    if (!m_pScrollArea || !m_pModel)
+    if (!m_pContentRoot || !m_pModel)
     {
         throw std::runtime_error(tr("Invalid container or model pointers!")
                                  .toStdString());
@@ -89,7 +91,7 @@ void UiBuilder::rebuild()
     pLayout->addStretch();
 
     pWidget->setLayout(pLayout);
-    m_pScrollArea->setWidget(pWidget);
+    m_pContentRoot->setWidget(pWidget);
 
     m_pLastWidget = pWidget;
     m_pLastLayout = pLayout;
@@ -398,6 +400,8 @@ void UiBuilder::onEditButtonClicked()
     {
         connector.item->value = result;
         connector.valueLabel->setText(result);
+
+        identityChanged();
     }
 }
 
@@ -465,6 +469,7 @@ void UiBuilder::onDeleteBlock()
     if (m_pModel->deleteBlock(connector.block))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -476,6 +481,7 @@ void UiBuilder::onMoveBlock()
     if (m_pModel->moveBlock(connector.block, connector.moveUp))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -497,6 +503,7 @@ void UiBuilder::onInsertBlock()
     if (m_pModel->insertBlock(block, connector.block))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -553,7 +560,11 @@ void UiBuilder::onDeleteItem()
 
     bool ok = connector.block->deleteItem(connector.item);
 
-    if (ok) m_bNeedsRebuild = true;
+    if (ok)
+    {
+        m_bNeedsRebuild = true;
+        identityChanged();
+    }
 }
 
 void UiBuilder::onMoveItem()
@@ -564,6 +575,7 @@ void UiBuilder::onMoveItem()
     if (connector.block->moveItem(connector.item, connector.moveUp))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -631,6 +643,7 @@ void UiBuilder::onInsertItem()
     if (connector.block->insertItem(item, connector.item))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 

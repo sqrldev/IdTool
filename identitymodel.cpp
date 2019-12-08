@@ -271,6 +271,16 @@ bool IdentityModel::hasBlocks()
 }
 
 /*!
+ * Returns \c true if a block of type \a blockType exists within the
+ * identity model, or \c false otherwise.
+ */
+
+bool IdentityModel::hasBlockType(uint16_t blockType)
+{
+     return getBlock(blockType) != nullptr;
+}
+
+/*!
  * Returns a formatted textual version of the identity.
  * The output looks something like this:
  *
