@@ -114,7 +114,7 @@ bool CryptUtil::getRandomByte(unsigned char &byte)
  * the crypto library failed).
  */
 
-bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteArray randomSalt,
+bool CryptUtil::enScryptIterations(QByteArray& result, QString password, QByteArray randomSalt,
                         int logNFactor, int iterationCount, QProgressDialog* progressDialog)
 {
     const int KEYLENGTH = 32;
@@ -181,7 +181,7 @@ bool CryptUtil::enSCryptIterations(QByteArray& result, QString password, QByteAr
  * the crypto library failed).
  */
 
-bool CryptUtil::enSCryptTime(QByteArray &result, int &iterationCount, QString password,
+bool CryptUtil::enScryptTime(QByteArray &result, int &iterationCount, QString password,
                              QByteArray randomSalt, int logNFactor, int secondsToRun,
                              QProgressDialog *progressDialog)
 {
@@ -317,7 +317,7 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
     for (size_t i=0; i<5; i++) plainText.append(block->items[i].toByteArray());
 
     QByteArray key;
-    bool ok = CryptUtil::enSCryptIterations(
+    bool ok = CryptUtil::enScryptIterations(
                 key,
                 rescueCode,
                 scryptSalt,
@@ -456,7 +456,7 @@ bool CryptUtil::createKeyFromPassword(QByteArray& key, IdentityBlock& block, QSt
     int scryptIterationCount = block.items[6].value.toInt();
 
     QByteArray tempKey;
-    bool ok = CryptUtil::enSCryptIterations(
+    bool ok = CryptUtil::enScryptIterations(
                 tempKey,
                 password,
                 scryptSalt,
@@ -560,7 +560,7 @@ IdentityBlock CryptUtil::createBlock1(QByteArray iuk, QString password,
     // Derive key from password
     if (progressDialog != nullptr) progressDialog->setLabelText(
                 QObject::tr("Encrypting block 1..."));
-    ok = enSCryptTime(key, iterationCount, password, randomSalt, 9, 5, progressDialog);
+    ok = enScryptTime(key, iterationCount, password, randomSalt, 9, 5, progressDialog);
 
     IdentityBlock block1 = IdentityParser::createEmptyBlock(1);
     block1.items[0].value = "125"; // Length
@@ -620,7 +620,7 @@ IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgr
     if (progressDialog != nullptr) progressDialog->setLabelText(
                 QObject::tr("Encrypting block 2..."));
 
-    ok = enSCryptTime(key, iterationCount, rescueCode, randomSalt, 9, 5, progressDialog);
+    ok = enScryptTime(key, iterationCount, rescueCode, randomSalt, 9, 5, progressDialog);
 
     block2.items[4].value = QString::number(iterationCount);
 
@@ -695,7 +695,7 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
     if (progressDialog != nullptr)
         progressDialog->setLabelText(QObject::tr("Running PBKDF and re-encrypting identity..."));
 
-    ok = enSCryptTime(newKey,
+    ok = enScryptTime(newKey,
                       newIterationCount,
                       newPassword,
                       newRandomSalt,
