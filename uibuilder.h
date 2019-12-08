@@ -65,6 +65,9 @@ private:
     QWidget* createBlockHeader(IdentityBlock *block);
     QWidget* createBlockItem(IdentityBlockItem* item, IdentityBlock* block = nullptr);
 
+signals:
+    void identityChanged();
+
 public slots:
     void onEditButtonClicked();
     void onCopyButtonClicked();

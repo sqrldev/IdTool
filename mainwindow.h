@@ -64,6 +64,10 @@ private:
     bool showRescueCodeInputDialog(QString& rescueCode);
     bool showGetPasswordDialog(QString& password, QWidget* parent = nullptr);
     bool showGetNewPasswordDialog(QString& password, QWidget* parent = nullptr);
+    bool canDiscardChanges();
+
+private: // Overrides
+    void closeEvent(QCloseEvent* event);
 
 private slots:
     void onCreateNewIdentity();

@@ -400,6 +400,8 @@ void UiBuilder::onEditButtonClicked()
     {
         connector.item->value = result;
         connector.valueLabel->setText(result);
+
+        identityChanged();
     }
 }
 
@@ -467,6 +469,7 @@ void UiBuilder::onDeleteBlock()
     if (m_pModel->deleteBlock(connector.block))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -478,6 +481,7 @@ void UiBuilder::onMoveBlock()
     if (m_pModel->moveBlock(connector.block, connector.moveUp))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -499,6 +503,7 @@ void UiBuilder::onInsertBlock()
     if (m_pModel->insertBlock(block, connector.block))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -555,7 +560,11 @@ void UiBuilder::onDeleteItem()
 
     bool ok = connector.block->deleteItem(connector.item);
 
-    if (ok) m_bNeedsRebuild = true;
+    if (ok)
+    {
+        m_bNeedsRebuild = true;
+        identityChanged();
+    }
 }
 
 void UiBuilder::onMoveItem()
@@ -566,6 +575,7 @@ void UiBuilder::onMoveItem()
     if (connector.block->moveItem(connector.item, connector.moveUp))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 
@@ -633,6 +643,7 @@ void UiBuilder::onInsertItem()
     if (connector.block->insertItem(item, connector.item))
     {
         m_bNeedsRebuild = true;
+        identityChanged();
     }
 }
 

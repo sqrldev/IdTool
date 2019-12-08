@@ -29,6 +29,7 @@ public:
     IdentityTab &getCurrentTab();
     int getCurrentTabIndex();
     bool hasTabs();
+    bool hasDirtyTabs();
     void setCurrentTabDirty(bool dirty);
     bool isCurrentTabDirty();
     void rebuildAllTabs();
@@ -41,6 +42,7 @@ signals:
 private slots:
     void onTabCloseRequested(int index);
     void onCurrentTabChanged(int index);
+    void onCurrentIdentityChanged();
 };
 
 /**********************************************

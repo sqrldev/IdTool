@@ -13,6 +13,9 @@ int TabManager::addTab(IdentityModel &identityModel, QFileInfo fileInfo, bool se
 {
     IdentityTab* pTab= new IdentityTab(identityModel, fileInfo);
     pTab->getUiBuilder().setEnableUnauthenticatedChanges(m_bEnableUnauthenticatedChanges);
+
+    connect(&(pTab->getUiBuilder()), SIGNAL(identityChanged()), this, SLOT(onCurrentIdentityChanged()));
+
     m_Tabs.append(pTab);
     m_pTabWidget->addTab(pTab, pTab->getTabText());
 
@@ -42,6 +45,14 @@ int TabManager::getCurrentTabIndex()
 bool TabManager::hasTabs()
 {
     return m_Tabs.count() > 0;
+}
+
+bool TabManager::hasDirtyTabs()
+{
+    for (IdentityTab* pTab : m_Tabs)
+        if (pTab->isDirty()) return true;
+
+    return false;
 }
 
 void TabManager::setCurrentTabDirty(bool dirty)
@@ -103,6 +114,12 @@ void TabManager::onTabCloseRequested(int index)
 void TabManager::onCurrentTabChanged(int index)
 {
     emit currentTabChanged(index);
+}
+
+void TabManager::onCurrentIdentityChanged()
+{
+    if (!hasTabs()) return;
+    setCurrentTabDirty(true);
 }
 
 IdentityTab::IdentityTab(IdentityModel& identityModel,

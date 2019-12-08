@@ -271,6 +271,41 @@ bool MainWindow::showGetNewPasswordDialog(QString &password, QWidget* parent)
     return true;
 }
 
+/*!
+ * Displays a dialog, asking the user to confirm that any changes that were
+ * made to any of the loaded identities can be discarded.
+ *
+ * Returns \c true if the user confirmed the message, or \c false otherwise.
+ */
+
+bool MainWindow::canDiscardChanges()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(m_pTabWidget, tr("Unsaved changes"),
+        tr("You have unsaved changes! Do you really want to close the "
+           "application without saving the changes?"));
+
+    if (reply == QMessageBox::No)  return false;
+    else return true;
+}
+
+
+/***************************************************
+ *              O V E R R I D E S                  *
+ * ************************************************/
+
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (m_pTabManager->hasDirtyTabs())
+    {
+        if (!canDiscardChanges()) event->ignore();
+        return;
+    }
+
+    event->accept();
+}
+
 
 /***************************************************
  *                S L O T S                        *
@@ -531,18 +566,19 @@ void MainWindow::onPasteIdentityText()
 
     if (!ok) return;
 
+    if (result.isEmpty())
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Invalid identity data!"));
+    }
+
     try
     {
-        if (result.isEmpty())
-        {
-            QMessageBox::critical(this, tr("Error"),
-                tr("Invalid identity data!"));
-        }
-
         IdentityParser parser;
         IdentityModel* pModel = new IdentityModel();
         parser.parseString(result, pModel);
         m_pTabManager->addTab(*pModel, QFileInfo());
+        m_pTabManager->setCurrentTabDirty(true);
     }
     catch (std::exception& e)
     {
@@ -929,5 +965,11 @@ void MainWindow::onCurrentTabChanged(int index)
 
 void MainWindow::onQuit()
 {
+
+    if (m_pTabManager->hasDirtyTabs())
+    {
+        if (!canDiscardChanges()) return;
+    }
+
     QApplication::quit();
 }
