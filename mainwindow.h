@@ -60,6 +60,7 @@ public:
 private:
     void showNoIdentityLoadedError();
     void showTextualIdentityInfoDialog(QString rescueCode = nullptr);
+    void configureMenuItems();
     bool showRescueCodeInputDialog(QString& rescueCode);
     bool showGetPasswordDialog(QString& password, QWidget* parent = nullptr);
     bool showGetNewPasswordDialog(QString& password, QWidget* parent = nullptr);
@@ -82,6 +83,7 @@ private slots:
     void onDecryptImkIlk();
     void onDecryptIuk();
     void onDecryptPreviousIuks();
+    void onCurrentTabChanged(int index);
     void onQuit();
 };
 

@@ -12,8 +12,10 @@ class IdentityTab;
  *    class TabManager                        *
  *********************************************/
 
-class TabManager
+class TabManager : public QObject
 {
+    Q_OBJECT
+
 private:
     QTabWidget* m_pTabWidget;
     QList<IdentityTab*> m_Tabs;
@@ -23,7 +25,18 @@ public:
     int addTab(IdentityModel& identityModel, QFileInfo fileInfo, bool setActive = true);
     void removeTabAt(int index);
     IdentityTab& getTabAt(int index);
-    IdentityTab &getActiveTab();
+    IdentityTab &getCurrentTab();
+    int getCurrentTabIndex();
+    bool hasTabs();
+    void setCurrentTabDirty(bool dirty);
+    bool isCurrentTabDirty();
+
+signals:
+    void currentTabChanged(int index);
+
+private slots:
+    void onTabCloseRequested(int index);
+    void onCurrentTabChanged(int index);
 };
 
 /**********************************************
@@ -35,6 +48,7 @@ class IdentityTab : public QWidget
     Q_OBJECT
 
 private:
+    bool m_bIsDirty = false;
     QFileInfo m_FileInfo;
     QScrollArea* m_pScrollArea;
     IdentityModel* m_pIdentityModel;
@@ -42,6 +56,8 @@ private:
 
 public:
     explicit IdentityTab(IdentityModel& identityModel, QFileInfo fileInfo, QWidget *parent = nullptr);
+    void setDirty(bool dirty = true);
+    bool isDirty();
     IdentityModel& getIdentityModel();
     UiBuilder& getUiBuilder();
     void rebuild();

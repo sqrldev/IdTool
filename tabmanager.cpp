@@ -4,9 +4,13 @@
 TabManager::TabManager(QTabWidget *tabWidget)
 {
     m_pTabWidget = tabWidget;
+
+    connect(m_pTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequested(int)));
+    connect(m_pTabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
 }
 
-int TabManager::addTab(IdentityModel &identityModel, QFileInfo fileInfo, bool setActive)
+int TabManager::addTab(IdentityModel &identityModel,
+                       QFileInfo fileInfo, bool setActive)
 {
     IdentityTab* pTab= new IdentityTab(identityModel, fileInfo);
     m_Tabs.append(pTab);
@@ -24,13 +28,59 @@ IdentityTab &TabManager::getTabAt(int index)
     return *m_Tabs[index];
 }
 
-IdentityTab &TabManager::getActiveTab()
+IdentityTab &TabManager::getCurrentTab()
 {
     int currentIndex = m_pTabWidget->currentIndex();
     return *m_Tabs[currentIndex];
 }
 
-IdentityTab::IdentityTab(IdentityModel& identityModel, QFileInfo fileInfo, QWidget *parent) :
+int TabManager::getCurrentTabIndex()
+{
+    return m_pTabWidget->currentIndex();
+}
+
+bool TabManager::hasTabs()
+{
+    return m_Tabs.count() > 0;
+}
+
+void TabManager::setCurrentTabDirty(bool dirty)
+{
+    if (!hasTabs()) return;
+    getCurrentTab().setDirty(dirty);
+}
+
+bool TabManager::isCurrentTabDirty()
+{
+    if (!hasTabs()) return false;
+    return getCurrentTab().isDirty();
+}
+
+void TabManager::onTabCloseRequested(int index)
+{
+    if (m_Tabs[index]->isDirty())
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(m_pTabWidget, tr("Unsaved changes"),
+            tr("You have unsaved changes! Do you really want to close this identity "
+               "without saving the changes?"));
+
+        if (reply == QMessageBox::No)  return;
+    }
+
+    delete m_Tabs[index];
+    m_Tabs.removeAt(index);
+
+    emit currentTabChanged(getCurrentTabIndex());
+}
+
+void TabManager::onCurrentTabChanged(int index)
+{
+    emit currentTabChanged(index);
+}
+
+IdentityTab::IdentityTab(IdentityModel& identityModel,
+                         QFileInfo fileInfo, QWidget *parent) :
     QWidget(parent)
 {
     m_FileInfo = fileInfo;
@@ -42,6 +92,16 @@ IdentityTab::IdentityTab(IdentityModel& identityModel, QFileInfo fileInfo, QWidg
     mainLayout->addWidget(m_pScrollArea);
     rebuild();
     setLayout(mainLayout);
+}
+
+void IdentityTab::setDirty(bool dirty)
+{
+    m_bIsDirty = dirty;
+}
+
+bool IdentityTab::isDirty()
+{
+    return m_bIsDirty;
 }
 
 IdentityModel &IdentityTab::getIdentityModel()

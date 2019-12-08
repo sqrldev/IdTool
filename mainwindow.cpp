@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
     resize(geometry().width(), desktopSize.height());
 
     m_pTabManager = new TabManager(ui->tabWidget);
-    //onControlUnauthenticatedChanges();
+    onControlUnauthenticatedChanges();
 
     connect(ui->actionCreateNewIdentity, &QAction::triggered, this, &MainWindow::onCreateNewIdentity);
     connect(ui->actionOpenFile, &QAction::triggered, this, &MainWindow::onOpenFile);
@@ -83,6 +83,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
     connect(ui->actionChangePassword, &QAction::triggered, this, &MainWindow::onChangePassword);
+    connect(m_pTabManager, &TabManager::currentTabChanged, this, &MainWindow::onCurrentTabChanged);
+
+    configureMenuItems();
 }
 
 /*!
@@ -126,7 +129,7 @@ void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
     }
     messageText += tr("Textual version of the identity:");
     messageText += "\r\n\r\n";
-    messageText += m_pTabManager->getActiveTab()
+    messageText += m_pTabManager->getCurrentTab()
             .getIdentityModel().getTextualVersionFormatted();
 
     QInputDialog resultDialog(this);
@@ -137,6 +140,37 @@ void MainWindow::showTextualIdentityInfoDialog(QString rescueCode)
     resultDialog.setLabelText(tr("The identity was successfully created!"));
     resultDialog.setTextValue(messageText);
     resultDialog.exec();
+}
+
+/*!
+ * Checks if at least one identity is loaded and enables or
+ * disables main menu entries / actions accrodingly.
+ */
+
+void MainWindow::configureMenuItems()
+{
+    int currentIndex = m_pTabManager->getCurrentTabIndex();
+    bool enable = currentIndex != -1 ? true : false;
+    bool enableBlock3Ops = false;
+
+    if (currentIndex != -1)
+    {
+        if (m_pTabManager->getCurrentTab()
+                .getIdentityModel().hasBlocksType(3))
+        {
+            enableBlock3Ops = true;
+        }
+    }
+
+    ui->actionDecryptIuk->setEnabled(enable);
+    ui->actionDecryptImkIlk->setEnabled(enable);
+    ui->actionChangePassword->setEnabled(enable);
+    ui->actionCreateSiteKeys->setEnabled(enable);
+    ui->actionIdentitySettings->setEnabled(enable);
+    ui->actionSaveIdentityFileAs->setEnabled(enable);
+    ui->actionDecryptPreviousIuks->setEnabled(enable && enableBlock3Ops);
+    ui->actionDisplayTextualIdentity->setEnabled(enable);
+    ui->actionEnableUnauthenticatedChanges->setEnabled(enable);
 }
 
 /*!
@@ -246,7 +280,7 @@ bool MainWindow::showGetNewPasswordDialog(QString &password, QWidget* parent)
 
 bool MainWindow::canDiscardCurrentIdentity()
 {
-    IdentityModel& identityModel = m_pTabManager->getActiveTab().getIdentityModel();
+    IdentityModel& identityModel = m_pTabManager->getCurrentTab().getIdentityModel();
 
     if (identityModel.hasBlocks())
     {
@@ -272,12 +306,10 @@ bool MainWindow::canDiscardCurrentIdentity()
 void MainWindow::onCreateNewIdentity()
 {
     IdentityModel identity;
+    QString password;
     QString rescueCode;
     bool ok = false;
 
-    if (!canDiscardCurrentIdentity()) return;
-
-    QString password;
     ok = showGetNewPasswordDialog(password);
     if (!ok) return;
 
@@ -287,19 +319,18 @@ void MainWindow::onCreateNewIdentity()
 
     ok = CryptUtil::createIdentity(identity, rescueCode, password,
                                    &progressDialog);
-
     progressDialog.close();
 
     if (!ok)
     {
         QMessageBox::critical(this, tr("Error"),
-                              tr("An error occured while creating the identity "
-                                 "or the operation was aborted by the user."));
+            tr("An error occured while creating the identity "
+               "or the operation was aborted by the user."));
         return;
     }
 
-    m_pTabManager->getActiveTab().getIdentityModel().import(identity);
-    m_pTabManager->getActiveTab().rebuild();
+    m_pTabManager->addTab(identity, tr("Untitled*"));
+    m_pTabManager->getCurrentTab().rebuild();
 
     showTextualIdentityInfoDialog(rescueCode);
 
@@ -360,8 +391,8 @@ void MainWindow::onImportTextualIdentity()
 
         identity.blocks.insert(identity.blocks.begin(), block1);
 
-        m_pTabManager->getActiveTab().getIdentityModel().import(identity);
-        m_pTabManager->getActiveTab().rebuild();
+        m_pTabManager->getCurrentTab().getIdentityModel().import(identity);
+        m_pTabManager->getCurrentTab().rebuild();
     }
     catch (std::exception& e)
     {
@@ -416,7 +447,7 @@ void MainWindow::onSaveFile()
 
     try
     {
-        m_pTabManager->getActiveTab().getIdentityModel()
+        m_pTabManager->getCurrentTab().getIdentityModel()
                 .writeToFile(fileName);
     }
     catch (std::exception& e)
@@ -449,7 +480,7 @@ void MainWindow::onChangePassword()
     ok = showGetNewPasswordDialog(newPassword);
     if (!ok) return;
 
-    IdentityBlock* block1 = m_pTabManager->getActiveTab()
+    IdentityBlock* block1 = m_pTabManager->getCurrentTab()
             .getIdentityModel().getBlock(1);
     if (block1 == nullptr) return;
     IdentityBlock newBlock1 = *block1;
@@ -466,19 +497,19 @@ void MainWindow::onChangePassword()
     }
 
     *block1 = newBlock1;
-    m_pTabManager->getActiveTab().rebuild();
+    m_pTabManager->getCurrentTab().rebuild();
 }
 
 void MainWindow::onShowIdentitySettingsDialog()
 {
-    IdentityBlock* pBlock1 = m_pTabManager->getActiveTab()
+    IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
             .getIdentityModel().getBlock(1);
     if (pBlock1 == nullptr) return;
 
     IdentitySettingsDialog dialog(this, pBlock1);
     dialog.exec();
 
-    m_pTabManager->getActiveTab().rebuild();
+    m_pTabManager->getCurrentTab().rebuild();
 }
 
 void MainWindow::onControlUnauthenticatedChanges()
@@ -506,10 +537,12 @@ void MainWindow::onControlUnauthenticatedChanges()
         }
     }
 
-    m_pTabManager->getActiveTab().getUiBuilder()
-            .setEnableUnauthenticatedChanges(enable, true);
-
     ui->actionBuildNewIdentity->setVisible(enable);
+
+    if (!m_pTabManager->hasTabs()) return;
+
+    m_pTabManager->getCurrentTab().getUiBuilder()
+            .setEnableUnauthenticatedChanges(enable, true);
 }
 
 void MainWindow::onPasteIdentityText()
@@ -533,11 +566,9 @@ void MainWindow::onPasteIdentityText()
         }
 
         IdentityParser parser;
-        IdentityModel& model = m_pTabManager->getActiveTab()
-                .getIdentityModel();
-        model.clear();
-        parser.parseString(result, &model);
-        m_pTabManager->getActiveTab().rebuild();
+        IdentityModel* pModel = new IdentityModel();
+        parser.parseString(result, pModel);
+        m_pTabManager->addTab(*pModel, tr("Untitled*"));
     }
     catch (std::exception& e)
     {
@@ -560,10 +591,10 @@ void MainWindow::onBuildNewIdentity()
     IdentityBlock block = IdentityParser::
             createEmptyBlock(blockType);
 
-    IdentityModel& model = m_pTabManager->getActiveTab().getIdentityModel();
+    IdentityModel& model = m_pTabManager->getCurrentTab().getIdentityModel();
     model.clear();
     model.blocks.push_back(block);
-    m_pTabManager->getActiveTab().rebuild();
+    m_pTabManager->getCurrentTab().rebuild();
 }
 
 void MainWindow::onShowBlockDesigner()
@@ -584,7 +615,7 @@ void MainWindow::onShowBlockDesigner()
 
 void MainWindow::onCreateSiteKeys()
 {
-    IdentityBlock* pBlock = m_pTabManager->getActiveTab()
+    IdentityBlock* pBlock = m_pTabManager->getCurrentTab()
             .getIdentityModel().getBlock(1);
     if (pBlock == nullptr) return;
 
@@ -663,7 +694,7 @@ void MainWindow::onCreateSiteKeys()
 
 void MainWindow::onDecryptImkIlk()
 {
-    IdentityBlock* pBlock1 = m_pTabManager->getActiveTab()
+    IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
             .getIdentityModel().getBlock(1);
     if (pBlock1 == nullptr)
     {
@@ -722,7 +753,7 @@ void MainWindow::onDecryptImkIlk()
 
 void MainWindow::onDecryptIuk()
 {
-    IdentityBlock* pBlock2 = m_pTabManager->getActiveTab()
+    IdentityBlock* pBlock2 = m_pTabManager->getCurrentTab()
             .getIdentityModel().getBlock(2);
     if (pBlock2 == nullptr)
     {
@@ -776,7 +807,7 @@ void MainWindow::onDecryptPreviousIuks()
     QByteArray decryptedImk(32, 0);
     QByteArray decryptedIlk(32, 0);
 
-    IdentityBlock* pBlock3 = m_pTabManager->getActiveTab()
+    IdentityBlock* pBlock3 = m_pTabManager->getCurrentTab()
             .getIdentityModel().getBlock(3);
     if (pBlock3 == nullptr)
     {
@@ -801,7 +832,7 @@ void MainWindow::onDecryptPreviousIuks()
 
     if (decryptionMethod == DECRYPTION_METHOD_PASSWORD)
     {
-        IdentityBlock* pBlock1 = m_pTabManager->getActiveTab()
+        IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
                 .getIdentityModel().getBlock(1);
 
         if (pBlock1 == nullptr)
@@ -841,7 +872,7 @@ void MainWindow::onDecryptPreviousIuks()
     }
     else if (decryptionMethod == DECRYPTION_METHOD_RESCUE_CODE)
     {
-        IdentityBlock* pBlock2 = m_pTabManager->getActiveTab().
+        IdentityBlock* pBlock2 = m_pTabManager->getCurrentTab().
                 getIdentityModel().getBlock(2);
         if (pBlock2 == nullptr)
         {
@@ -917,6 +948,11 @@ void MainWindow::onDecryptPreviousIuks()
     resultDialog.setTextValue(result);
     resultDialog.exec();
 
+}
+
+void MainWindow::onCurrentTabChanged(int index)
+{
+    configureMenuItems();
 }
 
 void MainWindow::onQuit()
