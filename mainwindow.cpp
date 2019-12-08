@@ -375,11 +375,11 @@ void MainWindow::onImportTextualIdentity()
 
         identityBytes = IdentityParser::HEADER.toLocal8Bit() + identityBytes;
 
-        IdentityModel identity;
+        IdentityModel* pIdentity = new IdentityModel();
         IdentityParser parser;
-        parser.parseIdentityData(identityBytes, &identity);
+        parser.parseIdentityData(identityBytes, pIdentity);
 
-        IdentityBlock* pBlock2 = identity.getBlock(2);
+        IdentityBlock* pBlock2 = pIdentity->getBlock(2);
 
         QString rescueCode;
         ok = showRescueCodeInputDialog(rescueCode);
@@ -398,10 +398,10 @@ void MainWindow::onImportTextualIdentity()
         progressDialog.setLabelText(tr("Encrypting IMK and ILK..."));
         IdentityBlock block1 = CryptUtil::createBlock1(decryptedIuk, password, &progressDialog);
 
-        identity.blocks.insert(identity.blocks.begin(), block1);
+        pIdentity->blocks.insert(pIdentity->blocks.begin(), block1);
 
-        m_pTabManager->getCurrentTab().getIdentityModel().import(identity);
-        m_pTabManager->getCurrentTab().rebuild();
+        m_pTabManager->addTab(*pIdentity, QFileInfo());
+        m_pTabManager->setCurrentTabDirty(true);
     }
     catch (std::exception& e)
     {
@@ -511,6 +511,7 @@ void MainWindow::onChangePassword()
 
     *block1 = newBlock1;
     m_pTabManager->getCurrentTab().rebuild();
+    m_pTabManager->setCurrentTabDirty(true);
 }
 
 void MainWindow::onShowIdentitySettingsDialog()
@@ -520,9 +521,11 @@ void MainWindow::onShowIdentitySettingsDialog()
     if (pBlock1 == nullptr) return;
 
     IdentitySettingsDialog dialog(this, pBlock1);
-    dialog.exec();
-
-    m_pTabManager->getCurrentTab().rebuild();
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_pTabManager->getCurrentTab().rebuild();
+        m_pTabManager->setCurrentTabDirty(true);
+    }
 }
 
 void MainWindow::onControlUnauthenticatedChanges()
@@ -603,6 +606,7 @@ void MainWindow::onBuildNewIdentity()
     IdentityModel* pModel = new IdentityModel();
     pModel->blocks.push_back(block);
     m_pTabManager->addTab(*pModel, QFileInfo());
+    m_pTabManager->setCurrentTabDirty(true);
 }
 
 void MainWindow::onShowBlockDesigner()
