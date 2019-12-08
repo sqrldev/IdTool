@@ -275,7 +275,7 @@ bool IdentityModel::hasBlocks()
  * identity model, or \c false otherwise.
  */
 
-bool IdentityModel::hasBlocksType(uint16_t blockType)
+bool IdentityModel::hasBlockType(uint16_t blockType)
 {
      return getBlock(blockType) != nullptr;
 }

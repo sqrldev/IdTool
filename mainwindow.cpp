@@ -156,7 +156,7 @@ void MainWindow::configureMenuItems()
     if (currentIndex != -1)
     {
         if (m_pTabManager->getCurrentTab()
-                .getIdentityModel().hasBlocksType(3))
+                .getIdentityModel().hasBlockType(3))
         {
             enableBlock3Ops = true;
         }
@@ -279,7 +279,7 @@ bool MainWindow::showGetNewPasswordDialog(QString &password, QWidget* parent)
 
 void MainWindow::onCreateNewIdentity()
 {
-    IdentityModel identity;
+    IdentityModel* pIidentity = new IdentityModel();
     QString password;
     QString rescueCode;
     bool ok = false;
@@ -291,7 +291,7 @@ void MainWindow::onCreateNewIdentity()
                                    tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    ok = CryptUtil::createIdentity(identity, rescueCode, password,
+    ok = CryptUtil::createIdentity(*pIidentity, rescueCode, password,
                                    &progressDialog);
     progressDialog.close();
 
@@ -303,8 +303,8 @@ void MainWindow::onCreateNewIdentity()
         return;
     }
 
-    m_pTabManager->addTab(identity, QFileInfo());
-    m_pTabManager->getCurrentTab().rebuild();
+    m_pTabManager->addTab(*pIidentity, QFileInfo());
+    m_pTabManager->setCurrentTabDirty(true);
 
     showTextualIdentityInfoDialog(rescueCode);
 
@@ -423,6 +423,10 @@ void MainWindow::onSaveFile()
     {
         m_pTabManager->getCurrentTab().getIdentityModel()
                 .writeToFile(fileName);
+        QFileInfo fileInfo(fileName);
+        m_pTabManager->getCurrentTab().updateFileInfo(fileInfo);
+        m_pTabManager->setCurrentTabDirty(false);
+        m_pTabManager->updateCurrentTabText();
     }
     catch (std::exception& e)
     {

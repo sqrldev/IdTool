@@ -33,6 +33,7 @@ public:
     bool isCurrentTabDirty();
     void rebuildAllTabs();
     void setEnableUnauthenticatedChanges(bool enable, bool rebuild = true);
+    void updateCurrentTabText();
 
 signals:
     void currentTabChanged(int index);
@@ -64,6 +65,9 @@ public:
     IdentityModel& getIdentityModel();
     UiBuilder& getUiBuilder();
     void rebuild();
+    QString getTabText();
+    QString getTabToolTip();
+    void updateFileInfo(QFileInfo fileInfo);
 };
 
 #endif // TABMANAGER_H

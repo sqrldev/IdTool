@@ -14,7 +14,7 @@ int TabManager::addTab(IdentityModel &identityModel, QFileInfo fileInfo, bool se
     IdentityTab* pTab= new IdentityTab(identityModel, fileInfo);
     pTab->getUiBuilder().setEnableUnauthenticatedChanges(m_bEnableUnauthenticatedChanges);
     m_Tabs.append(pTab);
-    m_pTabWidget->addTab(pTab, fileInfo.fileName());
+    m_pTabWidget->addTab(pTab, pTab->getTabText());
 
     int index = m_Tabs.size()-1;
     m_pTabWidget->setTabToolTip(index, fileInfo.filePath());
@@ -48,6 +48,7 @@ void TabManager::setCurrentTabDirty(bool dirty)
 {
     if (!hasTabs()) return;
     getCurrentTab().setDirty(dirty);
+    updateCurrentTabText();
 }
 
 bool TabManager::isCurrentTabDirty()
@@ -68,6 +69,17 @@ void TabManager::setEnableUnauthenticatedChanges(bool enable, bool rebuild)
 
     for (IdentityTab* pTab : m_Tabs)
         pTab->getUiBuilder().setEnableUnauthenticatedChanges(enable, rebuild);
+}
+
+void TabManager::updateCurrentTabText()
+{
+    if (!hasTabs()) return;
+
+    m_pTabWidget->setTabText(getCurrentTabIndex(),
+                             getCurrentTab().getTabText());
+
+    m_pTabWidget->setTabToolTip(getCurrentTabIndex(),
+                             getCurrentTab().getTabToolTip());
 }
 
 void TabManager::onTabCloseRequested(int index)
@@ -133,4 +145,22 @@ void IdentityTab::rebuild()
     m_pUiBuilder->rebuild();
 }
 
+QString IdentityTab::getTabText()
+{
+    QString fileName = m_FileInfo.fileName();
+    if (fileName == "") fileName = tr("Untitled");
+    if (this->isDirty()) fileName += "*";
+
+    return fileName;
+}
+
+QString IdentityTab::getTabToolTip()
+{
+    return m_FileInfo.filePath();
+}
+
+void IdentityTab::updateFileInfo(QFileInfo fileInfo)
+{
+    m_FileInfo = fileInfo;
+}
 

@@ -52,6 +52,7 @@
 UiBuilder::UiBuilder(QScrollArea* contentRoot, IdentityModel* identityModel)
 {
     m_pContentRoot = contentRoot;
+    m_pContentRoot->setStyleSheet("QScrollArea{border: 0px;}");
     m_pContentRoot->setWidgetResizable(true);
     m_pModel = identityModel;
 }
