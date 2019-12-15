@@ -752,7 +752,7 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
 QByteArray CryptUtil::aesGcmEncrypt(QByteArray message, QByteArray additionalData,
                                     QByteArray iv, QByteArray key)
 {
-    int len = message.length() + 16;
+     unsigned long long len = message.length() + 16;
     QByteArray cipherText(len, 0);
 
     crypto_aead_aes256gcm_encrypt(
