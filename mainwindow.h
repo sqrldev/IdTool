@@ -61,7 +61,7 @@ private:
     void showNoIdentityLoadedError();
     void showTextualIdentityInfoDialog(QString rescueCode = nullptr);
     void configureMenuItems();
-    bool showRescueCodeInputDialog(QString& rescueCode);
+    bool showGetRescueCodeDialog(QString& rescueCode, QWidget* parent = nullptr);
     bool showGetPasswordDialog(QString& password, QWidget* parent = nullptr);
     bool showGetNewPasswordDialog(QString& password, QWidget* parent = nullptr);
     bool canDiscardChanges();
@@ -77,6 +77,7 @@ private slots:
     void onSaveFile();
     void onShowAboutDialog();
     void onChangePassword();
+    void onResetPassword();
     void onShowIdentitySettingsDialog();
     void onControlUnauthenticatedChanges();
     void onPasteIdentityText();

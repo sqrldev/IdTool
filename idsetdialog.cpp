@@ -179,7 +179,7 @@ void IdentitySettingsDialog::onSaveButtonClicked()
     QProgressDialog progressDialog("", tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    ok = CryptUtil::updateBlock1(m_pBlock1, &newBlock1, password, password, &progressDialog);
+    ok = CryptUtil::updateBlock1WithPassword(m_pBlock1, &newBlock1, password, password, &progressDialog);
 
     if (!ok)
     {

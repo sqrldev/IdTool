@@ -662,8 +662,8 @@ IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgr
  * \return Returns true if the operation succeeds, false otherwise.
  */
 
-bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBlock,
-                             QString oldPassword, QString newPassword, QProgressDialog* progressDialog)
+bool CryptUtil::updateBlock1WithPassword(IdentityBlock *oldBlock, IdentityBlock* updatedBlock,
+                    QString oldPassword, QString newPassword, QProgressDialog* progressDialog)
 {
     QByteArray oldImk(32, 0);
     QByteArray oldIlk(32, 0);
@@ -752,8 +752,8 @@ bool CryptUtil::updateBlock1(IdentityBlock *oldBlock, IdentityBlock* updatedBloc
 QByteArray CryptUtil::aesGcmEncrypt(QByteArray message, QByteArray additionalData,
                                     QByteArray iv, QByteArray key)
 {
-     unsigned long long len = message.length() + 16;
-    QByteArray cipherText(len, 0);
+    unsigned long long len = static_cast<unsigned long long>(message.length() + 16);
+    QByteArray cipherText(static_cast<int>(len), 0);
 
     crypto_aead_aes256gcm_encrypt(
                 reinterpret_cast<unsigned char*>(cipherText.data()),
