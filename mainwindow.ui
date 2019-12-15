@@ -76,7 +76,7 @@
      <x>0</x>
      <y>0</y>
      <width>650</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -119,6 +119,7 @@
     <addaction name="actionEnableUnauthenticatedChanges"/>
     <addaction name="separator"/>
     <addaction name="actionChangePassword"/>
+    <addaction name="actionResetPassword"/>
     <addaction name="actionIdentitySettings"/>
    </widget>
    <addaction name="menuFile"/>
@@ -244,10 +245,10 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt IMK and ILK (needs password)</string>
+    <string>Decrypt IMK and ILK (requires password)</string>
    </property>
    <property name="toolTip">
-    <string>Decrypt IMK and ILK (needs password)</string>
+    <string>Decrypt IMK and ILK (requires password)</string>
    </property>
   </action>
   <action name="actionDecryptIuk">
@@ -256,10 +257,10 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt IUK (needs rescue code)</string>
+    <string>Decrypt IUK (requires rescue code)</string>
    </property>
    <property name="toolTip">
-    <string>Decrypt IUK (needs rescue code)</string>
+    <string>Decrypt IUK (requires rescue code)</string>
    </property>
   </action>
   <action name="actionDecryptPreviousIuks">
@@ -268,7 +269,10 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt previous IUKs (needs password or rescue code)</string>
+    <string>Decrypt previous IUKs (requires password or rescue code)</string>
+   </property>
+   <property name="toolTip">
+    <string>Decrypt previous IUKs (requires password or rescue code)</string>
    </property>
   </action>
   <action name="actionIdentitySettings">
@@ -339,7 +343,19 @@
      <normaloff>:/res/img/Password_16x.png</normaloff>:/res/img/Password_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Change identity master password</string>
+    <string>Change identity master password (requires current password)</string>
+   </property>
+   <property name="toolTip">
+    <string>Change identity master password (requires current password)</string>
+   </property>
+  </action>
+  <action name="actionResetPassword">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/Password_16x.png</normaloff>:/res/img/Password_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reset identity master password (requires rescue code)</string>
    </property>
   </action>
  </widget>

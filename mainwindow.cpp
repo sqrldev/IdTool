@@ -83,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
     connect(ui->actionChangePassword, &QAction::triggered, this, &MainWindow::onChangePassword);
+    connect(ui->actionResetPassword, &QAction::triggered, this, &MainWindow::onResetPassword);
     connect(m_pTabManager, &TabManager::currentTabChanged, this, &MainWindow::onCurrentTabChanged);
 
     configureMenuItems();
@@ -165,30 +166,30 @@ void MainWindow::configureMenuItems()
     ui->actionDecryptIuk->setEnabled(enable);
     ui->actionDecryptImkIlk->setEnabled(enable);
     ui->actionChangePassword->setEnabled(enable);
+    ui->actionResetPassword->setEnabled(enable);
     ui->actionCreateSiteKeys->setEnabled(enable);
     ui->actionIdentitySettings->setEnabled(enable);
     ui->actionSaveIdentityFileAs->setEnabled(enable);
     ui->actionDecryptPreviousIuks->setEnabled(enable && enableBlock3Ops);
     ui->actionDisplayTextualIdentity->setEnabled(enable);
-    //ui->actionEnableUnauthenticatedChanges->setEnabled(enable);
 }
 
 /*!
- * Displays a dialog, prompting the user to input the current identity's
- * rescue code. The string being input is then stripped of all dashes ("-")
- * and spaces (" ").
+ * Displays a dialog, setting \a parent as the dialog's parent widget,
+ * prompting the user to input the current identity's rescue code.
+ * The string being input is then stripped of all dashes ("-") and spaces (" ").
  *
  * If the dialog was not cancelled and the string is not empty after stripping
  * it of unwanted characters, \c true is returned and the input string is
  * placed into \a rescueCode. Otherwise, \c false is returned.
  */
 
-bool MainWindow::showRescueCodeInputDialog(QString& rescueCode)
+bool MainWindow::showGetRescueCodeDialog(QString& rescueCode, QWidget* parent)
 {
     bool ok = false;
 
     QString rc = QInputDialog::getText(
-                nullptr,
+                parent,
                 tr(""),
                 tr("Identity rescue code:"),
                 QLineEdit::Normal,
@@ -382,7 +383,7 @@ void MainWindow::onImportTextualIdentity()
         IdentityBlock* pBlock2 = pIdentity->getBlock(2);
 
         QString rescueCode;
-        ok = showRescueCodeInputDialog(rescueCode);
+        ok = showGetRescueCodeDialog(rescueCode);
         if (!ok) return;
 
         QString password;
@@ -501,7 +502,7 @@ void MainWindow::onChangePassword()
     QProgressDialog progressDialog("", tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    ok = CryptUtil::updateBlock1(block1, &newBlock1, password, newPassword, &progressDialog);
+    ok = CryptUtil::updateBlock1WithPassword(block1, &newBlock1, password, newPassword, &progressDialog);
     if (!ok)
     {
         QMessageBox::critical(this, tr("Error"),
@@ -512,6 +513,61 @@ void MainWindow::onChangePassword()
     *block1 = newBlock1;
     m_pTabManager->getCurrentTab().rebuild();
     m_pTabManager->setCurrentTabDirty(true);
+}
+
+void MainWindow::onResetPassword()
+{
+    QString rescueCode;
+    bool ok = showGetRescueCodeDialog(rescueCode, this);
+    if (!ok) return;
+
+    QString password;
+    ok = showGetNewPasswordDialog(password, this);
+    if (!ok) return;
+
+    IdentityBlock* pBlock2 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(2);
+    if (pBlock2 == nullptr) return;
+
+    QProgressDialog progressDialog(tr("Decrypting block 2..."),
+                                   tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+
+    QByteArray decryptedIuk(32, 0);
+    ok = CryptUtil::decryptBlock2(decryptedIuk, pBlock2, rescueCode, &progressDialog);
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Error decrypting block2!"));
+        return;
+    }
+
+    QByteArray decryptedImk = CryptUtil::createImkFromIuk(decryptedIuk);
+    QByteArray decryptedIlk = CryptUtil::createIlkFromIuk(decryptedIuk);
+
+
+    IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(1);
+    if (pBlock1 == nullptr) return;
+
+    IdentityBlock updatedBlock1 = *pBlock1;
+
+    ok = CryptUtil::updateBlock1(&updatedBlock1, decryptedImk, decryptedIlk,
+                                 password, &progressDialog);
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Error updating block type 1!"));
+        return;
+    }
+
+    *pBlock1 = updatedBlock1;
+
+    m_pTabManager->getCurrentTab().rebuild();
+    m_pTabManager->setCurrentTabDirty(true);
+
+    QMessageBox::information(this, tr("Success"),
+        tr("Password has been successfully reset!"));
 }
 
 void MainWindow::onShowIdentitySettingsDialog()
@@ -775,7 +831,7 @@ void MainWindow::onDecryptIuk()
     }
 
     QString rescueCode;
-    bool ok = showRescueCodeInputDialog(rescueCode);
+    bool ok = showGetRescueCodeDialog(rescueCode, this);
     if (!ok) return;
 
     QByteArray decryptedIuk(32, 0);
