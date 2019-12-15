@@ -96,3 +96,7 @@ else:unix: LIBS += -L$$PWD/lib/sodium/lib/ -lsodium
 
 INCLUDEPATH += $$PWD/lib/sodium/include
 DEPENDPATH += $$PWD/lib/sodium/include
+
+QMAKE_LFLAGS += /NODEFAULTLIB:LIBCMTD \
+    /NODEFAULTLIB:LIBCMT
+
