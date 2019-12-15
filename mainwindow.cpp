@@ -533,8 +533,8 @@ void MainWindow::onResetPassword()
                                    tr("Abort"), 0, 0, this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    QByteArray iuk(32, 0);
-    ok = CryptUtil::decryptBlock2(iuk, pBlock2, rescueCode, &progressDialog);
+    QByteArray decryptedIuk(32, 0);
+    ok = CryptUtil::decryptBlock2(decryptedIuk, pBlock2, rescueCode, &progressDialog);
     if (!ok)
     {
         QMessageBox::critical(this, tr("Error"),
@@ -542,12 +542,26 @@ void MainWindow::onResetPassword()
         return;
     }
 
-    IdentityBlock newBlock1 = CryptUtil::createBlock1(iuk, password, &progressDialog);
+    QByteArray decryptedImk = CryptUtil::createImkFromIuk(decryptedIuk);
+    QByteArray decryptedIlk = CryptUtil::createIlkFromIuk(decryptedIuk);
+
 
     IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
             .getIdentityModel().getBlock(1);
     if (pBlock1 == nullptr) return;
-    *pBlock1 = newBlock1;
+
+    IdentityBlock updatedBlock1 = *pBlock1;
+
+    ok = CryptUtil::updateBlock1(&updatedBlock1, decryptedImk, decryptedIlk,
+                                 password, &progressDialog);
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Error updating block type 1!"));
+        return;
+    }
+
+    *pBlock1 = updatedBlock1;
 
     m_pTabManager->getCurrentTab().rebuild();
     m_pTabManager->setCurrentTabDirty(true);
