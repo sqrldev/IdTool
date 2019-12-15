@@ -282,8 +282,7 @@ QWidget* UiBuilder::createBlockItem(IdentityBlockItem* item, IdentityBlock* bloc
 
     if (value.length() > 50)
     {
-        value = value.left(40);
-        value += "...";
+        value = value.left(18) + "..." + value.right(18);
     }
 
     pLayout->setContentsMargins(0,0,0,0);
