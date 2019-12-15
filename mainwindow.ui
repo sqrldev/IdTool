@@ -245,10 +245,10 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt IMK and ILK (needs password)</string>
+    <string>Decrypt IMK and ILK (requires password)</string>
    </property>
    <property name="toolTip">
-    <string>Decrypt IMK and ILK (needs password)</string>
+    <string>Decrypt IMK and ILK (requires password)</string>
    </property>
   </action>
   <action name="actionDecryptIuk">
@@ -257,10 +257,10 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt IUK (needs rescue code)</string>
+    <string>Decrypt IUK (requires rescue code)</string>
    </property>
    <property name="toolTip">
-    <string>Decrypt IUK (needs rescue code)</string>
+    <string>Decrypt IUK (requires rescue code)</string>
    </property>
   </action>
   <action name="actionDecryptPreviousIuks">
@@ -269,7 +269,10 @@
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
-    <string>Decrypt previous IUKs (needs password or rescue code)</string>
+    <string>Decrypt previous IUKs (requires password or rescue code)</string>
+   </property>
+   <property name="toolTip">
+    <string>Decrypt previous IUKs (requires password or rescue code)</string>
    </property>
   </action>
   <action name="actionIdentitySettings">
