@@ -786,7 +786,7 @@ QByteArray CryptUtil::aesGcmEncrypt(QByteArray message, QByteArray additionalDat
 
     crypto_aead_aes256gcm_encrypt(
                 reinterpret_cast<unsigned char*>(cipherText.data()),
-                reinterpret_cast<unsigned long long*>(&len),
+                &len,
                 reinterpret_cast<const unsigned char*>(message.constData()),
                 static_cast<unsigned long long>(message.length()),
                 reinterpret_cast<const unsigned char*>(additionalData.constData()),
