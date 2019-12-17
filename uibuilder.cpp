@@ -25,6 +25,7 @@
  */
 
 #include "uibuilder.h"
+#include "identityclipboard.h"
 
 /*!
  *
@@ -434,6 +435,18 @@ void UiBuilder::onBlockOptionsButtonClicked()
     QAction* pActionSeparator = new QAction();
     pActionSeparator->setSeparator(true);
 
+    QAction* pActionCopyBlock = new QAction(QIcon(":/res/img/CopyItem_16x.png"), tr("Copy block"));
+    QVariant copyBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block));
+    pActionCopyBlock->setProperty("0", copyBlockConnectorContainer);
+
+    QAction* pActionPasteBlock = new QAction(QIcon(":/res/img/Paste_16x.png"), tr("Paste block"));
+    QVariant pasteBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block));
+    pActionPasteBlock->setProperty("0", pasteBlockConnectorContainer);
+    pActionPasteBlock->setEnabled(IdentityClipboard::getInstance()->hasBlock());
+
+    QAction* pActionSeparator2 = new QAction();
+    pActionSeparator2->setSeparator(true);
+
     QAction* pActionAddBlock = new QAction(QIcon(":/res/img/Add_16x.png"), tr("Add block"));
     QVariant addBlockConnectorContainer = QVariant::fromValue(BlockConnector(connector.block));
     pActionAddBlock->setProperty("0", addBlockConnectorContainer);
@@ -446,6 +459,9 @@ void UiBuilder::onBlockOptionsButtonClicked()
     menu->addAction(pActionMoveBlockUp);
     menu->addAction(pActionMoveBlockDown);
     menu->addAction(pActionSeparator);
+    menu->addAction(pActionCopyBlock);
+    menu->addAction(pActionPasteBlock);
+    menu->addAction(pActionSeparator2);
     menu->addAction(pActionAddBlock);
     menu->addAction(pActionDeleteBlock);
 
@@ -453,6 +469,8 @@ void UiBuilder::onBlockOptionsButtonClicked()
     connect(pActionMoveBlockDown, &QAction::triggered, this, &UiBuilder::onMoveBlock);
     connect(pActionAddBlock, &QAction::triggered, this, &UiBuilder::onInsertBlock);
     connect(pActionDeleteBlock, &QAction::triggered, this, &UiBuilder::onDeleteBlock);
+    connect(pActionCopyBlock, &QAction::triggered, this, &UiBuilder::onCopyBlock);
+    connect(pActionPasteBlock, &QAction::triggered, this, &UiBuilder::onPasteBlock);
 
     menu->exec(static_cast<QWidget*>(sender())->mapToGlobal(
                     QPoint(0, 0)));
@@ -478,6 +496,31 @@ void UiBuilder::onMoveBlock()
             sender()->property("0").value<BlockConnector>();
 
     if (m_pModel->moveBlock(connector.block, connector.moveUp))
+    {
+        m_bNeedsRebuild = true;
+        identityChanged();
+    }
+}
+
+void UiBuilder::onCopyBlock()
+{
+    BlockConnector connector =
+            sender()->property("0").value<BlockConnector>();
+
+    IdentityClipboard* pClipboard = IdentityClipboard::getInstance();
+    pClipboard->setBlock(*(connector.block));
+}
+
+void UiBuilder::onPasteBlock()
+{
+    BlockConnector connector =
+            sender()->property("0").value<BlockConnector>();
+
+    IdentityClipboard* pClipboard = IdentityClipboard::getInstance();
+    if (!pClipboard->hasBlock()) return;
+    IdentityBlock block = pClipboard->getBlock();
+
+    if (m_pModel->insertBlock(block, connector.block))
     {
         m_bNeedsRebuild = true;
         identityChanged();

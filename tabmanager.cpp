@@ -1,5 +1,6 @@
 #include "tabmanager.h"
 #include "uibuilder.h"
+#include "identityclipboard.h"
 
 /*!
  *
