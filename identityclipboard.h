@@ -39,6 +39,7 @@ class IdentityClipboard
 private:
     static IdentityClipboard* m_pInstance;
     IdentityBlock m_block;
+    bool m_bHasBlock = false;
 
 private:
     IdentityClipboard();

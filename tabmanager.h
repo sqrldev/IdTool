@@ -7,7 +7,6 @@
 class IdentityModel;
 class UiBuilder;
 class IdentityTab;
-class IdentityClipboard;
 
 /**********************************************
  *    class TabManager                        *
@@ -18,7 +17,6 @@ class TabManager : public QObject
     Q_OBJECT
 
 private:
-    IdentityClipboard* m_pClipboard = nullptr;
     QTabWidget* m_pTabWidget;
     QList<IdentityTab*> m_Tabs;
     bool m_bEnableUnauthenticatedChanges = false;

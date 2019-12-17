@@ -25,7 +25,6 @@
 TabManager::TabManager(QTabWidget *tabWidget)
 {
     m_pTabWidget = tabWidget;
-    m_pClipboard = IdentityClipboard::getInstance();
 
     connect(m_pTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequested(int)));
     connect(m_pTabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));

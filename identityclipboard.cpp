@@ -29,10 +29,10 @@
 /*!
  *
  * \class IdentityClipboard
- * \brief A class for enabling copy-pasting of identity blocks/items.
+ * \brief A class for enabling copy-pasting of identity blocks.
  *
- * \c IdentityClipboard holds a single \c IdentityBlock as well as a
- * single \c IdentityBlockItem, which can be used for copy-paste operations.
+ * \c IdentityClipboard holds a single \c IdentityBlock which can be used
+ * for copy-paste operations.
  *
  * The class adheres to the "singleton" pattern and can therefore not be
  * instantiated directly using the constructor. Instead, call
@@ -47,7 +47,7 @@ IdentityClipboard::IdentityClipboard() { }
 IdentityClipboard::~IdentityClipboard() { delete m_pInstance; }
 
 /*!
- * Returns a \c IdentityClipboard instance while ensuring that only one
+ * Returns an \c IdentityClipboard instance while ensuring that only one
  * instance of the class exists at any given time.
  */
 
@@ -71,6 +71,7 @@ IdentityClipboard* IdentityClipboard::getInstance()
 void IdentityClipboard::setBlock(IdentityBlock block)
 {
     m_block = block;
+    m_bHasBlock = true;
 }
 
 /*!
@@ -83,6 +84,10 @@ void IdentityClipboard::setBlock(IdentityBlock block)
 
 IdentityBlock IdentityClipboard::getBlock()
 {
+    if (!hasBlock())
+    {
+        throw new std::runtime_error("No block present in clipboard!");
+    }
     return m_block;
 }
 
@@ -95,6 +100,5 @@ IdentityBlock IdentityClipboard::getBlock()
 
 bool IdentityClipboard::hasBlock()
 {
-    if (m_pInstance == nullptr) return false;
-    return true;
+    return m_bHasBlock;
 }

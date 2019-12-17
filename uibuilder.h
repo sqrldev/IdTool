@@ -76,6 +76,8 @@ public slots:
     void onInsertBlock();
     void onDeleteBlock();
     void onMoveBlock();
+    void onCopyBlock();
+    void onPasteBlock();
     void onInsertItem();
     void onDeleteItem();
     void onMoveItem();
