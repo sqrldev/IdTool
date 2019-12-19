@@ -111,6 +111,7 @@
     <addaction name="separator"/>
     <addaction name="actionCreateSiteKeys"/>
     <addaction name="actionDisplayTextualIdentity"/>
+    <addaction name="actionCheckIntegrity"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -356,6 +357,18 @@
    </property>
    <property name="text">
     <string>Reset identity master password (requires rescue code)</string>
+   </property>
+  </action>
+  <action name="actionCheckIntegrity">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/img/CheckIntegrity_16x.png</normaloff>:/res/img/CheckIntegrity_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Check integrity (requires password and rescue code)</string>
+   </property>
+   <property name="toolTip">
+    <string>Check block1/block2 integrity (requires password and rescue code)</string>
    </property>
   </action>
  </widget>

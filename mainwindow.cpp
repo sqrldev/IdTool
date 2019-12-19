@@ -172,6 +172,7 @@ void MainWindow::configureMenuItems()
     ui->actionSaveIdentityFileAs->setEnabled(enable);
     ui->actionDecryptPreviousIuks->setEnabled(enable && enableBlock3Ops);
     ui->actionDisplayTextualIdentity->setEnabled(enable);
+    ui->actionCheckIntegrity->setEnabled(enable);
 }
 
 /*!
