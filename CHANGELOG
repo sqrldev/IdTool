@@ -1,6 +1,7 @@
 Version 0.4.2
   Features
     * Copy/paste identity blocks (unauthenticated)
+    * Add "integrity check" feature
 
 Version 0.4.1
   Features
