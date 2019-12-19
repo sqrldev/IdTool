@@ -87,6 +87,7 @@ private slots:
     void onDecryptImkIlk();
     void onDecryptIuk();
     void onDecryptPreviousIuks();
+    void onCheckIntegrity();
     void onCurrentTabChanged(int index);
     void onQuit();
 };

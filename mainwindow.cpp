@@ -77,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDecryptImkIlk, &QAction::triggered, this, &MainWindow::onDecryptImkIlk);
     connect(ui->actionDecryptIuk, &QAction::triggered, this, &MainWindow::onDecryptIuk);
     connect(ui->actionDecryptPreviousIuks, &QAction::triggered, this, &MainWindow::onDecryptPreviousIuks);
+    connect(ui->actionCheckIntegrity, &QAction::triggered, this, &MainWindow::onCheckIntegrity);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::onCreateSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::onShowIdentitySettingsDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::onControlUnauthenticatedChanges);
@@ -903,13 +904,7 @@ void MainWindow::onDecryptPreviousIuks()
     {
         IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
                 .getIdentityModel().getBlock(1);
-
-        if (pBlock1 == nullptr)
-        {
-            QMessageBox::critical(this, tr("Error"),
-                tr("The loaded identity does not have a type 1 block!"));
-            return;
-        }
+        if (pBlock1 == nullptr) return;
 
         QString password;
         ok = showGetPasswordDialog(password, this);
@@ -935,7 +930,7 @@ void MainWindow::onDecryptPreviousIuks()
                     key))
         {
             QMessageBox::critical(this, tr("Error"),
-                tr("Decryption of identity keys failed! Wrong password?"));
+                tr("Decryption of identity keys failed!\nWrong password?"));
             return;
         }
     }
@@ -943,32 +938,17 @@ void MainWindow::onDecryptPreviousIuks()
     {
         IdentityBlock* pBlock2 = m_pTabManager->getCurrentTab().
                 getIdentityModel().getBlock(2);
-        if (pBlock2 == nullptr)
-        {
-            QMessageBox::critical(this, tr("Error"),
-                tr("The loaded identity does not have a type 2 block!"));
-            return;
-        }
+        if (pBlock2 == nullptr) return;
 
-        QString rescueCode = QInputDialog::getText(
-                    nullptr,
-                    tr(""),
-                    tr("Identity rescue code:"),
-                    QLineEdit::Normal,
-                    "",
-                    &ok);
-
+        QString rescueCode;
+        ok = showGetRescueCodeDialog(rescueCode, this);
         if (!ok) return;
 
-        rescueCode = rescueCode.replace("-", "");
-        rescueCode = rescueCode.replace(" ", "");
-
         QProgressDialog progressDialog(tr("Decrypting identity unlock key..."),
-                                       tr("Abort"), 0, 0, this);
+                tr("Abort"), 0, 0, this);
         progressDialog.setWindowModality(Qt::WindowModal);
 
         QByteArray decryptedIuk(32, 0);
-
         ok = CryptUtil::decryptBlock2(
                     decryptedIuk,
                     pBlock2,
@@ -980,8 +960,8 @@ void MainWindow::onDecryptPreviousIuks()
         if (!ok)
         {
             QMessageBox::critical(this, tr("Error"),
-                tr("Decryption of identity unlock key failed! "
-                   "Wrong password?"));
+                tr("Decryption of identity unlock key failed!\n"
+                   "Wrong rescue code?"));
             return;
         }
 
@@ -995,8 +975,8 @@ void MainWindow::onDecryptPreviousIuks()
                 pBlock3,
                 decryptedImk))
     {
-        QMessageBox::critical(this, tr("Error"), tr("Decryption of previous identity keys"
-                                                    "failed! Wrong password?"));
+        QMessageBox::critical(this, tr("Error"),
+            tr("Decryption of previous identity keys failed!\nWrong password?"));
         return;
     }
 
@@ -1016,7 +996,79 @@ void MainWindow::onDecryptPreviousIuks()
     resultDialog.setLabelText("Decryption of previous identitiy unlock keys succeeded!");
     resultDialog.setTextValue(result);
     resultDialog.exec();
+}
 
+void MainWindow::onCheckIntegrity()
+{
+    // Get password and rescue code
+    QString password, rescueCode;
+    if (!showGetPasswordDialog(password, this)) return;
+    if (!showGetRescueCodeDialog(rescueCode, this)) return;
+
+    // Get block1 and block2
+    IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(1);
+    IdentityBlock* pBlock2 = m_pTabManager->getCurrentTab()
+            .getIdentityModel().getBlock(2);
+    if (pBlock1 == nullptr || pBlock2 == nullptr) return;
+
+    // Derive key from password
+    QProgressDialog progressDialog("", tr("Abort"), 0, 0, this);
+    progressDialog.setWindowModality(Qt::WindowModal);
+    QByteArray key(32, 0);
+    bool ok = CryptUtil::createKeyFromPassword(key, *pBlock1, password, &progressDialog);
+    if (!ok) return;
+
+    // Decrypt block 1 (IMK)
+    QByteArray decryptedImk(32, 0), decryptedIlk(32, 0);
+    ok = CryptUtil::decryptBlock1(
+                decryptedImk,
+                decryptedIlk,
+                pBlock1,
+                key);
+
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Decryption of identity keys failed!\nWrong password?"));
+        return;
+    }
+
+    // Decrypt block 2 (IUK)
+    QByteArray decryptedIuk(32, 0);
+    ok = CryptUtil::decryptBlock2(
+                decryptedIuk,
+                pBlock2,
+                rescueCode,
+                &progressDialog);
+
+    progressDialog.close();
+
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"),
+            tr("Decryption of identity unlock key failed!\n"
+               "Wrong rescue code?"));
+        return;
+    }
+
+    // Derive IMK from IUK
+    QByteArray testImk = CryptUtil::createImkFromIuk(decryptedIuk);
+
+    // Check if the IMK in block 1 was in fact derived
+    // from the IUK in block 2
+    if (decryptedImk.compare(testImk) == 0)
+    {
+        QMessageBox::information(this, tr("Integrity check successful!"),
+                tr("The integrity check succeeded!\nBlock 1 and block 2 "
+                "belong to the same identity!"));
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Integrity check failed!"),
+                tr("The integrity test failed!\nBlock 1 and block 2 don't "
+                "seem to belong to the same identity!"));
+    }
 }
 
 void MainWindow::onCurrentTabChanged(int index)

@@ -123,7 +123,12 @@ bool CryptUtil::enScryptIterations(QByteArray& result, QString password, QByteAr
 
     if (sodium_init() < 0) return false;
 
-    if (progressDialog != nullptr) progressDialog->setMaximum(iterationCount);
+    if (progressDialog != nullptr)
+    {
+        if (progressDialog->labelText() == "")
+            progressDialog->setLabelText(QObject::tr("Running PBKDF..."));
+        progressDialog->setMaximum(iterationCount);
+    }
 
     int ret = crypto_pwhash_scryptsalsa208sha256_ll(
                 reinterpret_cast<const unsigned char*>(pwdBytes.constData()),
@@ -191,7 +196,12 @@ bool CryptUtil::enScryptTime(QByteArray &result, int &iterationCount, QString pa
 
     if (sodium_init() < 0) return false;
 
-    if (progressDialog != nullptr) progressDialog->setMaximum(secondsToRun*1000);
+    if (progressDialog != nullptr)
+    {
+        if (progressDialog->labelText() == "")
+            progressDialog->setLabelText(QObject::tr("Running PBKDF..."));
+        progressDialog->setMaximum(secondsToRun*1000);
+    }
 
     QElapsedTimer timer;
     timer.start();
