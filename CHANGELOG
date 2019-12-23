@@ -7,6 +7,7 @@ Version 0.4.1
   Features
     * Open multiple identities (tabbed interface)
     * Reset identity master password using rescue code
+    * Add Alt-Id to "create site-specific keys" feature
 
 Version 0.4.0
   Features
