@@ -35,6 +35,9 @@ SOURCES += \
         inc/bigint/BigIntegerUtils.cc \
         inc/bigint/BigUnsigned.cc \
         inc/bigint/BigUnsignedInABase.cc \
+        inc/qrcode/BitBuffer.cpp \
+        inc/qrcode/QrCode.cpp \
+        inc/qrcode/QrSegment.cpp \
         itemeditordialog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -55,6 +58,9 @@ HEADERS += \
         inc/bigint/BigUnsigned.hh \
         inc/bigint/BigUnsignedInABase.hh \
         inc/bigint/NumberlikeArray.hh \
+        inc/qrcode/BitBuffer.hpp \
+        inc/qrcode/QrCode.hpp \
+        inc/qrcode/QrSegment.hpp \
         itemeditordialog.h \
         mainwindow.h \
         tabmanager.h \

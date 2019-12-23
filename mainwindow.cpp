@@ -31,6 +31,7 @@
 #include "tabmanager.h"
 #include <QFileDialog>
 #include <QStandardPaths>
+#include "inc/qrcode/QrCode.hpp"
 
 /*!
  *
@@ -319,6 +320,37 @@ void MainWindow::onCreateNewIdentity()
     QString password;
     QString rescueCode;
     bool ok = false;
+
+
+    // TODO: REMOVE TEST CODE
+    using std::uint8_t;
+    using qrcodegen::QrCode;
+    using qrcodegen::QrSegment;
+
+    const char *text = "Hello, world!";              // User-supplied text
+    const QrCode::Ecc errCorLvl = QrCode::Ecc::MEDIUM;  // Error correction level
+
+    // Make and print the QR Code symbol
+    const QrCode qr = QrCode::encodeText(text, errCorLvl);
+    //QString svg = QString::fromStdString(qr.toSvgString(4));
+
+    QString qrString;
+    int border = 4;
+    for (int y = -border; y < qr.getSize() + border; y++) {
+        for (int x = -border; x < qr.getSize() + border; x++) {
+            qrString.append(qr.getModule(x, y) ? "##" : "  ");
+        }
+        qDebug() << qrString;
+        qrString = "";
+    }
+    qDebug() << "\n";
+
+    //QMessageBox::information(this, "Test", qrString);
+    //qDebug() << qrString;
+
+    return;
+
+    // END TEST
 
     ok = showGetNewPasswordDialog(password);
     if (!ok) return;
