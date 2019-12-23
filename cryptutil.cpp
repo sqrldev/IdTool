@@ -428,6 +428,9 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QB
 {
     unsigned char seed[crypto_sign_SEEDBYTES];
 
+    // Domains need to be lowecase!
+    domain = domain.toLower();
+
     int ret = crypto_auth_hmacsha256(
                 seed,
                 reinterpret_cast<const unsigned char*>(domain.constData()),
