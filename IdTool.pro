@@ -24,6 +24,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+# Copy the "blockdef" directory to the build directory
+copyblockdef.commands = $(COPY_DIR) \"$$shell_path($$PWD\\blockdef)\" \"$$shell_path($$OUT_PWD\\blockdef)\"
+first.depends = $(first) copyblockdef
+export(first.depends)
+export(copyblockdef.commands)
+QMAKE_EXTRA_TARGETS += first copyblockdef
+
+
 SOURCES += \
         blockdesignerdialog.cpp \
         cryptutil.cpp \
@@ -101,4 +109,3 @@ DEPENDPATH += $$PWD/lib/sodium/include
 
 QMAKE_LFLAGS_WINDOWS += /NODEFAULTLIB:LIBCMTD \
     /NODEFAULTLIB:LIBCMT
-
