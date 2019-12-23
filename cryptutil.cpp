@@ -417,24 +417,30 @@ bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, Identity
 }
 
 /*!
- * Creates a public- and private-key pair for \a domain using the identity master key \a imk.
- * Upon success, the public and private keys are stored within \a publicKey and \a privateKey.
+ * Creates a public- and private-key pair for \a domain and \a altId using the
+ * identity master key \a imk. Upon success, the public and private keys are
+ * stored within \a publicKey and \a privateKey.
+ *
+ * If no alternate id is needed, an empty string shall be passed to \a altId.
  *
  * \return True on success, false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
-bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QByteArray domain, QByteArray imk)
+bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey,
+                        QString domain, QString altId, QByteArray imk)
 {
+    // Turn the host/domain part of the url to lowercase
+    QByteArray domainBytes = makeHostLowercase(domain).toLocal8Bit();
+
+    // Append Alt-Id if present
+    if (altId != "") domainBytes = domainBytes.append('\0').append(altId);
+
     unsigned char seed[crypto_sign_SEEDBYTES];
-
-    // Domains need to be lowecase!
-    domain = domain.toLower();
-
     int ret = crypto_auth_hmacsha256(
                 seed,
-                reinterpret_cast<const unsigned char*>(domain.constData()),
-                static_cast<unsigned long long>(domain.length()),
+                reinterpret_cast<const unsigned char*>(domainBytes.constData()),
+                static_cast<unsigned long long>(domainBytes.length()),
                 reinterpret_cast<const unsigned char*>(imk.constData()));
 
     if (ret != 0) return false;
@@ -482,6 +488,30 @@ bool CryptUtil::createKeyFromPassword(QByteArray& key, IdentityBlock& block, QSt
     return true;
 }
 
+/*!
+ * \brief Returns the host (domain) part of \a url, converted
+ * to lowercase.
+ */
+
+QString CryptUtil::getHostLowercase(QString url)
+{
+    if (QUrl(url).scheme() == "") url.prepend("https://");
+    QUrl u(url);
+    return u.host().toLower();
+}
+
+/*!
+ * \brief Turns each character of \a url before the first forward
+ * slash ("/") to lowercase. If no forward slash is found, the whole
+ * string \a url is turned into lowercase.
+ */
+
+QString CryptUtil::makeHostLowercase(QString url)
+{
+    int index = url.indexOf('/');
+    if (index == -1) return url.toLower();
+    else return url.left(index).toLower().append(url.mid(index));
+}
 
 /*!
  * Derives and returns an identity master key (IMK) from the given
