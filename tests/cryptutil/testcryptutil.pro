@@ -14,6 +14,13 @@ INCLUDEPATH += .
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+# Copy the "vectors" directory to the build directory
+copyvectors.commands = $(COPY_DIR) \"$$shell_path($$PWD\\vectors)\" \"$$shell_path($$OUT_PWD\\vectors)\"
+first.depends = $(first) copyvectors
+export(first.depends)
+export(copyvectors.commands)
+QMAKE_EXTRA_TARGETS += first copyvectors
+
 # Input
 SOURCES += \
     testcryptutil.cpp
