@@ -53,7 +53,7 @@ public:
     static bool decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk, IdentityBlock *block, QByteArray key);
     static bool decryptBlock2(QByteArray& decryptedIuk, IdentityBlock *block, QString rescueCode, QProgressDialog* progressDialog = nullptr);
     static bool decryptBlock3(QList<QByteArray>& decryptedPreviousIuks, IdentityBlock *block, QByteArray imk);
-    static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk);
+    static bool createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QByteArray domain, QByteArray imk);
     static bool createKeyFromPassword(QByteArray& key, IdentityBlock& block, QString password, QProgressDialog* progressDialog = nullptr);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
     static QByteArray createIlkFromIuk(QByteArray decryptedIuk);

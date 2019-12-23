@@ -701,6 +701,17 @@ void MainWindow::onCreateSiteKeys()
 
     if (!ok) return;
 
+    QString altId = QInputDialog::getText(
+                nullptr,
+                tr(""),
+                tr("Alt-Id (optional):"),
+                QLineEdit::Normal,
+                "",
+                &ok);
+
+    QByteArray fullDomain = domain.toLocal8Bit();
+    if (ok && altId != "") fullDomain.append('\0').append(altId);
+
     QString password;
     ok = showGetPasswordDialog(password, this);
     if (!ok) return;
@@ -738,7 +749,7 @@ void MainWindow::onCreateSiteKeys()
     if ( !CryptUtil::createSiteKeys(
                 publicKey,
                 privateKey,
-                domain,
+                fullDomain,
                 decryptedImk))
     {
         QMessageBox::critical(this, tr("Error"),

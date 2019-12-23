@@ -424,15 +424,14 @@ bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, Identity
  * the crypto library failed).
  */
 
-bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QString domain, QByteArray imk)
+bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey, QByteArray domain, QByteArray imk)
 {
-    QByteArray domainBytes = domain.toLocal8Bit();
     unsigned char seed[crypto_sign_SEEDBYTES];
 
     int ret = crypto_auth_hmacsha256(
                 seed,
-                reinterpret_cast<const unsigned char*>(domainBytes.constData()),
-                static_cast<unsigned long long>(domainBytes.length()),
+                reinterpret_cast<const unsigned char*>(domain.constData()),
+                static_cast<unsigned long long>(domain.length()),
                 reinterpret_cast<const unsigned char*>(imk.constData()));
 
     if (ret != 0) return false;
