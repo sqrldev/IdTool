@@ -55,7 +55,7 @@ void TestCryptUtil::createSiteKeys()
 
         QByteArray pubKey(crypto_sign_PUBLICKEYBYTES, 0);
         QByteArray privKey(crypto_sign_SECRETKEYBYTES, 0);
-        CryptUtil::createSiteKeys(pubKey, privKey, domain, imk);
+        CryptUtil::createSiteKeys(pubKey, privKey, domain, altId, imk);
 
         QCOMPARE(expectedResult, pubKey);
     }
