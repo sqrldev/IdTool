@@ -55,7 +55,12 @@ HEADERS += \
 DISTFILES += \
     $$PWD/../../lib/sodium/lib/libsodium.lib \
     $$PWD/../../lib/sodium/lib/libsodium.so \
-    $$PWD/../../lib/sodium/lib/libsodiumd.lib
+    $$PWD/../../lib/sodium/lib/libsodiumd.lib \
+    vectors/enhash-vectors.txt \
+    vectors/enscrypt-vectors.txt \
+    vectors/identity-lock-vectors.txt \
+    vectors/identity-vectors.txt \
+    vectors/ins-vectors.txt
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../lib/sodium/lib/ -llibsodium
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../lib/sodium/lib/ -llibsodiumd
