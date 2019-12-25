@@ -150,4 +150,27 @@ void TestCryptUtil::enHash()
     }
 }
 
+void TestCryptUtil::base56EncodeDecode()
+{
+    for (int i=0; i<128; i++)
+    {
+        QByteArray input(i, 0);
+
+        // Avoid '\0' at the end of the byte array,
+        // which would make proper base56 decoding impossible
+        while(true)
+        {
+            CryptUtil::getRandomBytes(input);
+            if (i==0 || input[i-1] != '\0') break;
+        }
+
+        QString base56 = CryptUtil::base56EncodeIdentity(input);
+        if (!CryptUtil::verifyTextualIdentity(base56))
+            qDebug() << "Base56 verification failed: Length:" << base56.length() << " Base 56 string: " << base56;
+        QByteArray result = CryptUtil::base56DecodeIdentity(base56);
+
+        QCOMPARE(result, input);
+    }
+}
+
 QTEST_MAIN(TestCryptUtil)

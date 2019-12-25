@@ -13,5 +13,6 @@ private slots:
     void getHostLowercase();
     void makeHostLowercase();
     void enHash();
+    void base56EncodeDecode();
 };
 
