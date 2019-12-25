@@ -110,4 +110,16 @@ void TestCryptUtil::enScryptIterations()
     }
 }
 
+void TestCryptUtil::getHostLowercase()
+{
+    QCOMPARE(CryptUtil::getHostLowercase("www.Example.com"), "www.example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("www.example.com"), "www.example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("www.Example.com/TEST"), "www.example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("https://www.Example.com"), "www.example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("sqrl://test:test@www.Example.com"), "www.example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("Example.com"), "example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("sqrl.EXAMPLE.com"), "sqrl.example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("SQRL.Example.com"), "sqrl.example.com");
+}
+
 QTEST_MAIN(TestCryptUtil)

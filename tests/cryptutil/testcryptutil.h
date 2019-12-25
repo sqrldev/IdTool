@@ -10,6 +10,6 @@ private slots:
     void reverseByteArray();
     void createSiteKeys();
     void enScryptIterations();
-
+    void getHostLowercase();
 };
 
