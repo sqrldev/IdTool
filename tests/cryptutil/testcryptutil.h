@@ -7,7 +7,9 @@ private:
     QList<QList<QByteArray>> parseVectorsCsv(QString fileName, bool skipFirstLine=true, bool removeQuotes=true);
 
 private slots:
+    void reverseByteArray();
     void createSiteKeys();
+    void enScryptIterations();
 
 };
 
