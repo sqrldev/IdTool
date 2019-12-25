@@ -12,5 +12,6 @@ private slots:
     void enScryptIterations();
     void getHostLowercase();
     void makeHostLowercase();
+    void enHash();
 };
 

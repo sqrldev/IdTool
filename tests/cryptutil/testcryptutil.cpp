@@ -136,4 +136,18 @@ void TestCryptUtil::makeHostLowercase()
     QCOMPARE(CryptUtil::makeHostLowercase("SQRL.Example.com/cAsE"), "sqrl.example.com/cAsE");
 }
 
+void TestCryptUtil::enHash()
+{
+    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/enhash-vectors.txt");
+
+    for (QList<QByteArray> vector : vectors)
+    {
+        QByteArray input = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
+        QByteArray expectedResult = QByteArray::fromBase64(vector.at(1), QByteArray::Base64UrlEncoding);
+
+        QByteArray result = CryptUtil::enHash(input);
+        QCOMPARE(result, expectedResult);
+    }
+}
+
 QTEST_MAIN(TestCryptUtil)
