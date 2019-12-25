@@ -11,5 +11,6 @@ private slots:
     void createSiteKeys();
     void enScryptIterations();
     void getHostLowercase();
+    void makeHostLowercase();
 };
 

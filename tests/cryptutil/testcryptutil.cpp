@@ -118,8 +118,22 @@ void TestCryptUtil::getHostLowercase()
     QCOMPARE(CryptUtil::getHostLowercase("https://www.Example.com"), "www.example.com");
     QCOMPARE(CryptUtil::getHostLowercase("sqrl://test:test@www.Example.com"), "www.example.com");
     QCOMPARE(CryptUtil::getHostLowercase("Example.com"), "example.com");
+    QCOMPARE(CryptUtil::getHostLowercase("Example.com/pATH"), "example.com");
     QCOMPARE(CryptUtil::getHostLowercase("sqrl.EXAMPLE.com"), "sqrl.example.com");
     QCOMPARE(CryptUtil::getHostLowercase("SQRL.Example.com"), "sqrl.example.com");
+}
+
+void TestCryptUtil::makeHostLowercase()
+{
+    QCOMPARE(CryptUtil::makeHostLowercase("www.Example.com"), "www.example.com");
+    QCOMPARE(CryptUtil::makeHostLowercase("Www.Example.com"), "www.example.com");
+    QCOMPARE(CryptUtil::makeHostLowercase("www.example.com"), "www.example.com");
+    QCOMPARE(CryptUtil::makeHostLowercase("www.Example.com/TEST"), "www.example.com/TEST");
+    QCOMPARE(CryptUtil::makeHostLowercase("https://www.Example.com"), "https://www.example.com");
+    QCOMPARE(CryptUtil::makeHostLowercase("SQRL://teSt:Test@www.Example.coM"), "SQRL://teSt:Test@www.example.com");
+    QCOMPARE(CryptUtil::makeHostLowercase("Example.com"), "example.com");
+    QCOMPARE(CryptUtil::makeHostLowercase("sqrl.EXAMPLE.com"), "sqrl.example.com");
+    QCOMPARE(CryptUtil::makeHostLowercase("SQRL.Example.com/cAsE"), "sqrl.example.com/cAsE");
 }
 
 QTEST_MAIN(TestCryptUtil)
