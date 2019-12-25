@@ -2,6 +2,11 @@ Version 0.4.2
   Features
     * Copy/paste identity blocks (unauthenticated)
     * Add "integrity check" feature
+    * Add ability to enter an "Alt-Id" when creating site-specific keys
+    * Add unit tests and test vector generator projects
+  Fixes:
+    * Fix domain needs to be lowercase when creating site-specific keys
+    * Fix base56 verification edge case
 
 Version 0.4.1
   Features
