@@ -152,6 +152,24 @@ void TestCryptUtil::enHash()
 
 void TestCryptUtil::base56EncodeDecode()
 {
+    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/base56-vectors.txt");
+
+    for (QList<QByteArray> vector : vectors)
+    {
+        //QByteArray input = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
+        QByteArray input = QByteArray::fromHex(vector.at(1));
+        QString expectedResult = vector.at(2);
+
+        QString result = CryptUtil::base56EncodeIdentity(input);
+        QCOMPARE(result, expectedResult);
+
+        QByteArray decodeResult = CryptUtil::base56DecodeIdentity(result);
+        QCOMPARE(decodeResult, input);
+    }
+}
+
+void TestCryptUtil::base56EncodeDecodeRandomInput()
+{
     for (int i=0; i<128; i++)
     {
         QByteArray input(i, 0);
