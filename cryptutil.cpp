@@ -1110,7 +1110,7 @@ char CryptUtil::createBase56CheckSumChar(QByteArray dataBytes)
 /*!
  * Decodes the given base-56-encoded \a textualIdentity and if successful
  * returns the decoded binary identity data. If the \a textualIdentity is
- * invalid, \c nullptr will be returned.
+ * invalid, an empty \c QByteArray will be returned.
  *
  * See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf for
  * more information.
@@ -1121,7 +1121,7 @@ char CryptUtil::createBase56CheckSumChar(QByteArray dataBytes)
 QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
 {
     if (!verifyTextualIdentity(textualIdentity))
-        return nullptr;
+        return QByteArray("");
 
     textualIdentity = stripWhitespace(textualIdentity);
 
@@ -1190,21 +1190,26 @@ bool CryptUtil::verifyTextualIdentity(QString textualIdentity)
 
     for (int i=0; i<textualIdentity.length(); i+=20)
     {
+        int checkSumPos = i + 19;
         QByteArray checksumBytes = textualIdentity.mid(i, 19).toLocal8Bit();
-        if (checksumBytes.count() < 19) // last line - remove check char
+
+        if (checksumBytes.count() < 19 ||       // last line
+            textualIdentity.length() == i+19)   // last line has 18 characters, so the 19th
+                                                // character is the check character
+        {
             checksumBytes.remove(checksumBytes.length()-1, 1);
+            checkSumPos = i + checksumBytes.length();
+        }
 
         checksumBytes.append(lineNr);
 
         char computedCheckChar = createBase56CheckSumChar(checksumBytes);
+        char checkChar = textualIdentity.toLocal8Bit()[checkSumPos];
 
-        char checkChar = -1;
-        if (checksumBytes.count() < 20)
-            checkChar = textualIdentity.toLocal8Bit()[textualIdentity.length()-1];
-        else
-            checkChar = textualIdentity.toLocal8Bit()[i+19];
-
-        if (checkChar != computedCheckChar) return false;
+        if (checkChar != computedCheckChar)
+        {
+            return false;
+        }
 
         lineNr++;
     }
