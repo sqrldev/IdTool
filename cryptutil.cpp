@@ -501,16 +501,35 @@ QString CryptUtil::getHostLowercase(QString url)
 }
 
 /*!
- * \brief Turns each character of \a url before the first forward
- * slash ("/") to lowercase. If no forward slash is found, the whole
+ * \brief Turns the host part of \a url to lowercase.
+ *
+ * If no forward slash is found (no scheme or path present), the whole
  * string \a url is turned into lowercase.
  */
 
 QString CryptUtil::makeHostLowercase(QString url)
 {
-    int index = url.indexOf('/');
-    if (index == -1) return url.toLower();
-    else return url.left(index).toLower().append(url.mid(index));
+    int startPos = 0;
+    int endPos = url.length();
+
+    int index = url.indexOf("//"); // check for scheme (e.g. "https://")
+    if (index != -1) startPos = index + 2;
+
+    index = url.indexOf('/', startPos); // check for start of "path" segment
+    if (index != -1) endPos = index;
+
+    // check for credentials (e.g. "https://user:pass@hostname.com")
+    QString hostPart = url.mid(startPos, endPos - startPos);
+    index = hostPart.indexOf('@');
+    if (index != -1)
+    {
+        startPos += index + 1;
+        hostPart = url.mid(startPos, endPos - startPos);
+    }
+
+    // Swap out host part with lowercase version
+    url.remove(startPos, hostPart.length());
+    return url.insert(startPos, hostPart.toLower());
 }
 
 /*!
