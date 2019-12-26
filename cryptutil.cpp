@@ -564,6 +564,42 @@ QByteArray CryptUtil::createIlkFromIuk(QByteArray decryptedIuk)
 }
 
 /*!
+ * Creates and returns the so called "indexed secret" (INS), given
+ * the identity's identity master key \a imk, the \a domain and the
+ * server-provided \a secretIndex (SIN).
+ *
+ * In case of an error, an empty byte array is returned.
+ *
+ * See https://www.grc.com/sqrl/SQRL_Cryptography.pdf on page 11
+ * for more information.
+ */
+
+QByteArray CryptUtil::createIndexedSecret(QByteArray imk, QString domain, QString altId, QByteArray secretIndex)
+{
+    QByteArray publicKey(crypto_sign_PUBLICKEYBYTES, 0);
+    QByteArray privateKey(crypto_sign_SECRETKEYBYTES, 0);
+
+    bool ok = CryptUtil::createSiteKeys(
+                publicKey,
+                privateKey,
+                domain,
+                altId,
+                imk);
+    if (!ok) return QByteArray();
+
+    QByteArray hmacKey = enHash(privateKey);
+
+    QByteArray result(32, 0);
+    crypto_auth_hmacsha256(
+                reinterpret_cast<unsigned char*>(result.data()),
+                reinterpret_cast<const unsigned char*>(secretIndex.constData()),
+                static_cast<unsigned long long>(secretIndex.length()),
+                reinterpret_cast<const unsigned char*>(hmacKey.constData()));
+
+    return result;
+}
+
+/*!
  * Performs 16 iterations of the SHA256 hash on \a data, with each successive
  * output XORed to form a 1’s complement sum to produce the final result,
  * which is then returned.

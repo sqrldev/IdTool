@@ -59,6 +59,7 @@ public:
     static QString makeHostLowercase(QString url);
     static QByteArray createImkFromIuk(QByteArray decryptedIuk);
     static QByteArray createIlkFromIuk(QByteArray decryptedIuk);
+    static QByteArray createIndexedSecret(QByteArray imk, QString domain, QString altId, QByteArray secretIndex);
     static QByteArray enHash(QByteArray data);
     static IdentityBlock createBlock1(QByteArray iuk, QString password, QProgressDialog* progressDialog);
     static IdentityBlock createBlock2(QByteArray iuk, QString rescueCode, QProgressDialog* progressDialog);
