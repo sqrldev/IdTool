@@ -576,18 +576,20 @@ QByteArray CryptUtil::createIlkFromIuk(QByteArray decryptedIuk)
 
 QByteArray CryptUtil::createIndexedSecret(QByteArray imk, QString domain, QString altId, QByteArray secretIndex)
 {
-    QByteArray publicKey(crypto_sign_PUBLICKEYBYTES, 0);
-    QByteArray privateKey(crypto_sign_SECRETKEYBYTES, 0);
+    // Turn the host/domain part of the url to lowercase
+    QByteArray domainBytes = makeHostLowercase(domain).toLocal8Bit();
 
-    bool ok = CryptUtil::createSiteKeys(
-                publicKey,
-                privateKey,
-                domain,
-                altId,
-                imk);
-    if (!ok) return QByteArray();
+    // Append Alt-Id if present
+    if (altId != "") domainBytes = domainBytes.append('\0').append(altId);
 
-    QByteArray hmacKey = enHash(privateKey);
+    QByteArray seed(crypto_sign_SEEDBYTES, 0);
+    int ret = crypto_auth_hmacsha256(
+                reinterpret_cast<unsigned char*>(seed.data()),
+                reinterpret_cast<const unsigned char*>(domainBytes.constData()),
+                static_cast<unsigned long long>(domainBytes.length()),
+                reinterpret_cast<const unsigned char*>(imk.constData()));
+
+    QByteArray hmacKey = enHash(seed);
 
     QByteArray result(32, 0);
     crypto_auth_hmacsha256(

@@ -113,15 +113,6 @@ void TestCryptUtil::createSiteKeys()
 
 void TestCryptUtil::createIndexedSecret()
 {
-    /*
-    QByteArray imk = QByteArray::fromHex("3c4b6678b736a298aeb32abd67a169b107c34968fa9a307738dda226be21c4a6");
-    QByteArray domain = "www.grc.com";
-    QByteArray altId = "1";
-    QByteArray secretIndex = "0";
-    QByteArray expectedIns = QByteArray::fromHex("253ede02bdaf628a494137cabd1bba483a0ee0224673d6841ff24195b9d9ce2b");
-    QByteArray ins = CryptUtil::createIndexedSecret(imk, domain, altId, secretIndex);
-    */
-
     QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/ins-vectors.txt");
 
     for (QList<QByteArray> vector : vectors)
