@@ -42,5 +42,6 @@ private slots:
     void enHash();
     void base56EncodeDecode();
     void base56EncodeDecodeRandomInput();
+    void identityKeys();
 };
 
