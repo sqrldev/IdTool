@@ -35,6 +35,7 @@ private:
 private slots:
     void reverseByteArray();
     void createSiteKeys();
+    void createIndexedSecret();
     void enScryptIterations();
     void getHostLowercase();
     void makeHostLowercase();

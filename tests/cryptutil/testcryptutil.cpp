@@ -111,6 +111,26 @@ void TestCryptUtil::createSiteKeys()
     }
 }
 
+void TestCryptUtil::createIndexedSecret()
+{
+    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/ins-vectors.txt");
+
+    for (QList<QByteArray> vector : vectors)
+    {
+        if (vector.isEmpty()) continue;
+
+        QByteArray imk = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
+        QByteArray domain = vector.at(1);
+        QByteArray altId = "";
+        QByteArray secretIndex = vector.at(2);
+        QByteArray expectedIns = QByteArray::fromBase64(vector.at(3), QByteArray::Base64UrlEncoding);
+
+        QByteArray ins = CryptUtil::createIndexedSecret(imk, domain, altId, secretIndex);
+
+        QCOMPARE(ins, expectedIns);
+    }
+}
+
 void TestCryptUtil::enScryptIterations()
 {
     QSKIP("Test takes too long for regular runs. Skipping...");
