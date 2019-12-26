@@ -219,9 +219,6 @@ void TestCryptUtil::base56EncodeDecodeRandomInput()
 
 void TestCryptUtil::identityKeys()
 {
-    QByteArray iuK = QByteArray::fromHex("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
-    QByteArray ilK = CryptUtil::createIlkFromIuk(iuK).toHex();
-
     QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/identity-vectors.txt");
 
     for (QList<QByteArray> vector : vectors)
@@ -236,7 +233,7 @@ void TestCryptUtil::identityKeys()
         QByteArray idk = QByteArray::fromBase64(vector.at(5), QByteArray::Base64UrlEncoding);
 
         QByteArray computedIlk = CryptUtil::createIlkFromIuk(iuk);
-        //QCOMPARE(computedIlk, ilk);
+        QCOMPARE(computedIlk, ilk);
 
         QByteArray computedImk = CryptUtil::createImkFromIuk(iuk);
         QCOMPARE(computedImk, imk);
