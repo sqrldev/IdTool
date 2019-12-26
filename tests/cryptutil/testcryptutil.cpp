@@ -98,10 +98,10 @@ void TestCryptUtil::createSiteKeys()
     {
         if (vector.isEmpty()) continue;
 
-        QByteArray imk = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
-        QByteArray domain = vector.at(1);
-        QByteArray altId = vector.at(2);
-        QByteArray expectedResult = QByteArray::fromBase64(vector.at(3), QByteArray::Base64UrlEncoding);
+        QByteArray imk = QByteArray::fromBase64(vector.at(2), QByteArray::Base64UrlEncoding);
+        QByteArray domain = vector.at(3);
+        QByteArray altId = vector.at(4);
+        QByteArray expectedResult = QByteArray::fromBase64(vector.at(5), QByteArray::Base64UrlEncoding);
 
         QByteArray pubKey(crypto_sign_PUBLICKEYBYTES, 0);
         QByteArray privKey(crypto_sign_SECRETKEYBYTES, 0);
@@ -214,6 +214,38 @@ void TestCryptUtil::base56EncodeDecodeRandomInput()
         QByteArray result = CryptUtil::base56DecodeIdentity(base56);
 
         QCOMPARE(result, input);
+    }
+}
+
+void TestCryptUtil::identityKeys()
+{
+    QByteArray iuK = QByteArray::fromHex("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
+    QByteArray ilK = CryptUtil::createIlkFromIuk(iuK).toHex();
+
+    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/identity-vectors.txt");
+
+    for (QList<QByteArray> vector : vectors)
+    {
+        if (vector.isEmpty()) continue;
+
+        QByteArray iuk = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
+        QByteArray ilk = QByteArray::fromBase64(vector.at(1), QByteArray::Base64UrlEncoding);
+        QByteArray imk = QByteArray::fromBase64(vector.at(2), QByteArray::Base64UrlEncoding);
+        QByteArray domain = vector.at(3);
+        QByteArray altId = vector.at(4);
+        QByteArray idk = QByteArray::fromBase64(vector.at(5), QByteArray::Base64UrlEncoding);
+
+        QByteArray computedIlk = CryptUtil::createIlkFromIuk(iuk);
+        //QCOMPARE(computedIlk, ilk);
+
+        QByteArray computedImk = CryptUtil::createImkFromIuk(iuk);
+        QCOMPARE(computedImk, imk);
+
+        QByteArray pubKey(crypto_sign_PUBLICKEYBYTES, 0);
+        QByteArray privKey(crypto_sign_SECRETKEYBYTES, 0);
+        CryptUtil::createSiteKeys(pubKey, privKey, domain, altId, imk);
+
+        QCOMPARE(idk, pubKey);
     }
 }
 
