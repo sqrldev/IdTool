@@ -1184,6 +1184,8 @@ QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
  * Formats the given \a textualIdentity string to groups of 5x4 characters
  * per line, separated by a space.
  *
+ * If \a escapeNewline is \c true, newlines are escaped with "\n".
+ *
  * The output looks something like this:
  *
  * jWJX JmD3 hUKQ qcRQ YRis
@@ -1194,7 +1196,7 @@ QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
  * UA8a G3F
  */
 
-QString CryptUtil::formatTextualIdentity(QString textualIdentity)
+QString CryptUtil::formatTextualIdentity(QString textualIdentity, bool escapeNewline)
 {
     QByteArray result;
 
@@ -1203,7 +1205,7 @@ QString CryptUtil::formatTextualIdentity(QString textualIdentity)
         result.append(textualIdentity.at(i));
         if ((i+1) % 20 == 0)
         {
-            result.append("\r\n");
+            result.append(escapeNewline ? "\\n" : "\r\n");
             continue;
         }
         if ((i+1) % 4 == 0) result.append(" ");

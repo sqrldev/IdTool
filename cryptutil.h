@@ -76,7 +76,7 @@ public:
     static QString base56EncodeIdentity(QByteArray identityData);
     static char createBase56CheckSumChar(QByteArray dataBytes);
     static QByteArray base56DecodeIdentity(QString textualIdentity);
-    static QString formatTextualIdentity(QString textualIdentity);
+    static QString formatTextualIdentity(QString textualIdentity, bool escapeNewline = false);
     static bool verifyTextualIdentity(QString textualIdentity);
     static QString stripWhitespace(QString source);
 };
