@@ -1203,12 +1203,16 @@ QString CryptUtil::formatTextualIdentity(QString textualIdentity, bool escapeNew
     for (int i=0; i<textualIdentity.length(); i++)
     {
         result.append(textualIdentity.at(i));
-        if ((i+1) % 20 == 0)
+
+        if (i+1 < textualIdentity.length())
         {
-            result.append(escapeNewline ? "\\n" : "\r\n");
-            continue;
+            if ((i+1) % 20 == 0)
+            {
+                result.append(escapeNewline ? "\\n" : "\r\n");
+                continue;
+            }
+            if ((i+1) % 4 == 0) result.append(" ");
         }
-        if ((i+1) % 4 == 0) result.append(" ");
     }
 
     return result;
