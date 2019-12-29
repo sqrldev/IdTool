@@ -26,54 +26,8 @@
 
 #include "testcryptutil.h"
 #include "../../cryptutil.h"
+#include "../testutils.h"
 
-QList<QList<QByteArray>> TestCryptUtil::parseVectorsCsv(QString fileName,
-                            bool skipFirstLine, bool removeQuotes)
-{
-    QFile input(fileName);
-    input.open(QIODevice::ReadOnly);
-    QByteArray data = input.readAll();
-    input.close();
-
-    QList<QList<QByteArray>> result;
-    QList<QByteArray> lines =  data.split('\n');
-
-    for (int i=0; i<lines.count(); i++)
-    {
-        if (i==0 && skipFirstLine) continue;
-        if (lines.at(i).isEmpty()) continue;
-
-
-        QList<QByteArray> lineResult;
-        QList<QByteArray> fields = lines.at(i).split(',');
-
-        for (QByteArray field : fields)
-        {
-            if (field.length() > 1)
-            {
-                // Since we split by "\n", there might be some
-                // orphaned "\r" at the end of the last field,
-                // which we need to get rid of
-                if (field[field.length()-1] == '\r')
-                {
-                    field = field.left(field.length()-1);
-                }
-
-                if (removeQuotes)
-                {
-                    if (field[0] == '"') field.remove(0, 1);
-                    if (field[field.length()-1] == '"') field.remove(field.length()-1, 1);
-                }
-            }
-
-            lineResult.append(field);
-        }
-
-        result.append(lineResult);
-    }
-
-    return result;
-}
 
 void TestCryptUtil::reverseByteArray()
 {
@@ -92,7 +46,8 @@ void TestCryptUtil::reverseByteArray()
 
 void TestCryptUtil::createSiteKeys()
 {
-    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/identity-vectors.txt");
+    QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv("vectors/identity-vectors.txt");
+    if (vectors.count() < 1) QFAIL("No vectors found!");
 
     for (QList<QByteArray> vector : vectors)
     {
@@ -113,7 +68,8 @@ void TestCryptUtil::createSiteKeys()
 
 void TestCryptUtil::createIndexedSecret()
 {
-    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/ins-vectors.txt");
+    QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv("vectors/ins-vectors.txt");
+    if (vectors.count() < 1) QFAIL("No vectors found!");
 
     for (QList<QByteArray> vector : vectors)
     {
@@ -134,7 +90,8 @@ void TestCryptUtil::createIndexedSecret()
 void TestCryptUtil::enScryptIterations()
 {
     QSKIP("Test takes too long for regular runs. Skipping...");
-    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/enscrypt-vectors.txt");
+    QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv("vectors/enscrypt-vectors.txt");
+    if (vectors.count() < 1) QFAIL("No vectors found!");
 
     for (QList<QByteArray> vector : vectors)
     {
@@ -184,7 +141,8 @@ void TestCryptUtil::makeHostLowercase()
 
 void TestCryptUtil::enHash()
 {
-    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/enhash-vectors.txt");
+    QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv("vectors/enhash-vectors.txt");
+    if (vectors.count() < 1) QFAIL("No vectors found!");
 
     for (QList<QByteArray> vector : vectors)
     {
@@ -198,7 +156,9 @@ void TestCryptUtil::enHash()
 
 void TestCryptUtil::base56EncodeDecodeFullFormat()
 {
-    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/base56-vectors.txt");
+    QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv(
+                "vectors/base56-full-format-vectors.txt");
+    if (vectors.count() < 1) QFAIL("No vectors found!");
 
     for (QList<QByteArray> vector : vectors)
     {
@@ -235,7 +195,8 @@ void TestCryptUtil::base56EncodeDecodeRandomInput()
 
 void TestCryptUtil::identityKeys()
 {
-    QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/identity-vectors.txt");
+    QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv("vectors/identity-vectors.txt");
+    if (vectors.count() < 1) QFAIL("No vectors found!");
 
     for (QList<QByteArray> vector : vectors)
     {
