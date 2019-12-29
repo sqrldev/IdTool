@@ -196,15 +196,18 @@ void TestCryptUtil::enHash()
     }
 }
 
-void TestCryptUtil::base56EncodeDecode()
+void TestCryptUtil::base56EncodeDecodeFullFormat()
 {
     QList<QList<QByteArray>> vectors = parseVectorsCsv("vectors/base56-vectors.txt");
 
     for (QList<QByteArray> vector : vectors)
     {
-        //QByteArray input = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
-        QByteArray input = QByteArray::fromHex(vector.at(1));
+        QByteArray input = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
+        //QByteArray input = QByteArray::fromHex(vector.at(1));
         QString expectedResult = vector.at(2);
+
+        //Remove spaces and newlines encoded as "\n"
+        expectedResult = expectedResult.replace("\\n", "").replace(" ", "");
 
         QString result = CryptUtil::base56EncodeIdentity(input);
         QCOMPARE(result, expectedResult);
@@ -219,18 +222,11 @@ void TestCryptUtil::base56EncodeDecodeRandomInput()
     for (int i=0; i<128; i++)
     {
         QByteArray input(i, 0);
-
-        // Avoid '\0' at the end of the byte array,
-        // which would make proper base56 decoding impossible
-        while(true)
-        {
-            CryptUtil::getRandomBytes(input);
-            if (i==0 || input[i-1] != '\0') break;
-        }
+        CryptUtil::getRandomBytes(input);
 
         QString base56 = CryptUtil::base56EncodeIdentity(input);
         if (!CryptUtil::verifyTextualIdentity(base56))
-            qDebug() << "Base56 verification failed: Length:" << base56.length() << " Base 56 string: " << base56;
+            qDebug() << "Base56 verification failed! Length:" << base56.length() << " Base56 string: " << base56;
         QByteArray result = CryptUtil::base56DecodeIdentity(base56);
 
         QCOMPARE(result, input);

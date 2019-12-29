@@ -40,7 +40,7 @@ private slots:
     void getHostLowercase();
     void makeHostLowercase();
     void enHash();
-    void base56EncodeDecode();
+    void base56EncodeDecodeFullFormat();
     void base56EncodeDecodeRandomInput();
     void identityKeys();
 };
