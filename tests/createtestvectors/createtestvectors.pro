@@ -32,6 +32,7 @@ SOURCES += \
     ../../inc/bigint/BigIntegerUtils.cc \
     ../../inc/bigint/BigUnsigned.cc \
     ../../inc/bigint/BigUnsignedInABase.cc \
+    ../testutils.cpp \
     createtestvectors.cpp
 
 HEADERS += \
@@ -44,7 +45,8 @@ HEADERS += \
     ../../inc/bigint/BigIntegerUtils.hh \
     ../../inc/bigint/BigUnsigned.hh \
     ../../inc/bigint/BigUnsignedInABase.hh \
-    ../../inc/bigint/NumberlikeArray.hh 
+    ../../inc/bigint/NumberlikeArray.hh  \
+    ../testutils.h
 	
 DISTFILES += \
     $$PWD/../../lib/sodium/lib/libsodium.lib \

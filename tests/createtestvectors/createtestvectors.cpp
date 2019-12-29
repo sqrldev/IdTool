@@ -26,35 +26,71 @@
 
 #include <QtCore>
 #include "../../cryptutil.h"
+#include "../testutils.h"
 
 const int BASE56_VECTORS_COUNT = 128;
 
-void createBase56Vectors()
+void createBase56FullFormatVectors()
 {
-    QFile file("base56-vectors.txt");
+    // If RECREATE_FROM_FILE is true, the input bytes
+    // for the base56 encoding are being read from an
+    // existing file and merily recreated. If it is false,
+    // "fresh" input bytes are generated randomly.
+
+    const bool RECREATE_FROM_FILE = true;
+
+    const QString FILENAME = "base56-vectors.txt";
+    QList<QList<QByteArray>> vectors;
+    QList<QByteArray> inputs;
+
+
+    if (RECREATE_FROM_FILE)
+    {
+        vectors = TestUtils::parseVectorsCsv(FILENAME);
+
+        for (QList<QByteArray> vector : vectors)
+        {
+            QByteArray input = QByteArray::fromBase64(vector.at(0), QByteArray::Base64UrlEncoding);
+            //QByteArray input = QByteArray::fromHex(vector.at(1));
+
+            // We should have at least one input with all zero bytes
+            // to make sure zero-padding works as expected
+            if (input.length() == 24) input = QByteArray(24, 0);
+            inputs.append(input);
+        }
+    }
+    else
+    {
+        for (int i=1; i<=BASE56_VECTORS_COUNT; i++)
+        {
+            QByteArray input(i, 0);
+            CryptUtil::getRandomBytes(input);
+
+            // We should have at least one input with all zero bytes
+            // to make sure zero-padding works as expected
+            if (i==24) input = QByteArray(24, 0);
+
+            inputs.append(input);
+        }
+    }
+
+    QFile file(FILENAME);
     if( !file.open(QIODevice::WriteOnly) ) return;
     QTextStream outputStream(&file);
 
     outputStream << "Input(base64_url),Input(hex),Base56EncodedOutput\r\n";
 
-    for (int i=10; i<10+BASE56_VECTORS_COUNT; i++)
+    for (QByteArray input : inputs)
     {
-        QByteArray input(i, 0);
-
-        // Avoid '\0' at the end of the byte array,
-        // which would make proper base56 decoding impossible
-        while(true)
-        {
-            CryptUtil::getRandomBytes(input);
-            if (i==0 || input[i-1] != '\0') break;
-        }
-
         QString result = CryptUtil::base56EncodeIdentity(input);
-        outputStream << '"' << input.toBase64(QByteArray::Base64UrlEncoding | QByteArray::Base64Option::OmitTrailingEquals) << "\","
+        outputStream << '"' << input.toBase64(QByteArray::Base64UrlEncoding |
+                                              QByteArray::Base64Option::OmitTrailingEquals)
+                     << "\","
                      << '"' << input.toHex() << "\","
-                     << "\"" << result << "\"\r\n";
+                     << "\"" << CryptUtil::formatTextualIdentity(result, true) << "\"\r\n";
 
     }
+
     file.close();
 
     std::cout << "createBase56EncodeVectors() finished...\r\n";
@@ -62,6 +98,6 @@ void createBase56Vectors()
 
 int main(int argc, char *argv[])
 {
-    createBase56Vectors();
+    createBase56FullFormatVectors();
     return 0;
 }
