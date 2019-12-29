@@ -1163,13 +1163,25 @@ QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
 
     textualIdentity = stripWhitespace(textualIdentity);
 
-    BigUnsigned bigNum(0), powVal(0);
+    // Remove check characters
+    QByteArray withoutCheckCharacters;
 
+    for (int i=0; i<textualIdentity.length()-1; i++)
+    {
+        if ((i+1) % 20 == 0) continue;
+        withoutCheckCharacters.append(textualIdentity.at(i));
+    }
+    textualIdentity = withoutCheckCharacters;
+
+    // Get expected length of resulting byte array
+    int expectedNumberOfBytes = static_cast<int>(
+        (textualIdentity.length() * (log(BASE56_BASE_NUM)/log(2)) / 8)
+        );
+
+    // Calculate result
+    BigUnsigned bigNum(0), powVal(0);
     for (int i=0; i<textualIdentity.length(); i++)
     {
-        if ((i+1) % 20 == 0 || i == textualIdentity.length()-1)
-            continue; // Skip check characters
-
         if (powVal.isZero()) powVal = 1;
         else powVal *= BASE56_BASE_NUM;
         int index = BASE56_ALPHABET.indexOf(textualIdentity.at(i));
@@ -1177,7 +1189,13 @@ QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
         bigNum += newVal;
     }
 
-    return convertBigUnsignedToByteArray(bigNum);
+    QByteArray result = convertBigUnsignedToByteArray(bigNum);
+
+    // Add zero padding if necessary
+    int lenDiff = expectedNumberOfBytes - result.length();
+    if (lenDiff > 0) result.append(QByteArray(lenDiff, 0));
+
+    return result;
 }
 
 /*!
