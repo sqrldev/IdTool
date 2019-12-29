@@ -58,6 +58,7 @@ DISTFILES += \
     $$PWD/../../lib/sodium/lib/libsodium.lib \
     $$PWD/../../lib/sodium/lib/libsodium.so \
     $$PWD/../../lib/sodium/lib/libsodiumd.lib \
+    vectors/base56-full-format-vectors.txt \
     vectors/base56-vectors.txt \
     vectors/enhash-vectors.txt \
     vectors/enscrypt-vectors.txt \
