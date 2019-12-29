@@ -154,6 +154,32 @@ void TestCryptUtil::enHash()
     }
 }
 
+void TestCryptUtil::base56Encode()
+{
+    QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv("vectors/base56-vectors.txt");
+    if (vectors.count() < 1) QFAIL("No vectors found!");
+
+    for (QList<QByteArray> vector : vectors)
+    {
+        QByteArray input = QByteArray::fromHex(vector.at(0));
+        char lineNr = static_cast<char>(vector.at(1).toInt());
+        QByteArray expectedResult = vector.at(2);
+        char expectedCheckChar = vector.at(3).at(0);
+
+        QString result = CryptUtil::base56EncodeIdentity(input);
+        // Remove check character for this test, since
+        // we will calcualte it separately
+        result.remove(result.length()-1, 1);
+
+        QCOMPARE(result, QString::fromLocal8Bit(expectedResult));
+
+        result.append(lineNr);
+
+        char checkChar = CryptUtil::createBase56CheckSumChar(result.toLocal8Bit());
+        QCOMPARE(checkChar, expectedCheckChar);
+    }
+}
+
 void TestCryptUtil::base56EncodeDecodeFullFormat()
 {
     QList<QList<QByteArray>> vectors = TestUtils::parseVectorsCsv(
