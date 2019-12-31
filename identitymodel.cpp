@@ -82,7 +82,7 @@ void IdentityModel::writeToFile(QString fileName)
 
 IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
 {
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (blocks[i].blockType == blockType)
             return &blocks[i];
@@ -119,7 +119,7 @@ QByteArray IdentityBlock::toByteArray()
 
 bool IdentityModel::deleteBlock(IdentityBlock* block)
 {
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (&blocks[i] == block)
         {
@@ -144,24 +144,21 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
 {
     if (blocks.size() < 2) return false;
 
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (&blocks[i] == block)
         {
-            long long swapWith;
-
             if (up)
             {
                 if (i == 0) return false;
-                swapWith = static_cast<long long>(i) - 1;
+                blocks.swapItemsAt(i, i-1);
             }
             else
             {
                 if (i == (blocks.size() - 1)) return false;
-                swapWith = static_cast<long long>(i) + 1;
+                blocks.swapItemsAt(i, i+1);
             }
 
-            iter_swap(blocks.begin() + static_cast<long long>(i), blocks.begin() + swapWith);
             return true;
         }
     }
@@ -182,17 +179,13 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
 
 bool IdentityModel::insertBlock(IdentityBlock block, IdentityBlock* after)
 {
-    auto iter = blocks.begin();
-
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (&blocks[i] == after)
         {
-            blocks.insert(iter + 1, block);
+            blocks.insert(i+1, block);
             return true;
         }
-
-        iter++;
     }
 
     return false;
@@ -225,7 +218,7 @@ QByteArray IdentityModel::getRawBytes()
 {
     QByteArray ba(IdentityParser::HEADER.toUtf8());
 
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         ba.append(blocks[i].toByteArray());
     }
