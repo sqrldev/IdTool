@@ -135,7 +135,7 @@ bool CryptUtil::enScryptIterations(QByteArray& result, QString password, QByteAr
                 static_cast<size_t>(pwdBytes.length()),
                 reinterpret_cast<const unsigned char*>(randomSalt.constData()),
                 static_cast<size_t>(randomSalt.length()),
-                1 << logNFactor,
+                1ULL << logNFactor,
                 256,
                 1,
                 reinterpret_cast<uint8_t*>(key.data()),
@@ -152,7 +152,7 @@ bool CryptUtil::enScryptIterations(QByteArray& result, QString password, QByteAr
                     static_cast<size_t>(pwdBytes.length()),
                     reinterpret_cast<const unsigned char*>(key.constData()),
                     static_cast<size_t>(key.length()),
-                    1 << logNFactor,
+                    1ULL << logNFactor,
                     256,
                     1,
                     reinterpret_cast<uint8_t*>(key.data()),
@@ -211,7 +211,7 @@ bool CryptUtil::enScryptTime(QByteArray &result, int &iterationCount, QString pa
                 static_cast<size_t>(pwdBytes.length()),
                 reinterpret_cast<const unsigned char*>(randomSalt.constData()),
                 static_cast<size_t>(randomSalt.length()),
-                1 << logNFactor,
+                1ULL << logNFactor,
                 256,
                 1,
                 reinterpret_cast<uint8_t*>(key.data()),
@@ -229,7 +229,7 @@ bool CryptUtil::enScryptTime(QByteArray &result, int &iterationCount, QString pa
                     static_cast<size_t>(pwdBytes.length()),
                     reinterpret_cast<const unsigned char*>(key.constData()),
                     static_cast<size_t>(key.length()),
-                    1 << logNFactor,
+                    1ULL << logNFactor,
                     256,
                     1,
                     reinterpret_cast<uint8_t*>(key.data()),
@@ -376,7 +376,7 @@ bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, Identity
     if (!ok) return false;
 
     QByteArray verificationTag = QByteArray::fromHex(
-                block->items[3 + static_cast<size_t>(nrOfPreviousIuks)].value.toLocal8Bit()
+                block->items[3 + nrOfPreviousIuks].value.toLocal8Bit()
             );
 
     QByteArray plainText;
@@ -588,6 +588,7 @@ QByteArray CryptUtil::createIndexedSecret(QByteArray imk, QString domain, QStrin
                 reinterpret_cast<const unsigned char*>(domainBytes.constData()),
                 static_cast<unsigned long long>(domainBytes.length()),
                 reinterpret_cast<const unsigned char*>(imk.constData()));
+    if (ret != 0) return QByteArray();
 
     QByteArray hmacKey = enHash(seed);
 
