@@ -83,7 +83,7 @@ void UiBuilder::rebuild()
     QVBoxLayout *pLayout = new QVBoxLayout();
     pLayout->setSpacing(10);
 
-    for (size_t i=0; i<m_pModel->blocks.size(); i++)
+    for (int i=0; i<m_pModel->blocks.size(); i++)
     {
         QWidget* pBlock = createBlock(&m_pModel->blocks[i]);
         pLayout->addWidget(pBlock);
@@ -217,7 +217,7 @@ QWidget* UiBuilder::createBlock(IdentityBlock *block)
     pFrameLayout->addWidget(pBlockHeader);
 
     // Add items
-    for (size_t i=0; i<block->items.size(); i++)
+    for (int i=0; i<block->items.size(); i++)
     {
         QWidget* pItemWidget = createBlockItem(&block->items[i], block);
         pFrameLayout->addWidget(pItemWidget);

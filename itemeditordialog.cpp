@@ -84,13 +84,8 @@ QJsonObject *ItemEditorDialog::getItem()
 
 void ItemEditorDialog::loadDefaults()
 {
-    for (auto const& dataTypeItem : IdentityBlockItem::DataTypeMap)
-    {
-        ui->cmbDataType->addItem(dataTypeItem.second.name);
-    }
-
+    ui->cmbDataType->addItems(IdentityBlockItem::getDataTypeList());
     connect(ui->cmbDataType, SIGNAL(currentIndexChanged(int)), this, SLOT(onDataTypeChanged(int)));
-
     ui->cmbDataType->currentIndexChanged(0);
 }
 

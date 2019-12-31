@@ -456,7 +456,7 @@ bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
  *
 */
 
-std::map<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
+QMap<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
     {ItemDataType::UINT_8, {"UINT_8", 1}},
     {ItemDataType::UINT_16, {"UINT_16", 2}},
     {ItemDataType::UINT_32, {"UINT_32", 4}},
@@ -473,19 +473,18 @@ std::map<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
 
 ItemDataType IdentityBlockItem::findDataType(QString dataType)
 {
-    std::map<ItemDataType, ItemDataTypeInfo>::const_iterator it;
-    ItemDataType key = ItemDataType::UNDEFINED;
+    ItemDataType resultKey = ItemDataType::UNDEFINED;
 
-    for (it = DataTypeMap.begin(); it != DataTypeMap.end(); ++it)
+    for (ItemDataType key : DataTypeMap.keys())
     {
-        if (it->second.name == dataType)
+        if (DataTypeMap.value(key).name == dataType)
         {
-            key = it->first;
+            resultKey = key;
             break;
         }
     }
 
-    return key;
+    return resultKey;
 }
 
 /*!
@@ -494,12 +493,11 @@ ItemDataType IdentityBlockItem::findDataType(QString dataType)
 
 QStringList IdentityBlockItem::getDataTypeList()
 {
-    std::map<ItemDataType, ItemDataTypeInfo>::const_iterator it;
     QStringList result;
 
-    for (it = DataTypeMap.begin(); it != DataTypeMap.end(); ++it)
+    for (ItemDataType key : DataTypeMap.keys())
     {
-        result.append(it->second.name);
+        result.append(DataTypeMap.value(key).name);
     }
 
     return result;

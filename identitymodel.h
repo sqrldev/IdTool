@@ -102,7 +102,7 @@ public:
 class IdentityBlockItem
 {
 public:
-    static std::map<ItemDataType, ItemDataTypeInfo> DataTypeMap;
+    static QMap<ItemDataType, ItemDataTypeInfo> DataTypeMap;
     static ItemDataType findDataType(QString dataType);
     static QStringList getDataTypeList();
     QByteArray toByteArray();
