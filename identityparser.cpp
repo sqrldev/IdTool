@@ -246,7 +246,7 @@ IdentityBlock IdentityParser::parseBlock(QByteArray data, QJsonDocument* blockDe
         int repeat_count = 1;
         if (item.contains("repeat_index"))
         {
-            size_t repeat_index = static_cast<size_t>(item["repeat_index"].toInt());
+            int repeat_index = item["repeat_index"].toInt();
             if (newBlock.items.size() > repeat_index)
             {
                 repeat_count = newBlock.items[repeat_index].value.toInt();

@@ -82,7 +82,7 @@ void IdentityModel::writeToFile(QString fileName)
 
 IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
 {
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (blocks[i].blockType == blockType)
             return &blocks[i];
@@ -99,7 +99,7 @@ QByteArray IdentityBlock::toByteArray()
 {
     QByteArray ba;
 
-    for (size_t i=0; i<items.size(); i++)
+    for (int i=0; i<items.size(); i++)
     {
         ba.append(items[i].toByteArray());
     }
@@ -119,7 +119,7 @@ QByteArray IdentityBlock::toByteArray()
 
 bool IdentityModel::deleteBlock(IdentityBlock* block)
 {
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (&blocks[i] == block)
         {
@@ -144,24 +144,21 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
 {
     if (blocks.size() < 2) return false;
 
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (&blocks[i] == block)
         {
-            long long swapWith;
-
             if (up)
             {
                 if (i == 0) return false;
-                swapWith = static_cast<long long>(i) - 1;
+                blocks.swapItemsAt(i, i-1);
             }
             else
             {
                 if (i == (blocks.size() - 1)) return false;
-                swapWith = static_cast<long long>(i) + 1;
+                blocks.swapItemsAt(i, i+1);
             }
 
-            iter_swap(blocks.begin() + static_cast<long long>(i), blocks.begin() + swapWith);
             return true;
         }
     }
@@ -182,17 +179,13 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
 
 bool IdentityModel::insertBlock(IdentityBlock block, IdentityBlock* after)
 {
-    auto iter = blocks.begin();
-
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         if (&blocks[i] == after)
         {
-            blocks.insert(iter + 1, block);
+            blocks.insert(i+1, block);
             return true;
         }
-
-        iter++;
     }
 
     return false;
@@ -225,7 +218,7 @@ QByteArray IdentityModel::getRawBytes()
 {
     QByteArray ba(IdentityParser::HEADER.toUtf8());
 
-    for (size_t i=0; i<blocks.size(); i++)
+    for (int i=0; i<blocks.size(); i++)
     {
         ba.append(blocks[i].toByteArray());
     }
@@ -401,24 +394,21 @@ bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
 {
     if (items.size() < 2) return false;
 
-    for (size_t i=0; i<items.size(); i++)
+    for (int i=0; i<items.size(); i++)
     {
         if (&items[i] == item)
         {
-            long long swapWith;
-
             if (up)
             {
                 if (i == 0) return false;
-                swapWith = static_cast<long long>(i) - 1;
+                items.swapItemsAt(i, i-1);
             }
             else
             {
                 if (i == (items.size() - 1)) return false;
-                swapWith = static_cast<long long>(i) + 1;
+                items.swapItemsAt(i, i+1);
             }
 
-            iter_swap(items.begin() + static_cast<long long>(i), items.begin() + swapWith);
             return true;
         }
     }
@@ -436,17 +426,13 @@ bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
 
 bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
 {
-    auto iter = items.begin();
-
-    for (size_t i=0; i<items.size(); i++)
+    for (int i=0; i<items.size(); i++)
     {
         if (&items[i] == after)
         {
-            items.insert(iter + 1, item);
+            items.insert(i+1, item);
             return true;
         }
-
-        iter++;
     }
 
     return false;
@@ -470,7 +456,7 @@ bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
  *
 */
 
-std::map<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
+QMap<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
     {ItemDataType::UINT_8, {"UINT_8", 1}},
     {ItemDataType::UINT_16, {"UINT_16", 2}},
     {ItemDataType::UINT_32, {"UINT_32", 4}},
@@ -487,19 +473,18 @@ std::map<ItemDataType, ItemDataTypeInfo> IdentityBlockItem::DataTypeMap = {
 
 ItemDataType IdentityBlockItem::findDataType(QString dataType)
 {
-    std::map<ItemDataType, ItemDataTypeInfo>::const_iterator it;
-    ItemDataType key = ItemDataType::UNDEFINED;
+    ItemDataType resultKey = ItemDataType::UNDEFINED;
 
-    for (it = DataTypeMap.begin(); it != DataTypeMap.end(); ++it)
+    for (ItemDataType key : DataTypeMap.keys())
     {
-        if (it->second.name == dataType)
+        if (DataTypeMap.value(key).name == dataType)
         {
-            key = it->first;
+            resultKey = key;
             break;
         }
     }
 
-    return key;
+    return resultKey;
 }
 
 /*!
@@ -508,12 +493,11 @@ ItemDataType IdentityBlockItem::findDataType(QString dataType)
 
 QStringList IdentityBlockItem::getDataTypeList()
 {
-    std::map<ItemDataType, ItemDataTypeInfo>::const_iterator it;
     QStringList result;
 
-    for (it = DataTypeMap.begin(); it != DataTypeMap.end(); ++it)
+    for (ItemDataType key : DataTypeMap.keys())
     {
-        result.append(it->second.name);
+        result.append(DataTypeMap.value(key).name);
     }
 
     return result;

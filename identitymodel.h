@@ -29,10 +29,6 @@
 
 #include "common.h"
 
-// Forward declarations
-class CryptUtil;
-
-
 struct ItemDataTypeInfo
 {
     QString name;
@@ -52,6 +48,7 @@ enum ItemDataType
 // Forward declarations
 class IdentityBlock;
 class IdentityBlockItem;
+class CryptUtil;
 
 /**********************************************
  *    class IdentityModel                     *
@@ -60,7 +57,7 @@ class IdentityBlockItem;
 class IdentityModel
 {     
 public:
-    std::vector<IdentityBlock> blocks;
+    QList<IdentityBlock> blocks;
 
 public:
     void writeToFile(QString fileName);
@@ -87,7 +84,7 @@ public:
     int blockType = -1;
     QString description = "";
     QString color = "rgb(214, 201, 163)";
-    std::vector<IdentityBlockItem> items;
+    QList<IdentityBlockItem> items;
 
 public:
     IdentityBlockItem* getItem(QString name);
@@ -105,7 +102,7 @@ public:
 class IdentityBlockItem
 {
 public:
-    static std::map<ItemDataType, ItemDataTypeInfo> DataTypeMap;
+    static QMap<ItemDataType, ItemDataTypeInfo> DataTypeMap;
     static ItemDataType findDataType(QString dataType);
     static QStringList getDataTypeList();
     QByteArray toByteArray();

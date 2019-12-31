@@ -135,7 +135,7 @@ bool CryptUtil::enScryptIterations(QByteArray& result, QString password, QByteAr
                 static_cast<size_t>(pwdBytes.length()),
                 reinterpret_cast<const unsigned char*>(randomSalt.constData()),
                 static_cast<size_t>(randomSalt.length()),
-                1 << logNFactor,
+                1ULL << logNFactor,
                 256,
                 1,
                 reinterpret_cast<uint8_t*>(key.data()),
@@ -152,7 +152,7 @@ bool CryptUtil::enScryptIterations(QByteArray& result, QString password, QByteAr
                     static_cast<size_t>(pwdBytes.length()),
                     reinterpret_cast<const unsigned char*>(key.constData()),
                     static_cast<size_t>(key.length()),
-                    1 << logNFactor,
+                    1ULL << logNFactor,
                     256,
                     1,
                     reinterpret_cast<uint8_t*>(key.data()),
@@ -211,7 +211,7 @@ bool CryptUtil::enScryptTime(QByteArray &result, int &iterationCount, QString pa
                 static_cast<size_t>(pwdBytes.length()),
                 reinterpret_cast<const unsigned char*>(randomSalt.constData()),
                 static_cast<size_t>(randomSalt.length()),
-                1 << logNFactor,
+                1ULL << logNFactor,
                 256,
                 1,
                 reinterpret_cast<uint8_t*>(key.data()),
@@ -229,7 +229,7 @@ bool CryptUtil::enScryptTime(QByteArray &result, int &iterationCount, QString pa
                     static_cast<size_t>(pwdBytes.length()),
                     reinterpret_cast<const unsigned char*>(key.constData()),
                     static_cast<size_t>(key.length()),
-                    1 << logNFactor,
+                    1ULL << logNFactor,
                     256,
                     1,
                     reinterpret_cast<uint8_t*>(key.data()),
@@ -276,7 +276,7 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
     QByteArray verificationTag = QByteArray::fromHex(block->items[13].value.toLocal8Bit());
     QByteArray encryptedIdentityKeys = encryptedImk + encryptedIlk;
     QByteArray plainText;
-    for (size_t i=0; i<11; i++) plainText.append(block->items[i].toByteArray());
+    for (int i=0; i<11; i++) plainText.append(block->items[i].toByteArray());
 
     int ret = crypto_aead_aes256gcm_decrypt_detached(
                 reinterpret_cast<unsigned char*>(decryptedIdentityKeys.data()),
@@ -324,7 +324,7 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
     QByteArray encryptedIuk = QByteArray::fromHex(block->items[5].value.toLocal8Bit());
     QByteArray verificationTag = QByteArray::fromHex(block->items[6].value.toLocal8Bit());
     QByteArray plainText;
-    for (size_t i=0; i<5; i++) plainText.append(block->items[i].toByteArray());
+    for (int i=0; i<5; i++) plainText.append(block->items[i].toByteArray());
 
     QByteArray key;
     bool ok = CryptUtil::enScryptIterations(
@@ -376,15 +376,15 @@ bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, Identity
     if (!ok) return false;
 
     QByteArray verificationTag = QByteArray::fromHex(
-                block->items[3 + static_cast<size_t>(nrOfPreviousIuks)].value.toLocal8Bit()
+                block->items[3 + nrOfPreviousIuks].value.toLocal8Bit()
             );
 
     QByteArray plainText;
-    for (size_t i=0; i<3; i++) plainText.append(block->items[i].toByteArray());
+    for (int i=0; i<3; i++) plainText.append(block->items[i].toByteArray());
 
     QByteArray encryptedData;
 
-    for (size_t i=0; i<static_cast<size_t>(nrOfPreviousIuks); i++)
+    for (int i=0; i<static_cast<int>(nrOfPreviousIuks); i++)
     {
         encryptedData.append(
                     QByteArray::fromHex(block->items[3+i].value.toLocal8Bit())
@@ -588,6 +588,7 @@ QByteArray CryptUtil::createIndexedSecret(QByteArray imk, QString domain, QStrin
                 reinterpret_cast<const unsigned char*>(domainBytes.constData()),
                 static_cast<unsigned long long>(domainBytes.length()),
                 reinterpret_cast<const unsigned char*>(imk.constData()));
+    if (ret != 0) return QByteArray();
 
     QByteArray hmacKey = enHash(seed);
 
@@ -677,7 +678,7 @@ IdentityBlock CryptUtil::createBlock1(QByteArray iuk, QString password,
     // Encrypt identity keys
     QByteArray unencryptedKeys = imk + ilk;
     QByteArray additionalData;
-    for (size_t i=0; i<11; i++) additionalData.append(block1.items[i].toByteArray());
+    for (int i=0; i<11; i++) additionalData.append(block1.items[i].toByteArray());
     QByteArray encryptedData = aesGcmEncrypt(unencryptedKeys, additionalData, initVec, key);
     QByteArray encryptedImk = encryptedData.left(32);
     QByteArray encryptedIlk = encryptedData.mid(32, 32);
@@ -724,7 +725,7 @@ IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgr
     block2.items[4].value = QString::number(iterationCount);
 
     // Encrypt IUK
-    for (size_t i=0; i<5; i++) additionalData.append(block2.items[i].toByteArray());
+    for (int i=0; i<5; i++) additionalData.append(block2.items[i].toByteArray());
     QByteArray encryptedData = aesGcmEncrypt(iuk, additionalData, initVec, key);
     QByteArray encryptedIuk = encryptedData.left(32);
     QByteArray authTag = encryptedData.right(16);
@@ -842,7 +843,7 @@ bool CryptUtil::updateBlock1(IdentityBlock *block1, QByteArray unencryptedImk,
     QByteArray unencryptedKeys = unencryptedImk + unencryptedIlk;
     QByteArray encryptedKeys(unencryptedKeys.length(), 0);
     QByteArray authTag(16, 0);
-    for (size_t i=0; i<11; i++) newPlainText.append(block1->items[i].toByteArray());
+    for (int i=0; i<11; i++) newPlainText.append(block1->items[i].toByteArray());
     unsigned long long authTagLen;
 
     crypto_aead_aes256gcm_encrypt_detached(
