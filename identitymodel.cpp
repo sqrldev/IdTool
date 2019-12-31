@@ -99,7 +99,7 @@ QByteArray IdentityBlock::toByteArray()
 {
     QByteArray ba;
 
-    for (size_t i=0; i<items.size(); i++)
+    for (int i=0; i<items.size(); i++)
     {
         ba.append(items[i].toByteArray());
     }
@@ -394,24 +394,21 @@ bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
 {
     if (items.size() < 2) return false;
 
-    for (size_t i=0; i<items.size(); i++)
+    for (int i=0; i<items.size(); i++)
     {
         if (&items[i] == item)
         {
-            long long swapWith;
-
             if (up)
             {
                 if (i == 0) return false;
-                swapWith = static_cast<long long>(i) - 1;
+                items.swapItemsAt(i, i-1);
             }
             else
             {
                 if (i == (items.size() - 1)) return false;
-                swapWith = static_cast<long long>(i) + 1;
+                items.swapItemsAt(i, i+1);
             }
 
-            iter_swap(items.begin() + static_cast<long long>(i), items.begin() + swapWith);
             return true;
         }
     }
@@ -429,17 +426,13 @@ bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
 
 bool IdentityBlock::insertItem(IdentityBlockItem item, IdentityBlockItem *after)
 {
-    auto iter = items.begin();
-
-    for (size_t i=0; i<items.size(); i++)
+    for (int i=0; i<items.size(); i++)
     {
         if (&items[i] == after)
         {
-            items.insert(iter + 1, item);
+            items.insert(i+1, item);
             return true;
         }
-
-        iter++;
     }
 
     return false;

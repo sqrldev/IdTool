@@ -84,7 +84,7 @@ public:
     int blockType = -1;
     QString description = "";
     QString color = "rgb(214, 201, 163)";
-    std::vector<IdentityBlockItem> items;
+    QList<IdentityBlockItem> items;
 
 public:
     IdentityBlockItem* getItem(QString name);
