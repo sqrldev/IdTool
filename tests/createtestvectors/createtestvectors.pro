@@ -24,9 +24,9 @@ DEFINES += \
 
 # Input
 SOURCES += \
-    ../../cryptutil.cpp \
-    ../../identitymodel.cpp \
-    ../../identityparser.cpp \
+    ../../src/cryptutil.cpp \
+    ../../src/identitymodel.cpp \
+    ../../src/identityparser.cpp \
     ../../inc/bigint/BigInteger.cc \
     ../../inc/bigint/BigIntegerAlgorithms.cc \
     ../../inc/bigint/BigIntegerUtils.cc \
@@ -36,9 +36,9 @@ SOURCES += \
     createtestvectors.cpp
 
 HEADERS += \
-    ../../cryptutil.h \
-    ../../identitymodel.h \
-    ../../identityparser.h \
+    ../../src/cryptutil.h \
+    ../../src/identitymodel.h \
+    ../../src/identityparser.h \
     ../../inc/bigint/BigInteger.hh \
     ../../inc/bigint/BigIntegerAlgorithms.hh \
     ../../inc/bigint/BigIntegerLibrary.hh \
