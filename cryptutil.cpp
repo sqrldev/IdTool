@@ -36,7 +36,7 @@
  * \c CryptUtil implements most of the functionality described in
  * https://www.grc.com/sqrl/SQRL_Cryptography.pdf
  *
-*/
+ */
 
 const QByteArray CryptUtil::BASE56_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
 const int CryptUtil::BASE56_LINE_MAX_CHARS = 19;
@@ -50,7 +50,7 @@ CryptUtil::CryptUtil() {}
  * XOR operation, both byte arrays must be of the same length (number of bytes)
  * in order to avoid reuse of source material.
  *
- * \throws std::runtime_error is thrown if the byte arrays are not of equal size.
+ * \throws A \c std::runtime_error is thrown if the byte arrays are not of equal size.
  */
 
 QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
@@ -70,7 +70,7 @@ QByteArray CryptUtil::xorByteArrays(QByteArray a, QByteArray b)
 /*!
  * Fills \a buffer with \c buffer.length() number of random bytes.
  *
- * \return Retrurns true on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed)
  */
 
@@ -86,7 +86,7 @@ bool CryptUtil::getRandomBytes(QByteArray &buffer)
 /*!
  * Assigns a single random byte to \a byte.
  *
- * \return Retrurns true on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
@@ -110,7 +110,7 @@ bool CryptUtil::getRandomByte(unsigned char &byte)
  *
  * When successful, the result of the operation will be stored in \a result.
  *
- * \return True on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
@@ -182,7 +182,7 @@ bool CryptUtil::enScryptIterations(QByteArray& result, QString password, QByteAr
  * When successful, the result of the operation will be stored in \a result
  * and the number of iterations that were run is placed in \a iterationCount.
  *
- * \return True on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
@@ -255,7 +255,7 @@ bool CryptUtil::enScryptTime(QByteArray &result, int &iterationCount, QString pa
  * Decrypts the IMK and ILK contained within \a block using \a key, and
  * upon success places them into \a decryptedImk and \a decryptedIlk.
  *
- * \return True on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
@@ -304,7 +304,7 @@ bool CryptUtil::decryptBlock1(QByteArray& decryptedImk, QByteArray& decryptedIlk
  * If a valid \a progressDialog pointer is given, the operation will use it
  * to publish its progress. Otherwise, it will be ignored.
  *
- * \return True on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
@@ -355,9 +355,9 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
 
 /*!
  * Decrypts a list of previous IUKs contained within \a block using \a imk as the key,
- * and upon success places them into \a decryptedPreviousIuks.
+ * and upon success places them into \a decryptedPreviousIuks .
  *
- * \return True on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
@@ -423,7 +423,7 @@ bool CryptUtil::decryptBlock3(QList<QByteArray> &decryptedPreviousIuks, Identity
  *
  * If no alternate id is needed, an empty string shall be passed to \a altId.
  *
- * \return True on success, false otherwise (e.g. if initializing
+ * \return Returns \c true on success, \c false otherwise (e.g. if initializing
  * the crypto library failed).
  */
 
@@ -464,7 +464,7 @@ bool CryptUtil::createSiteKeys(QByteArray& publicKey, QByteArray& privateKey,
  *
  * Upon success, the key is put into \a key.
  *
- * \returns Returns \c true on success, and \c false otherwise.
+ * \return Returns \c true on success, and \c false otherwise.
  */
 
 bool CryptUtil::createKeyFromPassword(QByteArray& key, IdentityBlock& block, QString password, QProgressDialog* progressDialog)
@@ -489,7 +489,7 @@ bool CryptUtil::createKeyFromPassword(QByteArray& key, IdentityBlock& block, QSt
 }
 
 /*!
- * \brief Returns the host (domain) part of \a url, converted
+ * Returns the host (domain) part of \a url, converted
  * to lowercase.
  */
 
@@ -570,7 +570,7 @@ QByteArray CryptUtil::createIlkFromIuk(QByteArray decryptedIuk)
  *
  * In case of an error, an empty byte array is returned.
  *
- * See https://www.grc.com/sqrl/SQRL_Cryptography.pdf on page 11
+ * \note See https://www.grc.com/sqrl/SQRL_Cryptography.pdf on page 11
  * for more information.
  */
 
@@ -759,7 +759,7 @@ IdentityBlock CryptUtil::createBlock2(QByteArray iuk, QString rescueCode, QProgr
  * If successful, \a updatedBlock will contain the re-encrypted and
  * re-authenticated data.
  *
- * \return Returns true if the operation succeeds, false otherwise.
+ * \return Returns \c true if the operation succeeds, \c false otherwise.
  */
 
 bool CryptUtil::updateBlock1WithPassword(IdentityBlock *oldBlock, IdentityBlock* updatedBlock,
@@ -798,7 +798,7 @@ bool CryptUtil::updateBlock1WithPassword(IdentityBlock *oldBlock, IdentityBlock*
  * If successful, \a block1 will contain the re-encrypted and
  * re-authenticated data.
  *
- * \return Returns true if the operation succeeds, false otherwise.
+ * \return Returns \c true if the operation succeeds, \c false otherwise.
  */
 
 bool CryptUtil::updateBlock1(IdentityBlock *block1, QByteArray unencryptedImk,
@@ -900,7 +900,8 @@ QByteArray CryptUtil::aesGcmEncrypt(QByteArray message, QByteArray additionalDat
 
 /*!
  * Generates and returns a random 256 bit identity unlock key (IUK).
- * Returns \c nullptr if the operation fails.
+ *
+ * \return Returns \c nullptr if the operation fails.
  */
 
 QByteArray CryptUtil::createIuk()
@@ -913,7 +914,7 @@ QByteArray CryptUtil::createIuk()
 
 /*!
  * Generates and returns a random, 24 digit rescue code string.
- * Returns \c nullptr if the operation fails.
+ * \return Returns \c nullptr if the operation fails.
  */
 
 QString CryptUtil::createNewRescueCode()
@@ -1151,8 +1152,8 @@ char CryptUtil::createBase56CheckSumChar(QByteArray dataBytes)
  * returns the decoded binary identity data. If the \a textualIdentity is
  * invalid, an empty \c QByteArray will be returned.
  *
- * See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf for
- * more information.
+ * \note See page 27 of https://www.grc.com/sqrl/SQRL_Cryptography.pdf
+ * for more information.
  *
  * \sa base56EncodeIdentity
  */
@@ -1207,11 +1208,11 @@ QByteArray CryptUtil::base56DecodeIdentity(QString textualIdentity)
  *
  * The output looks something like this:
  *
- * jWJX JmD3 hUKQ qcRQ YRis
- * Gnmx uQHs LaE5 vR2f V7At
- * vW5g UQ5m B5kK gBjH 9uJr
- * JQEF T7sm yYm7 USzH tmfu
- * 6ktj U86K Dqdz p8Gh TfZS
+ * jWJX JmD3 hUKQ qcRQ YRis \n 
+ * Gnmx uQHs LaE5 vR2f V7At \n 
+ * vW5g UQ5m B5kK gBjH 9uJr \n 
+ * JQEF T7sm yYm7 USzH tmfu \n 
+ * 6ktj U86K Dqdz p8Gh TfZS \n 
  * UA8a G3F
  */
 
@@ -1241,8 +1242,7 @@ QString CryptUtil::formatTextualIdentity(QString textualIdentity, bool escapeNew
  * Verifies if the given \a textualIdentity is a valid base56-encoded
  * SQRL identity by checking the validity of the check characters.
  *
- * \returns Returns \c true if the identity is valid and \c false
- * otherwise.
+ * \return Returns \c true if the identity is valid and \c false otherwise.
  */
 
 bool CryptUtil::verifyTextualIdentity(QString textualIdentity)
