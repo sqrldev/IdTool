@@ -25,8 +25,8 @@
  */
 
 #include <QtCore>
-#include "../../cryptutil.h"
 #include "../testutils.h"
+#include "../../src/cryptutil.h"
 
 const int BASE56_VECTORS_COUNT = 128;
 
@@ -37,7 +37,7 @@ void createBase56FullFormatVectors()
     // existing file and merily recreated. If it is false,
     // "fresh" input bytes are generated randomly.
 
-    const bool RECREATE_FROM_FILE = true;
+    const bool RECREATE_FROM_FILE = false;
 
     const QString FILENAME = "base56-vectors.txt";
     QList<QList<QByteArray>> vectors;

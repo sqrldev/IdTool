@@ -33,31 +33,24 @@ QMAKE_EXTRA_TARGETS += first copyblockdef
 
 
 SOURCES += \
-        blockdesignerdialog.cpp \
-        cryptutil.cpp \
-        identityclipboard.cpp \
-        identitymodel.cpp \
-        identityparser.cpp \
-        idsetdialog.cpp \
         inc/bigint/BigInteger.cc \
         inc/bigint/BigIntegerAlgorithms.cc \
         inc/bigint/BigIntegerUtils.cc \
         inc/bigint/BigUnsigned.cc \
         inc/bigint/BigUnsignedInABase.cc \
-        itemeditordialog.cpp \
-        main.cpp \
-        mainwindow.cpp \
-        tabmanager.cpp \
-        uibuilder.cpp
+        src/blockdesignerdialog.cpp \
+        src/cryptutil.cpp \
+        src/identityclipboard.cpp \
+        src/identitymodel.cpp \
+        src/identityparser.cpp \
+        src/idsetdialog.cpp \
+        src/itemeditordialog.cpp \
+        src/main.cpp \
+        src/mainwindow.cpp \
+        src/tabmanager.cpp \
+        src/uibuilder.cpp
 
 HEADERS += \
-        blockdesignerdialog.h \
-        common.h \
-        cryptutil.h \
-        identityclipboard.h \
-        identitymodel.h \
-        identityparser.h \
-        idsetdialog.h \
         inc/bigint/BigInteger.hh \
         inc/bigint/BigIntegerAlgorithms.hh \
         inc/bigint/BigIntegerLibrary.hh \
@@ -65,16 +58,23 @@ HEADERS += \
         inc/bigint/BigUnsigned.hh \
         inc/bigint/BigUnsignedInABase.hh \
         inc/bigint/NumberlikeArray.hh \
-        itemeditordialog.h \
-        mainwindow.h \
-        tabmanager.h \
-        uibuilder.h
+        src/blockdesignerdialog.h \
+        src/common.h \
+        src/cryptutil.h \
+        src/identityclipboard.h \
+        src/identitymodel.h \
+        src/identityparser.h \
+        src/idsetdialog.h \
+        src/itemeditordialog.h \
+        src/mainwindow.h \
+        src/tabmanager.h \
+        src/uibuilder.h
 
 FORMS += \
-        blockdesignerdialog.ui \
-        idsetdialog.ui \
-        itemeditordialog.ui \
-        mainwindow.ui
+        ui/blockdesignerdialog.ui \
+        ui/idsetdialog.ui \
+        ui/itemeditordialog.ui \
+        ui/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

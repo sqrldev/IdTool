@@ -25,8 +25,8 @@
  */
 
 #include "testcryptutil.h"
-#include "../../cryptutil.h"
 #include "../testutils.h"
+#include "../../src/cryptutil.h"
 
 
 void TestCryptUtil::reverseByteArray()
