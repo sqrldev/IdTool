@@ -71,10 +71,10 @@ HEADERS += \
         src/uibuilder.h
 
 FORMS += \
-        blockdesignerdialog.ui \
-        idsetdialog.ui \
-        itemeditordialog.ui \
-        mainwindow.ui
+        ui/blockdesignerdialog.ui \
+        ui/idsetdialog.ui \
+        ui/itemeditordialog.ui \
+        ui/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
