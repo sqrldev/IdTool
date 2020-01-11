@@ -40,6 +40,7 @@ SOURCES += \
         inc/bigint/BigUnsignedInABase.cc \
         src/blockdesignerdialog.cpp \
         src/cryptutil.cpp \
+        src/diffdialog.cpp \
         src/identityclipboard.cpp \
         src/identitymodel.cpp \
         src/identityparser.cpp \
@@ -61,6 +62,7 @@ HEADERS += \
         src/blockdesignerdialog.h \
         src/common.h \
         src/cryptutil.h \
+        src/diffdialog.h \
         src/identityclipboard.h \
         src/identitymodel.h \
         src/identityparser.h \
@@ -72,6 +74,7 @@ HEADERS += \
 
 FORMS += \
         ui/blockdesignerdialog.ui \
+        ui/diffdialog.ui \
         ui/idsetdialog.ui \
         ui/itemeditordialog.ui \
         ui/mainwindow.ui

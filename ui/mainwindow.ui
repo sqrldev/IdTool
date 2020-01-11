@@ -112,6 +112,7 @@
     <addaction name="actionCreateSiteKeys"/>
     <addaction name="actionDisplayTextualIdentity"/>
     <addaction name="actionCheckIntegrity"/>
+    <addaction name="actionDiffIdentities"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -369,6 +370,18 @@
    </property>
    <property name="toolTip">
     <string>Check block1/block2 integrity (requires password and rescue code)</string>
+   </property>
+  </action>
+  <action name="actionDiffIdentities">
+   <property name="icon">
+    <iconset resource="../res.qrc">
+     <normaloff>:/res/img/Diff_16x.png</normaloff>:/res/img/Diff_16x.png</iconset>
+   </property>
+   <property name="text">
+    <string>Diff identities</string>
+   </property>
+   <property name="toolTip">
+    <string>Compare two identities (create diff)</string>
    </property>
   </action>
  </widget>

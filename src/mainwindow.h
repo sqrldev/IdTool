@@ -81,6 +81,7 @@ private slots:
     void onChangePassword();
     void onResetPassword();
     void onShowIdentitySettingsDialog();
+    void onShowDiffDialog();
     void onControlUnauthenticatedChanges();
     void onPasteIdentityText();
     void onBuildNewIdentity();

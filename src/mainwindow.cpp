@@ -29,6 +29,7 @@
 #include "ui_mainwindow.h"
 #include "cryptutil.h"
 #include "tabmanager.h"
+#include "diffdialog.h"
 #include <QFileDialog>
 #include <QStandardPaths>
 
@@ -80,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCheckIntegrity, &QAction::triggered, this, &MainWindow::onCheckIntegrity);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::onCreateSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::onShowIdentitySettingsDialog);
+    connect(ui->actionDiffIdentities, &QAction::triggered, this, &MainWindow::onShowDiffDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::onControlUnauthenticatedChanges);
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
@@ -582,6 +584,15 @@ void MainWindow::onShowIdentitySettingsDialog()
     {
         m_pTabManager->getCurrentTab().rebuild();
         m_pTabManager->setCurrentTabDirty(true);
+    }
+}
+
+void MainWindow::onShowDiffDialog()
+{
+    DiffDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        //TODO: implement
     }
 }
 
