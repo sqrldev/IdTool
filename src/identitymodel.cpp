@@ -151,12 +151,16 @@ bool IdentityModel::moveBlock(IdentityBlock* block, bool up)
             if (up)
             {
                 if (i == 0) return false;
-                blocks.swapItemsAt(i, i-1);
+                IdentityBlock tempBlock = blocks[i];
+                blocks[i] = blocks[i-1];
+                blocks[i-1] = tempBlock;
             }
             else
             {
                 if (i == (blocks.size() - 1)) return false;
-                blocks.swapItemsAt(i, i+1);
+                IdentityBlock tempBlock = blocks[i];
+                blocks[i] = blocks[i+1];
+                blocks[i+1] = tempBlock;
             }
 
             return true;
@@ -401,12 +405,16 @@ bool IdentityBlock::moveItem(IdentityBlockItem *item, bool up)
             if (up)
             {
                 if (i == 0) return false;
-                items.swapItemsAt(i, i-1);
+                IdentityBlockItem tempItem = items[i];
+                items[i] = items[i-1];
+                items[i-1] = tempItem;
             }
             else
             {
                 if (i == (items.size() - 1)) return false;
-                items.swapItemsAt(i, i+1);
+                IdentityBlockItem tempItem = items[i];
+                items[i] = items[i+1];
+                items[i+1] = tempItem;
             }
 
             return true;

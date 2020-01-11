@@ -1067,7 +1067,7 @@ void MainWindow::onCheckIntegrity()
 
     // Check if the IMK in block 1 was in fact derived
     // from the IUK in block 2
-    if (decryptedImk.compare(testImk) == 0)
+    if (decryptedImk == testImk)
     {
         QMessageBox::information(this, tr("Integrity check successful!"),
                 tr("The integrity check succeeded!\nBlock 1 and block 2 "
