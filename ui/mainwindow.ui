@@ -26,7 +26,7 @@
    <string>IdTool - View and manipulate SQRL identities</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res.qrc">
+   <iconset resource="../res.qrc">
     <normaloff>:/res/img/IdTool_Icon.png</normaloff>:/res/img/IdTool_Icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -143,7 +143,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpenFile">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/OpenFile_16x.png</normaloff>:/res/img/OpenFile_16x.png</iconset>
    </property>
    <property name="text">
@@ -155,7 +155,7 @@
   </action>
   <action name="actionPasteIdentityData">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Paste_16x.png</normaloff>:/res/img/Paste_16x.png</iconset>
    </property>
    <property name="text">
@@ -170,7 +170,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/About_16x.png</normaloff>:/res/img/About_16x.png</iconset>
    </property>
    <property name="text">
@@ -182,7 +182,7 @@
   </action>
   <action name="actionSaveIdentityFileAs">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/SaveAs_16x.png</normaloff>:/res/img/SaveAs_16x.png</iconset>
    </property>
    <property name="text">
@@ -194,7 +194,7 @@
   </action>
   <action name="actionExit">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Exit_16x.png</normaloff>:/res/img/Exit_16x.png</iconset>
    </property>
    <property name="text">
@@ -203,7 +203,7 @@
   </action>
   <action name="actionBuildNewIdentity">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Build_Identity_16x.png</normaloff>:/res/img/Build_Identity_16x.png</iconset>
    </property>
    <property name="text">
@@ -221,7 +221,7 @@
   </action>
   <action name="actionBlockDesigner">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/NewBlock_16x.png</normaloff>:/res/img/NewBlock_16x.png</iconset>
    </property>
    <property name="text">
@@ -230,7 +230,7 @@
   </action>
   <action name="actionCreateSiteKeys">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/SiteKey_16x.png</normaloff>:/res/img/SiteKey_16x.png</iconset>
    </property>
    <property name="text">
@@ -242,7 +242,7 @@
   </action>
   <action name="actionDecryptImkIlk">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
@@ -254,7 +254,7 @@
   </action>
   <action name="actionDecryptIuk">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
@@ -266,7 +266,7 @@
   </action>
   <action name="actionDecryptPreviousIuks">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Key_16x.png</normaloff>:/res/img/Key_16x.png</iconset>
    </property>
    <property name="text">
@@ -278,7 +278,7 @@
   </action>
   <action name="actionIdentitySettings">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/IdentitySettings_16x.png</normaloff>:/res/img/IdentitySettings_16x.png</iconset>
    </property>
    <property name="text">
@@ -298,7 +298,7 @@
   </action>
   <action name="actionCreateNewIdentity">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/NewFile_16x.png</normaloff>:/res/img/NewFile_16x.png</iconset>
    </property>
    <property name="text">
@@ -313,7 +313,7 @@
   </action>
   <action name="actionDisplayTextualIdentity">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/TextualId.png</normaloff>:/res/img/TextualId.png</iconset>
    </property>
    <property name="text">
@@ -328,7 +328,7 @@
   </action>
   <action name="actionImportTextualIdentity">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/TextualId.png</normaloff>:/res/img/TextualId.png</iconset>
    </property>
    <property name="text">
@@ -340,7 +340,7 @@
   </action>
   <action name="actionChangePassword">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Password_16x.png</normaloff>:/res/img/Password_16x.png</iconset>
    </property>
    <property name="text">
@@ -352,7 +352,7 @@
   </action>
   <action name="actionResetPassword">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/Password_16x.png</normaloff>:/res/img/Password_16x.png</iconset>
    </property>
    <property name="text">
@@ -361,7 +361,7 @@
   </action>
   <action name="actionCheckIntegrity">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset resource="../res.qrc">
      <normaloff>:/res/img/CheckIntegrity_16x.png</normaloff>:/res/img/CheckIntegrity_16x.png</iconset>
    </property>
    <property name="text">
@@ -374,7 +374,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="res.qrc"/>
+  <include location="../res.qrc"/>
  </resources>
  <connections/>
 </ui>
