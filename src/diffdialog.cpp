@@ -5,6 +5,7 @@ DiffDialog::DiffDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DiffDialog)
 {
+    this->setWindowFlags(Qt::Window);
     ui->setupUi(this);
 }
 
