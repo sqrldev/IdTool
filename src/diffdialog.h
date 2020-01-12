@@ -17,6 +17,9 @@ public:
     
 private:
     Ui::DiffDialog *ui;
+    
+private slots:
+    void onChooseIdentityFile();
 };
 
 #endif // DIFFDIALOG_H

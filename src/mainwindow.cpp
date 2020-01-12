@@ -103,6 +103,32 @@ MainWindow::~MainWindow()
 }
 
 /*!
+ * \brief Shows a dialog where the user can select an existing SQRL
+ * identity file.
+ * 
+ * If \a parent is not \c nullptr, the given \c QWidget will be set
+ * as the parent for the modal dialog.
+ * 
+ * \return Returns the chosen file path including the file name, or 
+ * an empty string if the user presses "Cancel".
+ */
+
+QString MainWindow::showChooseIdentityFileDialog(QWidget* parent)
+{
+    QString dir = nullptr;
+
+    const QStringList dirs = QStandardPaths::standardLocations(
+                QStandardPaths::DocumentsLocation);
+    if (dirs.count() > 0)
+    {
+        dir = QDir(dirs[0]).filePath("SQRL/");
+    }
+
+    return QFileDialog::getOpenFileName(parent,
+        tr("Open identity file"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
+}
+
+/*!
  * Displays an error message-box, telling the user that an identity
  * needs to be loaded to complete the operation.
  */
@@ -416,18 +442,7 @@ void MainWindow::onImportTextualIdentity()
 
 void MainWindow::onOpenFile()
 {
-    QString dir = nullptr;
-
-    const QStringList dirs = QStandardPaths::standardLocations(
-                QStandardPaths::DocumentsLocation);
-    if (dirs.count() > 0)
-    {
-        dir = QDir(dirs[0]).filePath("SQRL/");
-    }
-
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open identity file"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
-
+    QString fileName = showChooseIdentityFileDialog(this);
     if (fileName.isEmpty()) return;
 
     try
