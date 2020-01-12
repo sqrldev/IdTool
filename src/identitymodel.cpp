@@ -92,6 +92,26 @@ IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
 }
 
 /*!
+ * \brief Returns a list of block types which are available
+ * in the current \c IdentityModel.
+ */
+
+QList<int> IdentityModel::getAvailableBlockTypes()
+{
+    QList<int> result;
+
+    for (IdentityBlock block : blocks)
+    {
+        if (!result.contains(block.blockType))
+        {
+            result.append(block.blockType);
+        }
+    }
+
+    return result;
+}
+
+/*!
  * Returns the raw binary representation of the identity block.
  */
 

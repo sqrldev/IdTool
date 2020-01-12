@@ -62,6 +62,7 @@ public:
 public:
     void writeToFile(QString fileName);
     IdentityBlock* getBlock(uint16_t blockType);
+    QList<int> getAvailableBlockTypes();
     bool deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
     bool insertBlock(IdentityBlock block, IdentityBlock* after);

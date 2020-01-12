@@ -3,6 +3,9 @@
 
 #include <QDialog>
 
+// Forward declarations
+class IdentityModel;
+
 namespace Ui {
 class DiffDialog;
 }
@@ -17,9 +20,13 @@ public:
     
 private:
     Ui::DiffDialog *ui;
+
+private:
+    QList<int> calculateColumnWidths(QList<IdentityModel*> ids);
     
 private slots:
     void onChooseIdentityFile();
+    void onStartDiff();
 };
 
 #endif // DIFFDIALOG_H
