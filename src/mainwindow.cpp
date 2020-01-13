@@ -605,10 +605,7 @@ void MainWindow::onShowIdentitySettingsDialog()
 void MainWindow::onShowDiffDialog()
 {
     DiffDialog dialog(this);
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        //TODO: implement
-    }
+    dialog.exec();
 }
 
 void MainWindow::onControlUnauthenticatedChanges()

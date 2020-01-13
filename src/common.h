@@ -67,6 +67,7 @@
 #include <QDesktopWidget>
 #include <QElapsedTimer>
 #include <QCloseEvent>
+#include <QTextFormat>
 
 #include "../inc/bigint/BigIntegerLibrary.hh"
 

@@ -1,7 +1,7 @@
 #ifndef DIFFDIALOG_H
 #define DIFFDIALOG_H
 
-#include <QDialog>
+#include "common.h"
 
 // Forward declarations
 class IdentityModel;
@@ -23,6 +23,8 @@ private:
 
 private:
     QList<int> calculateColumnWidths(QList<IdentityModel*> ids);
+    QTextCharFormat getItemFormat(int diffType=0);
+    QTextCharFormat getHeaderFormat();
     
 private slots:
     void onChooseIdentityFile();
