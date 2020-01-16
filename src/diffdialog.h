@@ -24,7 +24,9 @@ private:
 private:
     QList<int> calculateColumnWidths(QList<IdentityModel*> ids);
     QTextCharFormat getItemFormat(int diffType=0);
-    QTextCharFormat getHeaderFormat();
+    QTextCharFormat getBlockHeaderFormat();
+    QTextFrameFormat getBlockFrameFormat();
+    QTextTableFormat getTableFormat();
     
 private slots:
     void onChooseIdentityFile();

@@ -57,12 +57,29 @@ QTextCharFormat DiffDialog::getItemFormat(int diffType)
     return result;
 }
 
-QTextCharFormat DiffDialog::getHeaderFormat()
+QTextCharFormat DiffDialog::getBlockHeaderFormat()
 {
     QTextCharFormat result;
 
     result.setFont(QFont("Courier", 16, QFont::Bold));
     return result;
+}
+
+QTextFrameFormat DiffDialog::getBlockFrameFormat()
+{
+    QTextFrameFormat frameFormat;
+    frameFormat.setMargin(5);
+    frameFormat.setPadding(5);
+    return frameFormat;
+}
+
+QTextTableFormat DiffDialog::getTableFormat()
+{
+    QTextTableFormat tableFormat;
+    tableFormat.setCellPadding(3);
+    tableFormat.setCellSpacing(1);
+    tableFormat.setBorder(0);
+    return tableFormat;
 }
 
 void DiffDialog::onChooseIdentityFile()
@@ -79,19 +96,18 @@ void DiffDialog::onChooseIdentityFile()
 
 void DiffDialog::onStartDiff()
 {
+    //TODO: Remove test code
+    ui->txt_Identity1->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1.sqrl");
+    ui->txt_Identity2->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1R2.sqrl");
+    // End todo
+
+    IdentityParser parser;
     QList<IdentityModel*> ids;
     ids.append(new IdentityModel());
     ids.append(new IdentityModel());
 
-    IdentityParser parser;
-
     try
     {
-        //TODO: Remove test code
-        ui->txt_Identity1->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1.sqrl");
-        ui->txt_Identity2->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1R2.sqrl");
-        // End todo
-
         parser.parseFile(ui->txt_Identity1->text(), ids[0]);
         parser.parseFile(ui->txt_Identity2->text(), ids[1]);
     }
@@ -100,9 +116,11 @@ void DiffDialog::onStartDiff()
         QMessageBox::critical(this, tr("Error"), e.what());
     }
 
-    QList<int> blockTypes1 = ids[0]->getAvailableBlockTypes();
-    QList<int> blockTypes2 = ids[1]->getAvailableBlockTypes();
-    QList<int> allBlockTypes = blockTypes1.toSet().unite(blockTypes2.toSet()).toList();
+    // Get a sorted list of all the block types which are
+    // present in both of the identities
+    QList<int> blockTypesOfId1 = ids[0]->getAvailableBlockTypes();
+    QList<int> blockTypesOfId2 = ids[1]->getAvailableBlockTypes();
+    QList<int> allBlockTypes = blockTypesOfId1.toSet().unite(blockTypesOfId2.toSet()).toList();
     std::sort(allBlockTypes.begin(), allBlockTypes.end());
 
     QList<int> columnWidths = calculateColumnWidths(ids);
@@ -113,24 +131,19 @@ void DiffDialog::onStartDiff()
     for (int blockType : allBlockTypes)
     {
         cursor = textDoc->rootFrame()->lastCursorPosition();
+        cursor.insertFrame(getBlockFrameFormat());
 
-        QTextFrameFormat frameFormat;
-        frameFormat.setMargin(5);
-        frameFormat.setPadding(5);
-        cursor.insertFrame(frameFormat);
-
-        cursor.setCharFormat(getHeaderFormat());
+        cursor.setCharFormat(getBlockHeaderFormat());
         cursor.insertText(QString("Block type %0").arg(blockType));
 
+        // Create a dummy block of the given block type as a
+        // reference for the block type's items, since either
+        // block 1 or block 2 could be missing a block that the
+        // other one has.
         IdentityBlock dummyBlock = IdentityParser::createEmptyBlock(blockType);
         int nrOfItems = dummyBlock.items.count();
 
-        QTextTableFormat tableFormat;
-        tableFormat.setCellPadding(3);
-        tableFormat.setCellSpacing(1);
-        tableFormat.setBorder(0);
-
-        QTextTable* pTable = cursor.insertTable(nrOfItems, 3, tableFormat);
+        QTextTable* pTable = cursor.insertTable(nrOfItems, 3, getTableFormat());
 
         for (int i=0; i<nrOfItems; i++)
         {
