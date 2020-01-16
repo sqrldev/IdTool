@@ -119,7 +119,7 @@ void IdentityParser::parseString(QString identityString, IdentityModel* model)
  * \c false otherwise.
  */
 
-bool IdentityParser::hasBlockDefinition(uint16_t blockType)
+bool IdentityParser::hasBlockDefinition(int blockType)
 {
     QDir path = QDir::currentPath();
     QDir fullPath = path.filePath(QString("blockdef/") + QString::number(blockType) + ".json");
@@ -157,8 +157,8 @@ void IdentityParser::parseIdentityData(QByteArray data, IdentityModel* model)
                         QObject::tr("Not enough data in block to read length and type!")
                                      .toStdString());
         }
-        uint16_t blockLength = getBlockLength(data);
-        uint16_t blockType = getBlockType(data);
+        int blockLength = getBlockLength(data);
+        int blockType = getBlockType(data);
 
         QByteArray baBlockDef = getBlockDefinitionBytes(blockType);
         if (baBlockDef.isNull() || baBlockDef.isEmpty())
@@ -358,7 +358,7 @@ bool IdentityParser::checkHeader(QByteArray data)
  * an empty byte array is returned.
  */
 
-QByteArray IdentityParser::getBlockDefinitionBytes(uint16_t blockType)
+QByteArray IdentityParser::getBlockDefinitionBytes(int blockType)
 {
     QDir path = QDir::currentPath();
     QDir fullPath = path.filePath(QString("blockdef/") + QString::number(blockType) + ".json");
@@ -456,7 +456,7 @@ QByteArray IdentityParser::getUnknownBlockDefinition()
  * an empty \c IdentityBlock object is returned.
  */
 
-IdentityBlock IdentityParser::createEmptyBlock(uint16_t blockType)
+IdentityBlock IdentityParser::createEmptyBlock(int blockType)
 {
     IdentityBlock result;
 
@@ -526,13 +526,13 @@ IdentityBlockItem IdentityParser::createEmptyItem(QString name, QString descript
  * If \a data holds less than two bytes, \c 0  is returned.
  */
 
-uint16_t IdentityParser::getBlockLength(QByteArray data)
+int IdentityParser::getBlockLength(QByteArray data)
 {
     if (data.count() < 2) return 0;
 
     unsigned char c1 = static_cast<unsigned char>(data[0]);
     unsigned char c2 = static_cast<unsigned char>(data[1]);
-    return static_cast<uint16_t>(c1 | (c2 << 8));
+    return c1 | (c2 << 8);
 }
 
 /*!
@@ -543,7 +543,7 @@ uint16_t IdentityParser::getBlockLength(QByteArray data)
  * holds less than four bytes.
  */
 
-uint16_t IdentityParser::getBlockType(QByteArray data)
+int IdentityParser::getBlockType(QByteArray data)
 {
     if (data.count() < 4)
     {
@@ -554,7 +554,7 @@ uint16_t IdentityParser::getBlockType(QByteArray data)
 
     unsigned char c1 = static_cast<unsigned char>(data[2]);
     unsigned char c2 = static_cast<unsigned char>(data[3]);
-    return static_cast<uint16_t>(c1 | (c2 << 8));
+    return c1 | (c2 << 8);
 }
 
 /*!

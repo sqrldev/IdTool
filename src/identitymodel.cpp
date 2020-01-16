@@ -80,7 +80,7 @@ void IdentityModel::writeToFile(QString fileName)
  * \sa IdentityBlock
  */
 
-IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
+IdentityBlock *IdentityModel::getBlock(int blockType)
 {
     for (int i=0; i<blocks.size(); i++)
     {
@@ -292,7 +292,7 @@ bool IdentityModel::hasBlocks()
  * identity model, or \c false otherwise.
  */
 
-bool IdentityModel::hasBlockType(uint16_t blockType)
+bool IdentityModel::hasBlockType(int blockType)
 {
      return getBlock(blockType) != nullptr;
 }

@@ -61,7 +61,7 @@ public:
 
 public:
     void writeToFile(QString fileName);
-    IdentityBlock* getBlock(uint16_t blockType);
+    IdentityBlock* getBlock(int blockType);
     QList<int> getAvailableBlockTypes();
     bool deleteBlock(IdentityBlock* block);
     bool moveBlock(IdentityBlock* block, bool up);
@@ -72,7 +72,7 @@ public:
     QString getTextualVersion();
     QString getTextualVersionFormatted();
     bool hasBlocks();
-    bool hasBlockType(uint16_t blockType);
+    bool hasBlockType(int blockType);
 };
 
 /**********************************************
