@@ -47,9 +47,10 @@ class IdentitySettingsDialog : public QDialog
 private:
     Ui::IdentitySettingsDialog *ui;
     IdentityBlock* m_pBlock1 = nullptr;
+    IdentityBlock* m_pBlock2 = nullptr;
 
 public:
-    IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1);
+    IdentitySettingsDialog(QWidget *parent, IdentityModel* id);
     ~IdentitySettingsDialog();
 
 private:

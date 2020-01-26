@@ -574,11 +574,10 @@ void MainWindow::onResetPassword()
 
 void MainWindow::onShowIdentitySettingsDialog()
 {
-    IdentityBlock* pBlock1 = m_pTabManager->getCurrentTab()
-            .getIdentityModel().getBlock(1);
-    if (pBlock1 == nullptr) return;
+    IdentityModel& currentIdentity = m_pTabManager->getCurrentTab()
+            .getIdentityModel();
 
-    IdentitySettingsDialog dialog(this, pBlock1);
+    IdentitySettingsDialog dialog(this, &currentIdentity);
     if (dialog.exec() == QDialog::Accepted)
     {
         m_pTabManager->getCurrentTab().rebuild();

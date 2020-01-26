@@ -37,22 +37,23 @@
  * obtaining the block's identity keys (IMK and ILK). Consequently,
  * the keys will be reencrypted using the (changed) settings as "additional
  * data" for the authenticated re-encryption of the identity keys.
+ * 
  *
 */
 
 
 /*!
  * Creates a new \c IdentitySettingsDialog window, using \a parent as the
- * parent form and storing a \a block1 pointer internally for accessing the
- * identity's settings.
+ * parent form and \a identity as the identity who's settings should be changed.
  */
 
-IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1) :
+IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent, IdentityModel* identity) :
     QDialog(parent),
     ui(new Ui::IdentitySettingsDialog)
 {
     ui->setupUi(this);
-    m_pBlock1 = block1;
+    m_pBlock1 = identity->getBlock(1);
+    m_pBlock2 = identity->getBlock(2);
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
     connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), SLOT(onResetButtonClicked()));
