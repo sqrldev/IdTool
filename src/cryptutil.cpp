@@ -869,6 +869,74 @@ bool CryptUtil::updateBlock1(IdentityBlock *block1, QByteArray unencryptedImk,
 }
 
 /*!
+ * \brief Re-encrypts and re-authenticates \a block2 using the key 
+ * \a unencryptedIuk under \a rescueCode.
+ *
+ * \a block2 shall already contain the required plain text changes, which
+ * are passed in as "additional data" to the AES GCM authenticated encryption.
+ * This function will create a new scrypt random salt and replace the existing 
+ * value in \a block2.
+ * 
+ * If \a secondsToRunScrypt is set to -1, the iteration count from \a block2
+ * will be used for "EnScrypt"ing the \a rescueCode. Otherwise, if a valid
+ * positive integer is provided, EnScrypt will be run for the given amount 
+ * of seconds, and the resulting iteration count will be written to \a block2.
+ *
+ * If a valid \a progressDialog pointer is given, the operation will use it
+ * to publish its progress. Otherwise, it will be ignored.
+ *
+ * If successful, \a block2 will contain the re-encrypted and
+ * re-authenticated data.
+ *
+ * \return Returns \c true if the operation succeeds, \c false otherwise.
+ */
+
+bool CryptUtil::updateBlock2(IdentityBlock *block2, QByteArray unencryptedIuk, 
+        QString rescueCode, int secondsToRunScrypt, QProgressDialog *progressDialog)
+{
+    bool ok = false;
+    QByteArray initVec(12, 0);
+    QByteArray randomSalt(16, 0);
+    QByteArray key(32, 0);
+    QByteArray additionalData;
+
+    getRandomBytes(randomSalt);
+    block2->items[2].value = randomSalt.toHex();
+    int logNFactor = block2->items[3].value.toInt();
+    int iterationCount;
+
+    // Derive key from rescue code
+    if (progressDialog != nullptr) progressDialog->setLabelText(
+                QObject::tr("Encrypting block 2..."));
+    
+    // If secondsToRunScrypt is a positive integer, run EnScrypt
+    // for the given amount of seconds and update the resulting
+    // iteration count within the block
+    if (secondsToRunScrypt > 0)
+    {
+        ok = enScryptTime(key, iterationCount, rescueCode, randomSalt, logNFactor, secondsToRunScrypt, progressDialog);
+        block2->items[4].value = QString::number(iterationCount);
+    }
+    // Otherwise, just use the existing iteration count within
+    // the block
+    else
+    {
+        ok = enScryptIterations(key, rescueCode, randomSalt, logNFactor, iterationCount, progressDialog);
+    }
+
+    // Encrypt IUK
+    for (int i=0; i<5; i++) additionalData.append(block2->items[i].toByteArray());
+    QByteArray encryptedData = aesGcmEncrypt(unencryptedIuk, additionalData, initVec, key);
+    QByteArray encryptedIuk = encryptedData.left(32);
+    QByteArray authTag = encryptedData.right(16);
+
+    block2->items[5].value = encryptedIuk.toHex();  // Encrypted IUK
+    block2->items[6].value = authTag.toHex();  // Verification tag
+
+    return block2;
+}
+
+/*!
  * Encrypts \a message under the secret key \a key and
  * the initialization vector \a iv, adding in \a additionalData
  * as additional data for the authenticated encryption.

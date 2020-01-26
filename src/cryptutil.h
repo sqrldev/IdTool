@@ -61,10 +61,11 @@ public:
     static QByteArray createIlkFromIuk(QByteArray decryptedIuk);
     static QByteArray createIndexedSecret(QByteArray imk, QString domain, QString altId, QByteArray secretIndex);
     static QByteArray enHash(QByteArray data);
-    static IdentityBlock createBlock1(QByteArray iuk, QString password, QProgressDialog* progressDialog);
-    static IdentityBlock createBlock2(QByteArray iuk, QString rescueCode, QProgressDialog* progressDialog);
-    static bool updateBlock1WithPassword(IdentityBlock* oldBlock, IdentityBlock* updatedBlock, QString password, QString newPassword, QProgressDialog* progressDialog);
-    static bool updateBlock1(IdentityBlock* block1, QByteArray unencryptedImk, QByteArray unencryptedIlk, QString newPassword, QProgressDialog* progressDialog);
+    static IdentityBlock createBlock1(QByteArray iuk, QString password, QProgressDialog* progressDialog = nullptr);
+    static IdentityBlock createBlock2(QByteArray iuk, QString rescueCode, QProgressDialog* progressDialog = nullptr);
+    static bool updateBlock1WithPassword(IdentityBlock* oldBlock, IdentityBlock* updatedBlock, QString password, QString newPassword, QProgressDialog* progressDialog = nullptr);
+    static bool updateBlock1(IdentityBlock* block1, QByteArray unencryptedImk, QByteArray unencryptedIlk, QString newPassword, QProgressDialog* progressDialog = nullptr);
+    static bool updateBlock2(IdentityBlock* block2, QByteArray unencryptedIuk, QString rescueCode, int secondsToRunScrypt = -1, QProgressDialog* progressDialog = nullptr);
     static QByteArray aesGcmEncrypt(QByteArray message, QByteArray additionalData, QByteArray iv, QByteArray key);
     static QByteArray createIuk();
     static QString createNewRescueCode();
