@@ -8,14 +8,30 @@ DiffDialog::DiffDialog(QWidget *parent) :
 {
     this->setWindowFlags(Qt::Window);
     ui->setupUi(this);
-
-    //QSize desktopSize = QDesktopWidget().availableGeometry(this).size() * 0.9;
-    //resize(geometry().width(), desktopSize.height());
-    this->setWindowState(Qt::WindowMaximized);
+    
+    m_ImkId1 = QByteArray(32, 0);
+    m_IlkId1 = QByteArray(32, 0);
+    m_ImkId2 = QByteArray(32, 0);
+    m_IlkId2 = QByteArray(32, 0);
+    m_IukId1 = QByteArray(32, 0);
+    m_IukId2 = QByteArray(32, 0);
     
     connect(ui->btn_Identity1, &QPushButton::clicked, this, &DiffDialog::onChooseIdentityFile);
     connect(ui->btn_Identity2, &QPushButton::clicked, this, &DiffDialog::onChooseIdentityFile);
     connect(ui->btn_StartDiff, &QPushButton::clicked, this, &DiffDialog::onStartDiff);
+    connect(ui->chk_DecryptBlock1, SIGNAL(toggled(bool)), ui->txt_PassId1, SLOT(setEnabled(bool)));
+    connect(ui->chk_DecryptBlock1, SIGNAL(toggled(bool)), ui->txt_PassId2, SLOT(setEnabled(bool)));
+    connect(ui->chk_DecryptBlock2, SIGNAL(toggled(bool)), ui->txt_RescueCodeId1, SLOT(setEnabled(bool)));
+    connect(ui->chk_DecryptBlock2, SIGNAL(toggled(bool)), ui->txt_RescueCodeId2, SLOT(setEnabled(bool)));
+    
+    //TODO: Remove test code
+    ui->txt_Identity1->setText("C:\\Users\\Alex\\Documents\\SQRL\\AlexDev3_.sqrl");
+    ui->txt_Identity2->setText("C:\\Users\\Alex\\Documents\\SQRL\\AlexDev3R4_.sqrl");
+    ui->txt_PassId1->setText("test12345678");
+    ui->txt_PassId2->setText("test12345678");
+    ui->txt_RescueCodeId1->setText("4287-8546-8365-8491-4348-2554");
+    ui->txt_RescueCodeId2->setText("5583-8638-9259-3876-2080-5033");
+    // End todo
 }
 
 DiffDialog::~DiffDialog()
@@ -82,6 +98,79 @@ QTextTableFormat DiffDialog::getTableFormat()
     return tableFormat;
 }
 
+bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
+{
+    QString passwordId1, passwordId2, rescueCodeId1, rescueCodeId2;
+    bool ok = false;
+    
+    // Block 1
+    
+    if (ui->chk_DecryptBlock1->isChecked())
+    {
+        passwordId1 = ui->txt_PassId1->text();
+        passwordId2 = ui->txt_PassId2->text();
+        
+        IdentityBlock* pBlock1Id1 = ids[0]->getBlock(1);
+        IdentityBlock* pBlock1Id2 = ids[1]->getBlock(1);
+        
+        QProgressDialog progressDialog(tr("Decrypting identity 1 block 1..."), tr("Abort"), 0, 0, this);
+        progressDialog.setWindowModality(Qt::WindowModal);
+        
+        QByteArray keyId1(32, 0);
+        QByteArray keyId2(32, 0);
+        ok = CryptUtil::createKeyFromPassword(keyId1, *pBlock1Id1, passwordId1, &progressDialog);
+        if (!ok) return false;
+        progressDialog.setLabelText(tr("Decrypting identity 2 block 1..."));
+        ok = CryptUtil::createKeyFromPassword(keyId2, *pBlock1Id2, passwordId2, &progressDialog);
+        if (!ok) return false;
+                       
+        ok = CryptUtil::decryptBlock1(m_ImkId1, m_IlkId1, pBlock1Id1, keyId1);
+        if (!ok) 
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Decryption of block 1 of identity 1 failed!"));
+            return false;
+        }
+        
+        ok = CryptUtil::decryptBlock1(m_ImkId2, m_IlkId2, pBlock1Id2, keyId2);
+        if (!ok) 
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Decryption block 1 of identity 2 failed!"));
+            return false;
+        }
+    }
+    
+    // Block 2
+    
+    if (ui->chk_DecryptBlock2->isChecked())
+    {
+        rescueCodeId1 = ui->txt_RescueCodeId1->text();
+        rescueCodeId2 = ui->txt_RescueCodeId2->text();
+        
+        IdentityBlock* pBlock2Id1 = ids[0]->getBlock(2);
+        IdentityBlock* pBlock2Id2 = ids[1]->getBlock(2);
+        
+        QProgressDialog progressDialog(tr("Decrypting identity 1 block 2..."), tr("Abort"), 0, 0, this);
+        progressDialog.setWindowModality(Qt::WindowModal);
+                       
+        ok = CryptUtil::decryptBlock2(m_IukId1, pBlock2Id1, rescueCodeId1, &progressDialog);
+        if (!ok) 
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Decryption of block 2 of identity 1 failed!"));
+            return false;
+        }
+        
+        progressDialog.setLabelText(tr("Decrypting identity 2 block 2..."));
+        ok = CryptUtil::decryptBlock2(m_IukId2, pBlock2Id2, rescueCodeId2, &progressDialog);
+        if (!ok) 
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Decryption of block 2 of identity 2 failed!"));
+            return false;
+        }
+    }
+    
+    // Block 3
+}
+
 void DiffDialog::onChooseIdentityFile()
 {
     QObject* pSender = sender();
@@ -96,13 +185,10 @@ void DiffDialog::onChooseIdentityFile()
 
 void DiffDialog::onStartDiff()
 {
-    //TODO: Remove test code
-    ui->txt_Identity1->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1.sqrl");
-    ui->txt_Identity2->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev#1R2.sqrl");
-    // End todo
-
     IdentityParser parser;
     QList<IdentityModel*> ids;
+    bool ok = false;
+    
     ids.append(new IdentityModel());
     ids.append(new IdentityModel());
 
@@ -115,9 +201,14 @@ void DiffDialog::onStartDiff()
     {
         QMessageBox::critical(this, tr("Error"), e.what());
     }
+    
+    // Decrypt blocks if requested
+    
+    if (!DecryptBlocks(ids)) return;
 
     // Get a sorted list of all the block types which are
     // present in both of the identities
+    
     QList<int> blockTypesOfId1 = ids[0]->getAvailableBlockTypes();
     QList<int> blockTypesOfId2 = ids[1]->getAvailableBlockTypes();
     QList<int> allBlockTypes = blockTypesOfId1.toSet().unite(blockTypesOfId2.toSet()).toList();
@@ -176,4 +267,7 @@ void DiffDialog::onStartDiff()
             cursor.insertText(value2);
         }
     }
+    
+    // Maximize diff window 
+    this->setWindowState(Qt::WindowMaximized);
 }
