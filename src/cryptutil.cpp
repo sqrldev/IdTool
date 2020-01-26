@@ -921,6 +921,7 @@ bool CryptUtil::updateBlock2(IdentityBlock *block2, QByteArray unencryptedIuk,
     // the block
     else
     {
+        iterationCount = block2->items[4].value.toInt();
         ok = enScryptIterations(key, rescueCode, randomSalt, logNFactor, iterationCount, progressDialog);
     }
 
