@@ -26,6 +26,7 @@
 
 #include "idsetdialog.h"
 #include "ui_idsetdialog.h"
+#include "mainwindow.h"
 
 /*!
  *
@@ -37,22 +38,23 @@
  * obtaining the block's identity keys (IMK and ILK). Consequently,
  * the keys will be reencrypted using the (changed) settings as "additional
  * data" for the authenticated re-encryption of the identity keys.
+ * 
  *
 */
 
 
 /*!
  * Creates a new \c IdentitySettingsDialog window, using \a parent as the
- * parent form and storing a \a block1 pointer internally for accessing the
- * identity's settings.
+ * parent form and \a identity as the identity who's settings should be changed.
  */
 
-IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent, IdentityBlock* block1) :
+IdentitySettingsDialog::IdentitySettingsDialog(QWidget *parent, IdentityModel* identity) :
     QDialog(parent),
     ui(new Ui::IdentitySettingsDialog)
 {
     ui->setupUi(this);
-    m_pBlock1 = block1;
+    m_pBlock1 = identity->getBlock(1);
+    m_pBlock2 = identity->getBlock(2);
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(onSaveButtonClicked()));
     connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), SLOT(onResetButtonClicked()));
@@ -184,12 +186,44 @@ void IdentitySettingsDialog::onSaveButtonClicked()
     if (!ok)
     {
         QMessageBox::critical(this, tr("Error"), tr("Operation failed! Wrong password?"));
+        return;
     }
 
     *m_pBlock1 = newBlock1;
+    
+    // Should block 2 be updated as well?
+    if (!ui->chk_UpdateBlock2->isChecked()) return;
+    
+    IdentityBlock newBlock2(*m_pBlock2);
+    
+    QString rescueCode;
+    ok = MainWindow::showGetRescueCodeDialog(rescueCode, this);
+    if (!ok) return;
+    
+    QByteArray decryptedIuk(32, 0);
+    ok = CryptUtil::decryptBlock2(decryptedIuk, &newBlock2, rescueCode, &progressDialog);
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Error decrypting block 2! Wrong rescue code?"));
+        return;
+    }
+    
+    // Set the same scrypt parameters than on block 1
+    newBlock2.items[3].value = newBlock1.items[5].value;
+    newBlock2.items[4].value = newBlock1.items[6].value;
+    
+    // Update block 2
+    ok = CryptUtil::updateBlock2(&newBlock2, decryptedIuk, rescueCode, -1, &progressDialog);
+    if (!ok)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Error updating block 2!"));
+        return;
+    }
+    
+    *m_pBlock2 = newBlock2;
 }
 
 void IdentitySettingsDialog::onResetButtonClicked()
 {
-    loadBlockData();
+    loadBlockData();   
 }

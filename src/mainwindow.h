@@ -56,14 +56,16 @@ private:
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    
+public:
+    static bool showGetRescueCodeDialog(QString& rescueCode, QWidget* parent = nullptr);
+    static bool showGetPasswordDialog(QString& password, QWidget* parent = nullptr);
+    static bool showGetNewPasswordDialog(QString& password, QWidget* parent = nullptr);
 
 private:
     void showNoIdentityLoadedError();
     void showTextualIdentityInfoDialog(QString rescueCode = nullptr);
     void configureMenuItems();
-    bool showGetRescueCodeDialog(QString& rescueCode, QWidget* parent = nullptr);
-    bool showGetPasswordDialog(QString& password, QWidget* parent = nullptr);
-    bool showGetNewPasswordDialog(QString& password, QWidget* parent = nullptr);
     bool canDiscardChanges();
 
 private: // Overrides
