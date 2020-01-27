@@ -20,12 +20,15 @@ public:
     
 private:
     Ui::DiffDialog *ui;
+    QList<IdentityModel*> m_Ids;
     QByteArray m_ImkId1;
     QByteArray m_IlkId1;
     QByteArray m_ImkId2;
     QByteArray m_IlkId2;
     QByteArray m_IukId1;
     QByteArray m_IukId2;
+    QList<QByteArray> m_prevIuksId1;
+    QList<QByteArray> m_prevIuksId2;
 
 private:
     QList<int> calculateColumnWidths(QList<IdentityModel*> ids);
@@ -34,6 +37,8 @@ private:
     QTextFrameFormat getBlockFrameFormat();
     QTextTableFormat getTableFormat();
     bool DecryptBlocks(QList<IdentityModel*>& ids);
+    void writeSummary(QTextCursor& cursor, QList<IdentityModel*>& ids);
+    void writeDiffTable(QTextCursor& cursor, QList<IdentityModel*>& ids, QList<int>& allBlockTypes);
     
 private slots:
     void onChooseIdentityFile();

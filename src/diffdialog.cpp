@@ -9,12 +9,15 @@ DiffDialog::DiffDialog(QWidget *parent) :
     this->setWindowFlags(Qt::Window);
     ui->setupUi(this);
     
+    m_Ids = QList<IdentityModel*>();
     m_ImkId1 = QByteArray(32, 0);
     m_IlkId1 = QByteArray(32, 0);
     m_ImkId2 = QByteArray(32, 0);
     m_IlkId2 = QByteArray(32, 0);
     m_IukId1 = QByteArray(32, 0);
     m_IukId2 = QByteArray(32, 0);
+    m_prevIuksId1 = QList<QByteArray>();
+    m_prevIuksId2 = QList<QByteArray>();
     
     connect(ui->btn_Identity1, &QPushButton::clicked, this, &DiffDialog::onChooseIdentityFile);
     connect(ui->btn_Identity2, &QPushButton::clicked, this, &DiffDialog::onChooseIdentityFile);
@@ -139,12 +142,14 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
         }
     }
     
-    // Block 2
+    // Block 2 and 3
     
     if (ui->chk_DecryptBlock2->isChecked())
     {
         rescueCodeId1 = ui->txt_RescueCodeId1->text();
         rescueCodeId2 = ui->txt_RescueCodeId2->text();
+
+        // Block 2
         
         IdentityBlock* pBlock2Id1 = ids[0]->getBlock(2);
         IdentityBlock* pBlock2Id2 = ids[1]->getBlock(2);
@@ -166,61 +171,53 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
             QMessageBox::critical(this, tr("Error"), tr("Decryption of block 2 of identity 2 failed!"));
             return false;
         }
+
+        // Block 3
+
+        IdentityBlock* pBlock3Id1 = ids[0]->getBlock(3);
+        IdentityBlock* pBlock3Id2 = ids[1]->getBlock(3);
+
+        if (pBlock3Id1 != nullptr)
+        {
+            ok = CryptUtil::decryptBlock3(m_prevIuksId1, pBlock3Id1, m_ImkId1);
+            if (!ok)
+            {
+                QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 1 failed!"));
+                return false;
+            }
+        }
+
+        if (pBlock3Id2 != nullptr)
+        {
+            ok = CryptUtil::decryptBlock3(m_prevIuksId2, pBlock3Id2, m_ImkId2);
+            if (!ok)
+            {
+                QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 2 failed!"));
+                return false;
+            }
+        }
     }
-    
-    // Block 3
 }
 
-void DiffDialog::onChooseIdentityFile()
+void DiffDialog::writeSummary(QTextCursor &cursor, QList<IdentityModel *> &ids)
 {
-    QObject* pSender = sender();
-    QString fileName = MainWindow::showChooseIdentityFileDialog(this);
-    
-    if (fileName == "") return;
-    
-    QLineEdit* txt = (pSender == ui->btn_Identity1) ? ui->txt_Identity1 : ui->txt_Identity2;
-    txt->setText(fileName);
-    
-}
-
-void DiffDialog::onStartDiff()
-{
-    IdentityParser parser;
-    QList<IdentityModel*> ids;
-    bool ok = false;
-    
-    ids.append(new IdentityModel());
-    ids.append(new IdentityModel());
-
-    try
-    {
-        parser.parseFile(ui->txt_Identity1->text(), ids[0]);
-        parser.parseFile(ui->txt_Identity2->text(), ids[1]);
-    }
-    catch (std::exception& e)
-    {
-        QMessageBox::critical(this, tr("Error"), e.what());
-    }
-    
-    // Decrypt blocks if requested
-    
-    if (!DecryptBlocks(ids)) return;
-
-    // Get a sorted list of all the block types which are
-    // present in both of the identities
-    
-    QList<int> blockTypesOfId1 = ids[0]->getAvailableBlockTypes();
-    QList<int> blockTypesOfId2 = ids[1]->getAvailableBlockTypes();
-    QList<int> allBlockTypes = blockTypesOfId1.toSet().unite(blockTypesOfId2.toSet()).toList();
-    std::sort(allBlockTypes.begin(), allBlockTypes.end());
-
-    QList<int> columnWidths = calculateColumnWidths(ids);
-
     QTextDocument* textDoc = ui->txt_Diff->document();
-    QTextCursor cursor = ui->txt_Diff->textCursor();
+
+    cursor = textDoc->rootFrame()->lastCursorPosition();
+    cursor.insertFrame(getBlockFrameFormat());
+
+    cursor.setCharFormat(getBlockHeaderFormat());
+    cursor.insertText(tr("Summary:"));
+}
+
+void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<IdentityModel *> &ids, QList<int> &allBlockTypes)
+{
+    QTextDocument* textDoc = ui->txt_Diff->document();
 
     for (int blockType : allBlockTypes)
     {
+        QList<int> columnWidths = calculateColumnWidths(ids);
+
         cursor = textDoc->rootFrame()->lastCursorPosition();
         cursor.insertFrame(getBlockFrameFormat());
 
@@ -267,6 +264,55 @@ void DiffDialog::onStartDiff()
             cursor.insertText(value2);
         }
     }
+}
+
+void DiffDialog::onChooseIdentityFile()
+{
+    QObject* pSender = sender();
+    QString fileName = MainWindow::showChooseIdentityFileDialog(this);
+    
+    if (fileName == "") return;
+    
+    QLineEdit* txt = (pSender == ui->btn_Identity1) ? ui->txt_Identity1 : ui->txt_Identity2;
+    txt->setText(fileName);
+    
+}
+
+void DiffDialog::onStartDiff()
+{
+    IdentityParser parser;
+
+    m_prevIuksId1.clear();
+    m_prevIuksId2.clear();
+
+    m_Ids.clear();
+    m_Ids.append(new IdentityModel());
+    m_Ids.append(new IdentityModel());
+
+    try
+    {
+        parser.parseFile(ui->txt_Identity1->text(), m_Ids[0]);
+        parser.parseFile(ui->txt_Identity2->text(), m_Ids[1]);
+    }
+    catch (std::exception& e)
+    {
+        QMessageBox::critical(this, tr("Error"), e.what());
+    }
+    
+    // Decrypt blocks if requested
+    if (!DecryptBlocks(m_Ids)) return;
+
+    // Get a sorted list of all the block types which are
+    // present in both of the identities
+    QList<int> blockTypesOfId1 = m_Ids[0]->getAvailableBlockTypes();
+    QList<int> blockTypesOfId2 = m_Ids[1]->getAvailableBlockTypes();
+    QList<int> allBlockTypes = blockTypesOfId1.toSet().unite(blockTypesOfId2.toSet()).toList();
+    std::sort(allBlockTypes.begin(), allBlockTypes.end());
+
+    QTextCursor cursor = ui->txt_Diff->textCursor();
+
+    writeSummary(cursor, m_Ids);
+    writeDiffTable(cursor, m_Ids, allBlockTypes);
     
     // Maximize diff window 
     this->setWindowState(Qt::WindowMaximized);
