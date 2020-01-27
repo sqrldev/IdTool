@@ -287,6 +287,9 @@
      <property name="lineWrapMode">
       <enum>QTextEdit::NoWrap</enum>
      </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -298,6 +301,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txt_Identity1</tabstop>
+  <tabstop>btn_Identity1</tabstop>
+  <tabstop>txt_Identity2</tabstop>
+  <tabstop>btn_Identity2</tabstop>
+  <tabstop>chk_DecryptBlock1</tabstop>
+  <tabstop>txt_PassId1</tabstop>
+  <tabstop>txt_PassId2</tabstop>
+  <tabstop>chk_DecryptBlock2</tabstop>
+  <tabstop>txt_RescueCodeId1</tabstop>
+  <tabstop>txt_RescueCodeId2</tabstop>
+  <tabstop>txt_Diff</tabstop>
+  <tabstop>btn_StartDiff</tabstop>
+ </tabstops>
  <resources>
   <include location="../res.qrc"/>
  </resources>
