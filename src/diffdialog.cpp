@@ -197,9 +197,11 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
             }
         }
     }
+
+    return true;
 }
 
-void DiffDialog::writeSummary(QTextCursor &cursor, QList<IdentityModel *> &ids)
+void DiffDialog::writeSummary(QTextCursor &cursor)
 {
     QTextDocument* textDoc = ui->txt_Diff->document();
 
@@ -210,13 +212,13 @@ void DiffDialog::writeSummary(QTextCursor &cursor, QList<IdentityModel *> &ids)
     cursor.insertText(tr("Summary:"));
 }
 
-void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<IdentityModel *> &ids, QList<int> &allBlockTypes)
+void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<int> &allBlockTypes)
 {
     QTextDocument* textDoc = ui->txt_Diff->document();
 
     for (int blockType : allBlockTypes)
     {
-        QList<int> columnWidths = calculateColumnWidths(ids);
+        QList<int> columnWidths = calculateColumnWidths(m_Ids);
 
         cursor = textDoc->rootFrame()->lastCursorPosition();
         cursor.insertFrame(getBlockFrameFormat());
@@ -235,8 +237,8 @@ void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<IdentityModel *> &ids
 
         for (int i=0; i<nrOfItems; i++)
         {
-            IdentityBlock* pBlockOfId1 = ids[0]->getBlock(blockType);
-            IdentityBlock* pBlockOfId2 = ids[1]->getBlock(blockType);
+            IdentityBlock* pBlockOfId1 = m_Ids[0]->getBlock(blockType);
+            IdentityBlock* pBlockOfId2 = m_Ids[1]->getBlock(blockType);
 
             QString name = dummyBlock.items.at(i).name.leftJustified(columnWidths[0]);
             QString value1 = pBlockOfId1 == nullptr ? "" : pBlockOfId1->items.at(i).value;
@@ -311,8 +313,8 @@ void DiffDialog::onStartDiff()
 
     QTextCursor cursor = ui->txt_Diff->textCursor();
 
-    writeSummary(cursor, m_Ids);
-    writeDiffTable(cursor, m_Ids, allBlockTypes);
+    writeSummary(cursor);
+    writeDiffTable(cursor, allBlockTypes);
     
     // Maximize diff window 
     this->setWindowState(Qt::WindowMaximized);

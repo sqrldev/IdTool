@@ -37,8 +37,8 @@ private:
     QTextFrameFormat getBlockFrameFormat();
     QTextTableFormat getTableFormat();
     bool DecryptBlocks(QList<IdentityModel*>& ids);
-    void writeSummary(QTextCursor& cursor, QList<IdentityModel*>& ids);
-    void writeDiffTable(QTextCursor& cursor, QList<IdentityModel*>& ids, QList<int>& allBlockTypes);
+    void writeSummary(QTextCursor& cursor);
+    void writeDiffTable(QTextCursor& cursor, QList<int>& allBlockTypes);
     
 private slots:
     void onChooseIdentityFile();
