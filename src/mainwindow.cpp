@@ -885,7 +885,7 @@ void MainWindow::onDecryptIuk()
     if (!ok)
     {
         QMessageBox::critical(this, tr("Error"),
-            tr("Decryption of identity unlock key failed! Wrong password?"));
+            tr("Decryption of identity unlock key failed! Wrong rescue code?"));
         return;
     }
 
