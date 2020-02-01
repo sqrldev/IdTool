@@ -34,6 +34,7 @@ private:
     QList<int> calculateColumnWidths(QList<IdentityModel*> ids);
     QTextCharFormat getItemFormat(int diffType=0);
     QTextCharFormat getBlockHeaderFormat();
+    QTextCharFormat getSummaryTextFormat();
     QTextFrameFormat getBlockFrameFormat();
     QTextTableFormat getTableFormat();
     bool DecryptBlocks(QList<IdentityModel*>& ids);

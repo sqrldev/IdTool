@@ -84,6 +84,14 @@ QTextCharFormat DiffDialog::getBlockHeaderFormat()
     return result;
 }
 
+QTextCharFormat DiffDialog::getSummaryTextFormat()
+{
+    QTextCharFormat result;
+
+    result.setFont(QFont("Courier", 12));
+    return result;
+}
+
 QTextFrameFormat DiffDialog::getBlockFrameFormat()
 {
     QTextFrameFormat frameFormat;
@@ -203,6 +211,11 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
 
 void DiffDialog::writeSummary(QTextCursor &cursor)
 {
+    int editionId1 = 0, editionId2 = 0;
+
+    if (m_Ids[0]->hasBlockType(3)) editionId1 = m_Ids[0]->getBlock(3)->items[2].value.toInt();
+    if (m_Ids[1]->hasBlockType(3)) editionId2 = m_Ids[1]->getBlock(3)->items[2].value.toInt();
+
     QTextDocument* textDoc = ui->txt_Diff->document();
 
     cursor = textDoc->rootFrame()->lastCursorPosition();
@@ -210,6 +223,12 @@ void DiffDialog::writeSummary(QTextCursor &cursor)
 
     cursor.setCharFormat(getBlockHeaderFormat());
     cursor.insertText(tr("Summary:"));
+
+    cursor.insertBlock();
+    cursor.setCharFormat(getSummaryTextFormat());
+    cursor.insertText(tr("Identity 1 has been rekeyed %1 times.").arg(QString::number(editionId1)));
+    cursor.insertBlock();
+    cursor.insertText(tr("Identity 2 has been rekeyed %1 times.").arg(QString::number(editionId2)));
 }
 
 void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<int> &allBlockTypes)
@@ -284,6 +303,7 @@ void DiffDialog::onStartDiff()
 {
     IdentityParser parser;
 
+    ui->txt_Diff->clear();
     m_prevIuksId1.clear();
     m_prevIuksId2.clear();
 
