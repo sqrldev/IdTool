@@ -107,14 +107,14 @@
      <item row="0" column="0">
       <widget class="QCheckBox" name="chk_DecryptBlock1">
        <property name="text">
-        <string>Decrypt block 1 (requires password)</string>
+        <string>Decrypt blocks 1+3 (requires password)</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QCheckBox" name="chk_DecryptBlock2">
        <property name="text">
-        <string>Decrypt blocks 2 + 3  (requires rescue code)</string>
+        <string>Decrypt block 2 (requires rescue code)</string>
        </property>
       </widget>
      </item>

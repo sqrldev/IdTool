@@ -35,6 +35,9 @@ private:
     QTextCharFormat getItemFormat(int diffType=0);
     QTextCharFormat getBlockHeaderFormat();
     QTextCharFormat getSummaryTextFormat();
+    QTextCharFormat getSummarySuccessTextFormat();
+    QTextCharFormat getSummaryNeutralTextFormat();
+    QTextCharFormat getSummaryFailureTextFormat();
     QTextFrameFormat getBlockFrameFormat();
     QTextTableFormat getTableFormat();
     bool DecryptBlocks(QList<IdentityModel*>& ids);

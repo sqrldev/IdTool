@@ -92,6 +92,27 @@ QTextCharFormat DiffDialog::getSummaryTextFormat()
     return result;
 }
 
+QTextCharFormat DiffDialog::getSummarySuccessTextFormat()
+{
+    QTextCharFormat result = getSummaryTextFormat();
+    result.setForeground(QBrush(QColor(156,219,156,255)));
+    return result;
+}
+
+QTextCharFormat DiffDialog::getSummaryNeutralTextFormat()
+{
+    QTextCharFormat result = getSummaryTextFormat();
+    result.setForeground(QBrush(QColor(255,255,224,255)));
+    return result;
+}
+
+QTextCharFormat DiffDialog::getSummaryFailureTextFormat()
+{
+    QTextCharFormat result = getSummaryTextFormat();
+    result.setForeground(QBrush(QColor(255,135,135,255)));
+    return result;
+}
+
 QTextFrameFormat DiffDialog::getBlockFrameFormat()
 {
     QTextFrameFormat frameFormat;
@@ -114,10 +135,10 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
     QString passwordId1, passwordId2, rescueCodeId1, rescueCodeId2;
     bool ok = false;
     
-    // Block 1
-    
     if (ui->chk_DecryptBlock1->isChecked())
     {
+        // Block 1
+        
         passwordId1 = ui->txt_PassId1->text();
         passwordId2 = ui->txt_PassId2->text();
         
@@ -148,9 +169,34 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
             QMessageBox::critical(this, tr("Error"), tr("Decryption block 1 of identity 2 failed!"));
             return false;
         }
+        
+        // Block 3
+
+        IdentityBlock* pBlock3Id1 = ids[0]->getBlock(3);
+        IdentityBlock* pBlock3Id2 = ids[1]->getBlock(3);
+
+        if (pBlock3Id1 != nullptr)
+        {
+            ok = CryptUtil::decryptBlock3(m_prevIuksId1, pBlock3Id1, m_ImkId1);
+            if (!ok)
+            {
+                QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 1 failed!"));
+                return false;
+            }
+        }
+
+        if (pBlock3Id2 != nullptr)
+        {
+            ok = CryptUtil::decryptBlock3(m_prevIuksId2, pBlock3Id2, m_ImkId2);
+            if (!ok)
+            {
+                QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 2 failed!"));
+                return false;
+            }
+        }
     }
     
-    // Block 2 and 3
+    // Block 2
     
     if (ui->chk_DecryptBlock2->isChecked())
     {
@@ -179,31 +225,6 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
             QMessageBox::critical(this, tr("Error"), tr("Decryption of block 2 of identity 2 failed!"));
             return false;
         }
-
-        // Block 3
-
-        IdentityBlock* pBlock3Id1 = ids[0]->getBlock(3);
-        IdentityBlock* pBlock3Id2 = ids[1]->getBlock(3);
-
-        if (pBlock3Id1 != nullptr)
-        {
-            ok = CryptUtil::decryptBlock3(m_prevIuksId1, pBlock3Id1, m_ImkId1);
-            if (!ok)
-            {
-                QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 1 failed!"));
-                return false;
-            }
-        }
-
-        if (pBlock3Id2 != nullptr)
-        {
-            ok = CryptUtil::decryptBlock3(m_prevIuksId2, pBlock3Id2, m_ImkId2);
-            if (!ok)
-            {
-                QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 2 failed!"));
-                return false;
-            }
-        }
     }
 
     return true;
@@ -211,11 +232,6 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
 
 void DiffDialog::writeSummary(QTextCursor &cursor)
 {
-    int editionId1 = 0, editionId2 = 0;
-
-    if (m_Ids[0]->hasBlockType(3)) editionId1 = m_Ids[0]->getBlock(3)->items[2].value.toInt();
-    if (m_Ids[1]->hasBlockType(3)) editionId2 = m_Ids[1]->getBlock(3)->items[2].value.toInt();
-
     QTextDocument* textDoc = ui->txt_Diff->document();
 
     cursor = textDoc->rootFrame()->lastCursorPosition();
@@ -223,13 +239,55 @@ void DiffDialog::writeSummary(QTextCursor &cursor)
 
     cursor.setCharFormat(getBlockHeaderFormat());
     cursor.insertText(tr("Summary:"));
-
+    
     cursor.insertBlock();
-    cursor.setCharFormat(getSummaryTextFormat());
-    cursor.insertText(tr("Identity 1 has been rekeyed %1 times.").arg(QString::number(editionId1)));
-    cursor.insertBlock();
-    cursor.insertText(tr("Identity 2 has been rekeyed %1 times.").arg(QString::number(editionId2)));
+   
+    if (m_IukId1 == m_IukId2) 
+    {
+        cursor.setCharFormat(getSummarySuccessTextFormat());
+        cursor.insertText(tr("Both files represent the same identity!"));
+    }
+    else if (m_prevIuksId2.contains(m_IukId1) || m_prevIuksId1.contains(m_IukId2)) 
+    {
+        cursor.setCharFormat(getSummaryNeutralTextFormat());
+        cursor.insertText(tr("Both files represent the same identity, but are not the same version!"));
+    }
+    else 
+    {
+        cursor.setCharFormat(getSummarySuccessTextFormat());
+        cursor.insertText(tr("The files do NOT represent the same identity!"));
+    }
+    
+    /*
+  
+    for (int i=0; i<2; i++)
+    {
+        IdentityModel* pThis = (i==0 ? m_Ids[0] : m_Ids[1]);
+        IdentityModel* pOther = (i==0 ? m_Ids[1] : m_Ids[0]);
+        
+        QString nameOfThis = (i==0 ? tr("Identity 1") : tr("Identity 2"));
+        QString nameOfOther = (i==0 ? tr("Identity 2") : tr("Identity 1"));
+               
+        cursor.insertBlock();
+        cursor.setCharFormat(getSummaryTextFormat());
+        
+        // Print rekeying info, but do it only once
+        if (i==0) 
+        {
+            int editionId1 = 0, editionId2 = 0;
+            if (pThis->hasBlockType(3)) editionId1 = pThis->getBlock(3)->items[2].value.toInt();
+            if (pOther->hasBlockType(3)) editionId2 = pOther->getBlock(3)->items[2].value.toInt();
+            
+            cursor.insertText(tr("%1 has been rekeyed %2 times.").arg(nameOfThis, QString::number(editionId1)));
+            cursor.insertBlock();
+            cursor.insertText(tr("%1 has been rekeyed %2 times.").arg(nameOfOther, QString::number(editionId2)));
+            cursor.insertBlock();
+        }      
+    }
+    */
+    
 }
+    
 
 void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<int> &allBlockTypes)
 {
