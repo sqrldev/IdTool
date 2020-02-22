@@ -16,8 +16,8 @@ DiffDialog::DiffDialog(QWidget *parent) :
     m_IlkId2 = QByteArray(32, 0);
     m_IukId1 = QByteArray(32, 0);
     m_IukId2 = QByteArray(32, 0);
-    m_prevIuksId1 = QList<QByteArray>();
-    m_prevIuksId2 = QList<QByteArray>();
+    m_prevImksId1 = QList<QByteArray>();
+    m_prevImksId2 = QList<QByteArray>();
     
     connect(ui->btn_Identity1, &QPushButton::clicked, this, &DiffDialog::onChooseIdentityFile);
     connect(ui->btn_Identity2, &QPushButton::clicked, this, &DiffDialog::onChooseIdentityFile);
@@ -95,21 +95,21 @@ QTextCharFormat DiffDialog::getSummaryTextFormat()
 QTextCharFormat DiffDialog::getSummarySuccessTextFormat()
 {
     QTextCharFormat result = getSummaryTextFormat();
-    result.setForeground(QBrush(QColor(156,219,156,255)));
+    result.setBackground(QBrush(QColor(156,219,156,255)));
     return result;
 }
 
 QTextCharFormat DiffDialog::getSummaryNeutralTextFormat()
 {
     QTextCharFormat result = getSummaryTextFormat();
-    result.setForeground(QBrush(QColor(255,255,224,255)));
+    result.setBackground(QBrush(QColor(255,255,224,255)));
     return result;
 }
 
 QTextCharFormat DiffDialog::getSummaryFailureTextFormat()
 {
     QTextCharFormat result = getSummaryTextFormat();
-    result.setForeground(QBrush(QColor(255,135,135,255)));
+    result.setBackground(QBrush(QColor(255,135,135,255)));
     return result;
 }
 
@@ -170,28 +170,77 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
             return false;
         }
         
+        // Insert the decrypted keys as block items so that they get displayed in the diff table
+        IdentityBlockItem imkItem = IdentityBlockItem();
+        imkItem.name = "  └ decrypted";
+        imkItem.description = "The decrypted identity master key";
+        imkItem.dataType = ItemDataType::BYTE_ARRAY;
+        imkItem.nrOfBytes = 32;
+        imkItem.value = m_ImkId1.toHex();
+        m_Ids[0]->getBlock(1)->items.insert(12, imkItem);
+        imkItem.value = m_ImkId2.toHex();
+        m_Ids[1]->getBlock(1)->items.insert(12, imkItem);
+        
+        IdentityBlockItem ilkItem = IdentityBlockItem();
+        ilkItem.name = "  └ decrypted";
+        ilkItem.description = "The decrypted identity lock key";
+        ilkItem.dataType = ItemDataType::BYTE_ARRAY;
+        ilkItem.nrOfBytes = 32;
+        ilkItem.value = m_IlkId1.toHex();
+        m_Ids[0]->getBlock(1)->items.insert(14, ilkItem);
+        ilkItem.value = m_IlkId2.toHex();
+        m_Ids[1]->getBlock(1)->items.insert(14, ilkItem);
+        
         // Block 3
 
         IdentityBlock* pBlock3Id1 = ids[0]->getBlock(3);
         IdentityBlock* pBlock3Id2 = ids[1]->getBlock(3);
+        QList<QByteArray> prevIuksId1 = QList<QByteArray>();
+        QList<QByteArray> prevIuksId2 = QList<QByteArray>();
 
         if (pBlock3Id1 != nullptr)
         {
-            ok = CryptUtil::decryptBlock3(m_prevIuksId1, pBlock3Id1, m_ImkId1);
+            
+            ok = CryptUtil::decryptBlock3(prevIuksId1, pBlock3Id1, m_ImkId1);
             if (!ok)
             {
                 QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 1 failed!"));
                 return false;
             }
+            
+            for (QByteArray iuk : prevIuksId1) m_prevImksId1.append(CryptUtil::createImkFromIuk(iuk));
         }
 
         if (pBlock3Id2 != nullptr)
         {
-            ok = CryptUtil::decryptBlock3(m_prevIuksId2, pBlock3Id2, m_ImkId2);
+            ok = CryptUtil::decryptBlock3(prevIuksId2, pBlock3Id2, m_ImkId2);
             if (!ok)
             {
                 QMessageBox::critical(this, tr("Error"), tr("Decryption of block 3 of identity 2 failed!"));
                 return false;
+            }
+            
+            for (QByteArray iuk : prevIuksId2) m_prevImksId2.append(CryptUtil::createImkFromIuk(iuk));
+        }
+        
+        // Insert the decrypted previous keys as block items so that they get displayed in the diff table
+        int maxPrevIuks = std::max(prevIuksId1.count(), prevIuksId2.count());
+        for (int i=0; i<maxPrevIuks; i++)
+        {
+            IdentityBlockItem prevIukItem = IdentityBlockItem();
+            prevIukItem.name = "  └ decrypted";
+            prevIukItem.description = "The decrypted previous identity unlock key";
+            prevIukItem.dataType = ItemDataType::BYTE_ARRAY;
+            prevIukItem.nrOfBytes = 32;
+            if (i < prevIuksId1.count())
+            {
+                prevIukItem.value = prevIuksId1[i].toHex();
+                m_Ids[0]->getBlock(3)->items.insert(4+(i*2), prevIukItem);
+            }
+            if (i < prevIuksId2.count())
+            {
+                prevIukItem.value = prevIuksId2[i].toHex();
+                m_Ids[1]->getBlock(3)->items.insert(4+(i*2), prevIukItem);    
             }
         }
     }
@@ -225,6 +274,17 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
             QMessageBox::critical(this, tr("Error"), tr("Decryption of block 2 of identity 2 failed!"));
             return false;
         }
+        
+        // Insert the decrypted IUK as block item so that it gets displayed in the diff table
+        IdentityBlockItem iukItem = IdentityBlockItem();
+        iukItem.name = "  └ decrypted";
+        iukItem.description = "The decrypted identity unlock key";
+        iukItem.dataType = ItemDataType::BYTE_ARRAY;
+        iukItem.nrOfBytes = 32;
+        iukItem.value = m_IukId1.toHex();
+        m_Ids[0]->getBlock(2)->items.insert(6, iukItem);
+        iukItem.value = m_IukId2.toHex();
+        m_Ids[1]->getBlock(2)->items.insert(6, iukItem);
     }
 
     return true;
@@ -242,22 +302,29 @@ void DiffDialog::writeSummary(QTextCursor &cursor)
     
     cursor.insertBlock();
    
-    if (m_IukId1 == m_IukId2) 
+    if (ui->chk_DecryptBlock1->isChecked())
     {
-        cursor.setCharFormat(getSummarySuccessTextFormat());
-        cursor.insertText(tr("Both files represent the same identity!"));
+        if (m_ImkId1 == m_ImkId2) 
+        {
+            cursor.setCharFormat(getSummarySuccessTextFormat());
+            cursor.insertText(tr("Both files represent the same identity (decrypted IMKs/IUKs match)!"));
+        }
+        else if (m_prevImksId2.contains(m_ImkId1) || m_prevImksId1.contains(m_ImkId2)) 
+        {
+            cursor.setCharFormat(getSummaryNeutralTextFormat());
+            cursor.insertText(tr("Both files represent the same identity, but are not the same version!\n"));
+            if (m_prevImksId2.contains(m_ImkId1))
+                cursor.insertText(tr("(IUK of Identity 1 is a previous IUK of Identity 2)\n"));
+            if (m_prevImksId1.contains(m_ImkId2))
+                cursor.insertText(tr("(IUK of Identity 2 is a previous IUK of Identity 1)\n"));
+        }
+        else 
+        {
+            cursor.setCharFormat(getSummaryFailureTextFormat());
+            cursor.insertText(tr("The files do NOT represent the same identity!"));
+        }
     }
-    else if (m_prevIuksId2.contains(m_IukId1) || m_prevIuksId1.contains(m_IukId2)) 
-    {
-        cursor.setCharFormat(getSummaryNeutralTextFormat());
-        cursor.insertText(tr("Both files represent the same identity, but are not the same version!"));
-    }
-    else 
-    {
-        cursor.setCharFormat(getSummarySuccessTextFormat());
-        cursor.insertText(tr("The files do NOT represent the same identity!"));
-    }
-    
+        
     /*
   
     for (int i=0; i<2; i++)
@@ -307,8 +374,9 @@ void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<int> &allBlockTypes)
         // reference for the block type's items, since either
         // block 1 or block 2 could be missing a block that the
         // other one has.
-        IdentityBlock dummyBlock = IdentityParser::createEmptyBlock(blockType);
-        int nrOfItems = dummyBlock.items.count();
+        IdentityBlock* pDummyBlock = m_Ids[0]->getBlock(blockType) != nullptr ? 
+                m_Ids[0]->getBlock(blockType) : m_Ids[1]->getBlock(blockType);
+        int nrOfItems = pDummyBlock->items.count();
 
         QTextTable* pTable = cursor.insertTable(nrOfItems, 3, getTableFormat());
 
@@ -317,7 +385,7 @@ void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<int> &allBlockTypes)
             IdentityBlock* pBlockOfId1 = m_Ids[0]->getBlock(blockType);
             IdentityBlock* pBlockOfId2 = m_Ids[1]->getBlock(blockType);
 
-            QString name = dummyBlock.items.at(i).name.leftJustified(columnWidths[0]);
+            QString name = pDummyBlock->items.at(i).name.leftJustified(columnWidths[0]);
             QString value1 = pBlockOfId1 == nullptr ? "" : pBlockOfId1->items.at(i).value;
             QString value2 = pBlockOfId2 == nullptr ? "" : pBlockOfId2->items.at(i).value;
 
@@ -362,8 +430,8 @@ void DiffDialog::onStartDiff()
     IdentityParser parser;
 
     ui->txt_Diff->clear();
-    m_prevIuksId1.clear();
-    m_prevIuksId2.clear();
+    m_prevImksId1.clear();
+    m_prevImksId2.clear();
 
     m_Ids.clear();
     m_Ids.append(new IdentityModel());

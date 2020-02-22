@@ -27,8 +27,8 @@ private:
     QByteArray m_IlkId2;
     QByteArray m_IukId1;
     QByteArray m_IukId2;
-    QList<QByteArray> m_prevIuksId1;
-    QList<QByteArray> m_prevIuksId2;
+    QList<QByteArray> m_prevImksId1;
+    QList<QByteArray> m_prevImksId2;
 
 private:
     QList<int> calculateColumnWidths(QList<IdentityModel*> ids);
