@@ -327,9 +327,9 @@ void DiffDialog::writeSummary(QTextCursor &cursor)
         cursor.setCharFormat(getSummaryNeutralTextFormat());
         cursor.insertText(tr("Both files represent the same identity, but are not the same edition!\n"));
         if (m_prevImksId2.contains(m_ImkId1))
-            cursor.insertText(tr("(IUK of Identity 1 is a previous IUK of Identity 2)\n"));
+            cursor.insertText(tr("The IUK of Identity 1 is a previous IUK of Identity 2."));
         if (m_prevImksId1.contains(m_ImkId2))
-            cursor.insertText(tr("(IUK of Identity 2 is a previous IUK of Identity 1)\n"));
+            cursor.insertText(tr("The IUK of Identity 2 is a previous IUK of Identity 1."));
     }
     else
     {
