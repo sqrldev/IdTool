@@ -27,5 +27,6 @@
         <file>res/img/Password_16x.png</file>
         <file>res/img/CopyItem_16x.png</file>
         <file>res/img/CheckIntegrity_16x.png</file>
+        <file>res/img/Diff_16x.png</file>
     </qresource>
 </RCC>

@@ -29,6 +29,7 @@
 #include "ui_mainwindow.h"
 #include "cryptutil.h"
 #include "tabmanager.h"
+#include "diffdialog.h"
 #include <QFileDialog>
 #include <QStandardPaths>
 
@@ -80,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCheckIntegrity, &QAction::triggered, this, &MainWindow::onCheckIntegrity);
     connect(ui->actionCreateSiteKeys, &QAction::triggered, this, &MainWindow::onCreateSiteKeys);
     connect(ui->actionIdentitySettings, &QAction::triggered, this, &MainWindow::onShowIdentitySettingsDialog);
+    connect(ui->actionDiffIdentities, &QAction::triggered, this, &MainWindow::onShowDiffDialog);
     connect(ui->actionEnableUnauthenticatedChanges, &QAction::triggered, this, &MainWindow::onControlUnauthenticatedChanges);
     connect(ui->actionDisplayTextualIdentity, &QAction::triggered, this, &MainWindow::onDisplayTextualIdentity);
     connect(ui->actionImportTextualIdentity, &QAction::triggered, this, &MainWindow::onImportTextualIdentity);
@@ -98,6 +100,32 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete m_pTabManager;
+}
+
+/*!
+ * \brief Shows a dialog where the user can select an existing SQRL
+ * identity file.
+ * 
+ * If \a parent is not \c nullptr, the given \c QWidget will be set
+ * as the parent for the modal dialog.
+ * 
+ * \return Returns the chosen file path including the file name, or 
+ * an empty string if the user presses "Cancel".
+ */
+
+QString MainWindow::showChooseIdentityFileDialog(QWidget* parent)
+{
+    QString dir = nullptr;
+
+    const QStringList dirs = QStandardPaths::standardLocations(
+                QStandardPaths::DocumentsLocation);
+    if (dirs.count() > 0)
+    {
+        dir = QDir(dirs[0]).filePath("SQRL/");
+    }
+
+    return QFileDialog::getOpenFileName(parent,
+        tr("Open identity file"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
 }
 
 /*!
@@ -414,18 +442,7 @@ void MainWindow::onImportTextualIdentity()
 
 void MainWindow::onOpenFile()
 {
-    QString dir = nullptr;
-
-    const QStringList dirs = QStandardPaths::standardLocations(
-                QStandardPaths::DocumentsLocation);
-    if (dirs.count() > 0)
-    {
-        dir = QDir(dirs[0]).filePath("SQRL/");
-    }
-
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open identity file"), dir, tr("SQRL identity files (*.sqrl *.sqrc)"));
-
+    QString fileName = showChooseIdentityFileDialog(this);
     if (fileName.isEmpty()) return;
 
     try
@@ -583,6 +600,12 @@ void MainWindow::onShowIdentitySettingsDialog()
         m_pTabManager->getCurrentTab().rebuild();
         m_pTabManager->setCurrentTabDirty(true);
     }
+}
+
+void MainWindow::onShowDiffDialog()
+{
+    DiffDialog dialog(this);
+    dialog.exec();
 }
 
 void MainWindow::onControlUnauthenticatedChanges()
@@ -862,7 +885,7 @@ void MainWindow::onDecryptIuk()
     if (!ok)
     {
         QMessageBox::critical(this, tr("Error"),
-            tr("Decryption of identity unlock key failed! Wrong password?"));
+            tr("Decryption of identity unlock key failed! Wrong rescue code?"));
         return;
     }
 

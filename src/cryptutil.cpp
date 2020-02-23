@@ -316,6 +316,10 @@ bool CryptUtil::decryptBlock2(QByteArray &decryptedIuk, IdentityBlock *block, QS
     {
         return false;
     }
+    
+    // Strip dashes and whitespace from rescue code
+    rescueCode = rescueCode.replace("-", "");
+    rescueCode = rescueCode.replace(" ", "");
 
     QByteArray aesGcmIV(12, 0);
     QByteArray scryptSalt = QByteArray::fromHex(block->items[2].value.toLocal8Bit());

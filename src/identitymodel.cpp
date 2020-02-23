@@ -80,7 +80,7 @@ void IdentityModel::writeToFile(QString fileName)
  * \sa IdentityBlock
  */
 
-IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
+IdentityBlock *IdentityModel::getBlock(int blockType)
 {
     for (int i=0; i<blocks.size(); i++)
     {
@@ -89,6 +89,26 @@ IdentityBlock *IdentityModel::getBlock(uint16_t blockType)
     }
 
     return nullptr;
+}
+
+/*!
+ * \brief Returns a list of block types which are available
+ * in the current \c IdentityModel.
+ */
+
+QList<int> IdentityModel::getAvailableBlockTypes()
+{
+    QList<int> result;
+
+    for (IdentityBlock block : blocks)
+    {
+        if (!result.contains(block.blockType))
+        {
+            result.append(block.blockType);
+        }
+    }
+
+    return result;
 }
 
 /*!
@@ -272,7 +292,7 @@ bool IdentityModel::hasBlocks()
  * identity model, or \c false otherwise.
  */
 
-bool IdentityModel::hasBlockType(uint16_t blockType)
+bool IdentityModel::hasBlockType(int blockType)
 {
      return getBlock(blockType) != nullptr;
 }
