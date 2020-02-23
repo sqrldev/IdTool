@@ -53,7 +53,12 @@ QList<int> DiffDialog::calculateColumnWidths(QList<IdentityModel*> ids)
             for (IdentityBlockItem item : block.items)
             {
                 if (item.name.length() > result[0]) result[0] = item.name.length();
-                if (item.value.length() > result[1]) result[1] = item.value.length();
+                
+                int itemlength = 0;
+                
+                if (ui->chk_ShortenKeys->isChecked()) itemlength = 23;
+                else itemlength = item.value.length();
+                if (itemlength > result[1]) result[1] = itemlength;
             }
         }
     }
@@ -128,6 +133,15 @@ QTextTableFormat DiffDialog::getTableFormat()
     tableFormat.setCellSpacing(1);
     tableFormat.setBorder(0);
     return tableFormat;
+}
+
+QString DiffDialog::shortenValue(QString value)
+{
+    if (value.length() <= 23) return value;
+    
+    value = value.remove(10, value.length() - 20);
+    value = value.insert(10, QString("..."));
+    return value;
 }
 
 bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
@@ -323,36 +337,7 @@ void DiffDialog::writeSummary(QTextCursor &cursor)
             cursor.setCharFormat(getSummaryFailureTextFormat());
             cursor.insertText(tr("The files do NOT represent the same identity!"));
         }
-    }
-        
-    /*
-  
-    for (int i=0; i<2; i++)
-    {
-        IdentityModel* pThis = (i==0 ? m_Ids[0] : m_Ids[1]);
-        IdentityModel* pOther = (i==0 ? m_Ids[1] : m_Ids[0]);
-        
-        QString nameOfThis = (i==0 ? tr("Identity 1") : tr("Identity 2"));
-        QString nameOfOther = (i==0 ? tr("Identity 2") : tr("Identity 1"));
-               
-        cursor.insertBlock();
-        cursor.setCharFormat(getSummaryTextFormat());
-        
-        // Print rekeying info, but do it only once
-        if (i==0) 
-        {
-            int editionId1 = 0, editionId2 = 0;
-            if (pThis->hasBlockType(3)) editionId1 = pThis->getBlock(3)->items[2].value.toInt();
-            if (pOther->hasBlockType(3)) editionId2 = pOther->getBlock(3)->items[2].value.toInt();
-            
-            cursor.insertText(tr("%1 has been rekeyed %2 times.").arg(nameOfThis, QString::number(editionId1)));
-            cursor.insertBlock();
-            cursor.insertText(tr("%1 has been rekeyed %2 times.").arg(nameOfOther, QString::number(editionId2)));
-            cursor.insertBlock();
-        }      
-    }
-    */
-    
+    }   
 }
     
 
@@ -386,8 +371,19 @@ void DiffDialog::writeDiffTable(QTextCursor &cursor, QList<int> &allBlockTypes)
             IdentityBlock* pBlockOfId2 = m_Ids[1]->getBlock(blockType);
 
             QString name = pDummyBlock->items.at(i).name.leftJustified(columnWidths[0]);
-            QString value1 = pBlockOfId1 == nullptr ? "" : pBlockOfId1->items.at(i).value;
-            QString value2 = pBlockOfId2 == nullptr ? "" : pBlockOfId2->items.at(i).value;
+            
+            QString value1;
+            QString value2;
+            if (ui->chk_ShortenKeys->isChecked())
+            {
+                value1 = pBlockOfId1 == nullptr ? "" : shortenValue(pBlockOfId1->items.at(i).value);
+                value2 = pBlockOfId2 == nullptr ? "" : shortenValue(pBlockOfId2->items.at(i).value);
+            }
+            else
+            {
+                value1 = pBlockOfId1 == nullptr ? "" : pBlockOfId1->items.at(i).value;
+                value2 = pBlockOfId2 == nullptr ? "" : pBlockOfId2->items.at(i).value;
+            }
 
             int diffType = 1;
             if (value1 != value2) diffType = 2;
@@ -462,6 +458,7 @@ void DiffDialog::onStartDiff()
     writeSummary(cursor);
     writeDiffTable(cursor, allBlockTypes);
     
-    // Maximize diff window 
-    this->setWindowState(Qt::WindowMaximized);
+    // Maximize diff window if "shorten keys" is disabled
+    if (!ui->chk_ShortenKeys->isChecked())
+        this->setWindowState(Qt::WindowMaximized);
 }

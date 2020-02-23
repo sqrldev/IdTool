@@ -283,6 +283,16 @@
     </layout>
    </item>
    <item>
+    <widget class="QCheckBox" name="chk_ShortenKeys">
+     <property name="text">
+      <string>Shorten keys to increase readability</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QTextEdit" name="txt_Diff">
      <property name="lineWrapMode">
       <enum>QTextEdit::NoWrap</enum>

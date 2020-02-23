@@ -40,6 +40,7 @@ private:
     QTextCharFormat getSummaryFailureTextFormat();
     QTextFrameFormat getBlockFrameFormat();
     QTextTableFormat getTableFormat();
+    QString shortenValue(QString value);
     bool DecryptBlocks(QList<IdentityModel*>& ids);
     void writeSummary(QTextCursor& cursor);
     void writeDiffTable(QTextCursor& cursor, QList<int>& allBlockTypes);
