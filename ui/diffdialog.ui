@@ -322,6 +322,7 @@
   <tabstop>chk_DecryptBlock2</tabstop>
   <tabstop>txt_RescueCodeId1</tabstop>
   <tabstop>txt_RescueCodeId2</tabstop>
+  <tabstop>chk_ShortenKeys</tabstop>
   <tabstop>txt_Diff</tabstop>
   <tabstop>btn_StartDiff</tabstop>
  </tabstops>

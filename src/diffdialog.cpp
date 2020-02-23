@@ -27,14 +27,14 @@ DiffDialog::DiffDialog(QWidget *parent) :
     connect(ui->chk_DecryptBlock2, SIGNAL(toggled(bool)), ui->txt_RescueCodeId1, SLOT(setEnabled(bool)));
     connect(ui->chk_DecryptBlock2, SIGNAL(toggled(bool)), ui->txt_RescueCodeId2, SLOT(setEnabled(bool)));
     
-    //TODO: Remove test code
+    /* These are just test identies, nothing to hide here
     ui->txt_Identity1->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev3_.sqrl");
     ui->txt_Identity2->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev3R4_.sqrl");
     ui->txt_PassId1->setText("test12345678");
     ui->txt_PassId2->setText("test12345678");
     ui->txt_RescueCodeId1->setText("4287-8546-8365-8491-4348-2554");
     ui->txt_RescueCodeId2->setText("5583-8638-9259-3876-2080-5033");
-    // End todo
+    */
 }
 
 DiffDialog::~DiffDialog()
