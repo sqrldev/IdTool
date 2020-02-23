@@ -1,3 +1,7 @@
+Version 0.5.0
+  Features
+    * Identity diffing (compare two identities)
+
 Version 0.4.2
   Features
     * Copy/paste identity blocks (unauthenticated)

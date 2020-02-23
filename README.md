@@ -10,6 +10,9 @@ SQRL employs its own binary identity storage format called "S4". While being lig
 
 IdTool shows a nice visual representation of each of the identity's binary blocks and allows for a quick inspection of the values encoded within the identity.
 
+### Diffing of SQRL identities
+IdTool lets you visually compare the (encrypted and unencrypted) contents of two identities and makes it easy to dertermine whether two identities are related.
+
 ### Manipulation of identity files
 IdTool lets the user 
 * change identity settings (authenticated)
@@ -92,13 +95,6 @@ make
 ```
 
 Any help with testing it on other platforms is highly appreciated.
-
-## Roadmap
-There are some more ideas for features that I would still like to implement if I find time, like for example
-- ~~building json templates using the GUI~~ -> DONE
-- ~~creating site-specific public keys to help in debugging identity-related problems~~ -> DONE
-- ~~changing identity settings~~ -> DONE
-- diffing of identities
 
 ## Collaboration
 I invite everyone willing to contribute to do so by either helping with further development/posting PRs, or simply finding and reporting bugs using the issue tracker.
