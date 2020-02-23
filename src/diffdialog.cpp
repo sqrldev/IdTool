@@ -28,8 +28,8 @@ DiffDialog::DiffDialog(QWidget *parent) :
     connect(ui->chk_DecryptBlock2, SIGNAL(toggled(bool)), ui->txt_RescueCodeId2, SLOT(setEnabled(bool)));
     
     //TODO: Remove test code
-    ui->txt_Identity1->setText("C:\\Users\\Alex\\Documents\\SQRL\\AlexDev3_.sqrl");
-    ui->txt_Identity2->setText("C:\\Users\\Alex\\Documents\\SQRL\\AlexDev3R4_.sqrl");
+    ui->txt_Identity1->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev3_.sqrl");
+    ui->txt_Identity2->setText("C:\\Users\\alexh\\Documents\\SQRL\\AlexDev3R4_.sqrl");
     ui->txt_PassId1->setText("test12345678");
     ui->txt_PassId2->setText("test12345678");
     ui->txt_RescueCodeId1->setText("4287-8546-8365-8491-4348-2554");
@@ -93,7 +93,7 @@ QTextCharFormat DiffDialog::getSummaryTextFormat()
 {
     QTextCharFormat result;
 
-    result.setFont(QFont("Courier", 12));
+    result.setFont(QFont("Courier", 10));
     return result;
 }
 
@@ -306,38 +306,36 @@ bool DiffDialog::DecryptBlocks(QList<IdentityModel*>& ids)
 
 void DiffDialog::writeSummary(QTextCursor &cursor)
 {
+    if (!ui->chk_DecryptBlock1->isChecked()) return;
+
     QTextDocument* textDoc = ui->txt_Diff->document();
-
     cursor = textDoc->rootFrame()->lastCursorPosition();
-    cursor.insertFrame(getBlockFrameFormat());
 
+    cursor.insertFrame(getBlockFrameFormat());
     cursor.setCharFormat(getBlockHeaderFormat());
     cursor.insertText(tr("Summary:"));
     
     cursor.insertBlock();
-   
-    if (ui->chk_DecryptBlock1->isChecked())
+
+    if (m_ImkId1 == m_ImkId2)
     {
-        if (m_ImkId1 == m_ImkId2) 
-        {
-            cursor.setCharFormat(getSummarySuccessTextFormat());
-            cursor.insertText(tr("Both files represent the same identity (decrypted IMKs/IUKs match)!"));
-        }
-        else if (m_prevImksId2.contains(m_ImkId1) || m_prevImksId1.contains(m_ImkId2)) 
-        {
-            cursor.setCharFormat(getSummaryNeutralTextFormat());
-            cursor.insertText(tr("Both files represent the same identity, but are not the same version!\n"));
-            if (m_prevImksId2.contains(m_ImkId1))
-                cursor.insertText(tr("(IUK of Identity 1 is a previous IUK of Identity 2)\n"));
-            if (m_prevImksId1.contains(m_ImkId2))
-                cursor.insertText(tr("(IUK of Identity 2 is a previous IUK of Identity 1)\n"));
-        }
-        else 
-        {
-            cursor.setCharFormat(getSummaryFailureTextFormat());
-            cursor.insertText(tr("The files do NOT represent the same identity!"));
-        }
-    }   
+        cursor.setCharFormat(getSummarySuccessTextFormat());
+        cursor.insertText(tr("Both files represent the same identity (decrypted IMKs match)!"));
+    }
+    else if (m_prevImksId2.contains(m_ImkId1) || m_prevImksId1.contains(m_ImkId2))
+    {
+        cursor.setCharFormat(getSummaryNeutralTextFormat());
+        cursor.insertText(tr("Both files represent the same identity, but are not the same edition!\n"));
+        if (m_prevImksId2.contains(m_ImkId1))
+            cursor.insertText(tr("(IUK of Identity 1 is a previous IUK of Identity 2)\n"));
+        if (m_prevImksId1.contains(m_ImkId2))
+            cursor.insertText(tr("(IUK of Identity 2 is a previous IUK of Identity 1)\n"));
+    }
+    else
+    {
+        cursor.setCharFormat(getSummaryFailureTextFormat());
+        cursor.insertText(tr("The files do NOT represent the same identity!"));
+    }
 }
     
 
